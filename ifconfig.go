@@ -2,12 +2,17 @@ package main
 
 import (
     "fmt"
+    "html/template"
     "io"
     "log"
     "net"
     "net/http"
     "regexp"
 )
+
+type Client struct {
+    Host string
+}
 
 func isCli(userAgent string) bool {
     match, _ := regexp.MatchString("^(?i)(curl|wget|fetch\\slibfetch)\\/.*$",
@@ -31,7 +36,9 @@ func handler(w http.ResponseWriter, req *http.Request) {
     if isCli(req.UserAgent()) {
         io.WriteString(w, fmt.Sprintf("%s\n", host))
     } else {
-        // XXX: Render HTML
+        t, _ := template.ParseFiles("index.html")
+        client := &Client{Host: host}
+        t.Execute(w, client)
     }
 }
 
