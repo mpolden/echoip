@@ -11,7 +11,7 @@ The usual suspects
 ------------------
     $ curl ifconfig.co
     127.0.0.1
-    $ wget -O - ifconfig.co
+    $ wget -q -O - ifconfig.co
     127.0.0.1
 
 BSD fetch
