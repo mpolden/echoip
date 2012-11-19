@@ -11,7 +11,7 @@ import (
 )
 
 type Client struct {
-    Host string
+    IP net.IP
 }
 
 func isCli(userAgent string) bool {
@@ -34,6 +34,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
     } else {
         host, _, err = net.SplitHostPort(req.RemoteAddr)
     }
+    ip := net.ParseIP(host)
     if err != nil {
         log.Printf("Failed to parse remote address: %s\n", req.RemoteAddr)
         http.Error(w, "Failed to parse remote address", 500)
@@ -41,10 +42,10 @@ func handler(w http.ResponseWriter, req *http.Request) {
     }
 
     if isCli(req.UserAgent()) {
-        io.WriteString(w, fmt.Sprintf("%s\n", host))
+        io.WriteString(w, fmt.Sprintf("%s\n", ip))
     } else {
         t, _ := template.ParseFiles("index.html")
-        client := &Client{Host: host}
+        client := &Client{IP: ip}
         t.Execute(w, client)
     }
 }
