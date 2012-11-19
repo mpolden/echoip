@@ -26,7 +26,14 @@ func handler(w http.ResponseWriter, req *http.Request) {
         return
     }
 
-    host, _, err := net.SplitHostPort(req.RemoteAddr)
+    var host string
+    var err error
+    realIP := req.Header.Get("X-Real-IP")
+    if realIP != "" {
+        host = realIP
+    } else {
+        host, _, err = net.SplitHostPort(req.RemoteAddr)
+    }
     if err != nil {
         log.Printf("Failed to parse remote address: %s\n", req.RemoteAddr)
         http.Error(w, "Failed to parse remote address", 500)
