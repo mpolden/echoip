@@ -51,6 +51,8 @@ func handler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+    http.Handle("/assets/", http.StripPrefix("/assets/",
+        http.FileServer(http.Dir("assets/"))))
     http.HandleFunc("/", handler)
     err := http.ListenAndServe(":8080", nil)
     if err != nil {
