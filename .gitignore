@@ -1,1 +1,4 @@
 ifconfig
+*.lock
+*.pid
+*.log
