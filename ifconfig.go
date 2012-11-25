@@ -12,8 +12,8 @@ import (
 )
 
 type Client struct {
-    IP net.IP
-    Port string
+    IP     net.IP
+    Port   string
     Header http.Header
 }
 
@@ -64,7 +64,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
             io.WriteString(w, fmt.Sprintf("%s\n", value))
         }
     } else {
-        funcMap := template.FuncMap {
+        funcMap := template.FuncMap{
             "ToLower": strings.ToLower,
         }
         t, _ := template.
