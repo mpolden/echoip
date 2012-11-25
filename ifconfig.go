@@ -8,10 +8,13 @@ import (
     "net"
     "net/http"
     "regexp"
+    "strings"
 )
 
 type Client struct {
     IP net.IP
+    Port string
+    Header http.Header
 }
 
 func isCli(userAgent string) bool {
@@ -20,32 +23,55 @@ func isCli(userAgent string) bool {
     return match
 }
 
+func parseRealIP(req *http.Request) (net.IP, string) {
+    var host string
+    var port string
+    realIP := req.Header.Get("X-Real-IP")
+    if realIP != "" {
+        host = realIP
+    } else {
+        host, port, _ = net.SplitHostPort(req.RemoteAddr)
+    }
+    return net.ParseIP(host), port
+}
+
+func pathToKey(path string) string {
+    re := regexp.MustCompile("^\\/|\\.json$")
+    return re.ReplaceAllLiteralString(strings.ToLower(path), "")
+}
+
+func isJson(req *http.Request) bool {
+    return strings.HasSuffix(req.URL.Path, ".json") ||
+        strings.Contains(req.Header.Get("Accept"), "application/json")
+}
+
 func handler(w http.ResponseWriter, req *http.Request) {
     if req.Method != "GET" {
         http.Error(w, "Invalid request method", 405)
         return
     }
 
-    var host string
-    var err error
-    realIP := req.Header.Get("X-Real-IP")
-    if realIP != "" {
-        host = realIP
-    } else {
-        host, _, err = net.SplitHostPort(req.RemoteAddr)
-    }
-    ip := net.ParseIP(host)
-    if err != nil {
-        log.Printf("Failed to parse remote address: %s\n", req.RemoteAddr)
-        http.Error(w, "Failed to parse remote address", 500)
-        return
-    }
+    ip, port := parseRealIP(req)
+    header := pathToKey(req.URL.Path)
 
     if isCli(req.UserAgent()) {
-        io.WriteString(w, fmt.Sprintf("%s\n", ip))
+        if header == "" || header == "ip" {
+            io.WriteString(w, fmt.Sprintf("%s\n", ip))
+        } else if header == "port" {
+            io.WriteString(w, fmt.Sprintf("%s\n", port))
+        } else {
+            value := req.Header.Get(header)
+            io.WriteString(w, fmt.Sprintf("%s\n", value))
+        }
     } else {
-        t, _ := template.ParseFiles("index.html")
-        client := &Client{IP: ip}
+        funcMap := template.FuncMap {
+            "ToLower": strings.ToLower,
+        }
+        t, _ := template.
+            New("index.html").
+            Funcs(funcMap).
+            ParseFiles("index.html")
+        client := &Client{IP: ip, Port: port, Header: req.Header}
         t.Execute(w, client)
     }
 }
