@@ -5,7 +5,7 @@
     <title>What is my IP address &mdash; ifconfig.co</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Lookup my IP address">
-    <link href="http://fonts.googleapis.com/css?family=Oswald" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Oswald" rel="stylesheet" type="text/css">
     <link href="/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css">
     <style>
@@ -29,6 +29,11 @@
           <h1>What is my IP address?</h1>
           <p>Your IP address is:</p>
           <h2>{{ .IP }}</h2>
+          <select id="select-command">
+            <option value="curl">curl</option>
+            <option value="wget -qO -">wget</option>
+            <option value="fetch -qo -">fetch</option>
+          </select>
         </div>
       </div>
       <div class="row">
@@ -42,17 +47,17 @@
             </thead>
             <tbody>
               <tr>
-                <td><code>curl ifconfig.co</code></td>
+                <td><code><span class="command">curl</span> ifconfig.co</code></td>
                 <td class="response">{{ .IP }}</td>
               </tr>
               <tr>
-                <td><code>curl ifconfig.co/port</code></td>
+                <td><code><span class="command">curl</span> ifconfig.co/port</code></td>
                 <td class="response">{{ .Port }}</td>
               </tr>
               {{ if $self := . }}
               {{ range $key, $value := .Header }}
               <tr>
-                <td><code>curl ifconfig.co/{{ ToLower $key }}</code></td>
+                <td><code><span class="command">curl</span> ifconfig.co/{{ ToLower $key }}</code></td>
                 <td class="response">{{ index $self.Header $key }}</td>
               </tr>
               {{end}}
@@ -63,5 +68,7 @@
       </div>
     </div>
     <a href="https://github.com/martinp/ifconfig"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    <script src="/assets/js/zepto.min.js"></script>
+    <script src="/assets/js/cmd.min.js"></script>
   </body>
 </html>
