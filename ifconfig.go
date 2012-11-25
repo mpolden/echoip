@@ -1,6 +1,7 @@
 package main
 
 import (
+    "encoding/json"
     "fmt"
     "html/template"
     "io"
@@ -13,6 +14,7 @@ import (
 
 type Client struct {
     IP     net.IP
+    JSON   string
     Header http.Header
 }
 
@@ -52,7 +54,18 @@ func handler(w http.ResponseWriter, req *http.Request) {
     ip := parseRealIP(req)
     header := pathToKey(req.URL.Path)
 
-    if isCli(req.UserAgent()) {
+    if isJson(req) {
+        if header == "all" {
+            b, _ := json.MarshalIndent(req.Header, "", "  ")
+            io.WriteString(w, fmt.Sprintf("%s\n", b))
+        } else {
+            m := map[string]string{
+                header: req.Header.Get(header),
+            }
+            b, _ := json.MarshalIndent(m, "", "  ")
+            io.WriteString(w, fmt.Sprintf("%s\n", b))
+        }
+    } else if isCli(req.UserAgent()) {
         if header == "" || header == "ip" {
             io.WriteString(w, fmt.Sprintf("%s\n", ip))
         } else {
@@ -67,7 +80,8 @@ func handler(w http.ResponseWriter, req *http.Request) {
             New("index.html").
             Funcs(funcMap).
             ParseFiles("index.html")
-        client := &Client{IP: ip, Header: req.Header}
+        b, _ := json.MarshalIndent(req.Header, "", "  ")
+        client := &Client{IP: ip, JSON: string(b), Header: req.Header}
         t.Execute(w, client)
     }
 }
