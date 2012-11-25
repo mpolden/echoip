@@ -1,3 +1,3 @@
 $(document).ready ->
-  $('#select-command').bind 'change', ->
+  $('#select-command').on 'change', ->
     $('.command').text $(this).val()
