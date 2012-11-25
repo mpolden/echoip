@@ -13,7 +13,6 @@ import (
 
 type Client struct {
     IP     net.IP
-    Port   string
     Header http.Header
 }
 
@@ -23,16 +22,15 @@ func isCli(userAgent string) bool {
     return match
 }
 
-func parseRealIP(req *http.Request) (net.IP, string) {
+func parseRealIP(req *http.Request) net.IP {
     var host string
-    var port string
     realIP := req.Header.Get("X-Real-IP")
     if realIP != "" {
         host = realIP
     } else {
-        host, port, _ = net.SplitHostPort(req.RemoteAddr)
+        host, _, _ = net.SplitHostPort(req.RemoteAddr)
     }
-    return net.ParseIP(host), port
+    return net.ParseIP(host)
 }
 
 func pathToKey(path string) string {
@@ -51,14 +49,12 @@ func handler(w http.ResponseWriter, req *http.Request) {
         return
     }
 
-    ip, port := parseRealIP(req)
+    ip := parseRealIP(req)
     header := pathToKey(req.URL.Path)
 
     if isCli(req.UserAgent()) {
         if header == "" || header == "ip" {
             io.WriteString(w, fmt.Sprintf("%s\n", ip))
-        } else if header == "port" {
-            io.WriteString(w, fmt.Sprintf("%s\n", port))
         } else {
             value := req.Header.Get(header)
             io.WriteString(w, fmt.Sprintf("%s\n", value))
@@ -71,7 +67,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
             New("index.html").
             Funcs(funcMap).
             ParseFiles("index.html")
-        client := &Client{IP: ip, Port: port, Header: req.Header}
+        client := &Client{IP: ip, Header: req.Header}
         t.Execute(w, client)
     }
 }

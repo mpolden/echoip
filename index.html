@@ -50,10 +50,6 @@
                 <td><code><span class="command">curl</span> ifconfig.co</code></td>
                 <td class="response">{{ .IP }}</td>
               </tr>
-              <tr>
-                <td><code><span class="command">curl</span> ifconfig.co/port</code></td>
-                <td class="response">{{ .Port }}</td>
-              </tr>
               {{ if $self := . }}
               {{ range $key, $value := .Header }}
               <tr>
