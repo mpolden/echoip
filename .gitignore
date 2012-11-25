@@ -2,3 +2,4 @@ ifconfig
 *.lock
 *.pid
 *.log
+cmd.js
