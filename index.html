@@ -53,7 +53,7 @@
               {{ range $key, $value := .Header }}
               <tr>
                 <td><code>curl ifconfig.co/{{ ToLower $key }}</code></td>
-                <td class="response">{{ index $self.Header $key }}
+                <td class="response">{{ index $self.Header $key }}</td>
               </tr>
               {{end}}
               {{end}}
