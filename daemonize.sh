@@ -32,7 +32,8 @@ case "$1" in
         fi
         PID=$(head -n1 $PID_FILE)
         echo "Stopping $NAME: $PID"
-        kill $PID && rm -- $PID_FILE $LOCK_FILE
+        kill $PID
+        rm -f -- $PID_FILE $LOCK_FILE
         ;;
     status)
         if [[ ! -s "$PID_FILE" ]]; then
