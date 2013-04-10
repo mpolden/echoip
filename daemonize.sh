@@ -2,8 +2,9 @@
 
 NAME="ifconfig"
 IFC_PATH=$(dirname $(readlink -f $0))
-LOCK_FILE="$IFC_PATH/$NAME.lock"
-PID_FILE="$IFC_PATH/$NAME.pid"
+LOCK_FILE="$IFC_PATH/tmp/${NAME}.lock"
+PID_FILE="$IFC_PATH/tmp/${NAME}.pid"
+LOG_FILE="$IFC_PATH/tmp/${NAME}.log"
 BIN="$IFC_PATH/$NAME"
 
 E_USAGE=1
@@ -16,34 +17,50 @@ if [[ ! -x "$BIN" ]]; then
     exit $E_NOTFOUND
 fi
 
+start () {
+    if [[ -f "$LOCK_FILE" ]]; then
+        echo "Lock file $LOCK_FILE exists. Already running?"
+        exit $E_LOCKED
+    fi
+    echo "Starting $NAME"
+    daemonize -c $IFC_PATH -o $LOG_FILE -p $PID_FILE -l $LOCK_FILE $BIN
+}
+
+stop () {
+    if [[ ! -s "$PID_FILE" ]]; then
+        echo "PID file $PID_FILE empty or not found. Not started?"
+        exit $E_NOPID
+    fi
+    PID=$(head -n1 $PID_FILE)
+    echo "Stopping $NAME: $PID"
+    kill $PID
+    rm -f -- $PID_FILE $LOCK_FILE
+}
+
+status () {
+    if [[ ! -s "$PID_FILE" ]]; then
+        echo "$NAME is not running"
+    else
+        echo "$NAME is running: $(head -n1 $PID_FILE)"
+    fi
+}
+
 case "$1" in
     start)
-        if [[ -f "$LOCK_FILE" ]]; then
-            echo "Lock file $LOCK_FILE exists. Already running?"
-            exit $E_LOCKED
-        fi
-        echo "Starting $NAME"
-        daemonize -c $IFC_PATH -o ${NAME}.log -p $PID_FILE -l $LOCK_FILE $BIN
+        start
         ;;
     stop)
-        if [[ ! -s "$PID_FILE" ]]; then
-            echo "PID file $PID_FILE empty or not found. Not started?"
-            exit $E_NOPID
-        fi
-        PID=$(head -n1 $PID_FILE)
-        echo "Stopping $NAME: $PID"
-        kill $PID
-        rm -f -- $PID_FILE $LOCK_FILE
+        stop
+        ;;
+    restart)
+        stop
+        start
         ;;
     status)
-        if [[ ! -s "$PID_FILE" ]]; then
-            echo "$NAME is not running"
-        else
-            echo "$NAME is running: $(head -n1 $PID_FILE)"
-        fi
+        status
         ;;
     *)
-        echo "usage: $0 {start|stop|status}"
+        echo "usage: $0 {start|stop|restart|status}"
         exit $E_USAGE
         ;;
 esac
