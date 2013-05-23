@@ -1,47 +1,43 @@
 #!/usr/bin/env bash
 
 NAME="ifconfig"
-IFC_PATH=$(dirname $(readlink -f $0))
-LOCK_FILE="$IFC_PATH/tmp/${NAME}.lock"
-PID_FILE="$IFC_PATH/tmp/${NAME}.pid"
-LOG_FILE="$IFC_PATH/tmp/${NAME}.log"
-BIN="$IFC_PATH/$NAME"
+PREFIX=$(dirname $(readlink -f $0))
+DAEMON="$PREFIX/$NAME"
+PID_FILE="${PREFIX}/tmp/${NAME}.pid"
+LOCK_FILE="${PREFIX}/tmp/${NAME}.lock"
+LOG_FILE="${PREFIX}/tmp/${NAME}.log"
 
 E_USAGE=1
 E_NOTFOUND=2
-E_NOPID=3
-E_LOCKED=4
 
-if [[ ! -x "$BIN" ]]; then
-    echo "$BIN does not exist or is not executable"
+if [[ ! -x "$DAEMON" ]]; then
+    echo "$DAEMON does not exist or is not executable"
     exit $E_NOTFOUND
 fi
 
 start () {
-    if [[ -f "$LOCK_FILE" ]]; then
-        echo "Lock file $LOCK_FILE exists. Already running?"
-        exit $E_LOCKED
-    fi
-    echo "Starting $NAME"
-    daemonize -c $IFC_PATH -o $LOG_FILE -p $PID_FILE -l $LOCK_FILE $BIN
+    echo -n "Starting $NAME: "
+    mkdir -p $PREFIX/tmp
+    daemonize -c $PREFIX -o $LOG_FILE -p $PID_FILE -l $LOCK_FILE $DAEMON && \
+        echo "ok" || echo "failed"
 }
 
 stop () {
-    if [[ ! -s "$PID_FILE" ]]; then
-        echo "PID file $PID_FILE empty or not found. Not started?"
-        exit $E_NOPID
+    echo -n "Stopping $NAME: "
+    if [[ -s "$PID_FILE" ]]; then
+        PID=$(head -n1 $PID_FILE)
+        kill $PID 2> /dev/null && echo "ok" || echo "not running?"
     fi
-    PID=$(head -n1 $PID_FILE)
-    echo "Stopping $NAME: $PID"
-    kill $PID
     rm -f -- $PID_FILE $LOCK_FILE
 }
 
 status () {
-    if [[ ! -s "$PID_FILE" ]]; then
-        echo "$NAME is not running"
+    if [[ -s "$PID_FILE" ]]; then
+        PID=$(head -n1 $PID_FILE)
+        kill -0 $PID 2> /dev/null && echo "$NAME is running (pid: $PID)" || \
+            echo "$NAME is not running"
     else
-        echo "$NAME is running: $(head -n1 $PID_FILE)"
+        echo "$NAME is not running"
     fi
 }
 
@@ -64,3 +60,5 @@ case "$1" in
         exit $E_USAGE
         ;;
 esac
+
+exit $?
