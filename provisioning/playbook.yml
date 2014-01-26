@@ -1,0 +1,7 @@
+---
+- hosts: development
+  sudo: yes
+  roles:
+    - ntp
+    - golang
+    - vagrant

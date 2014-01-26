@@ -1,0 +1,24 @@
+---
+- name: install packages
+  apt: pkg={{ item }} state=latest update_cache=yes cache_valid_time=3600
+  with_items:
+    - gdb
+    - git
+    - make
+    - mercurial
+  environment:
+    LANG: en_US.UTF-8
+
+- name: hide login message
+  copy: dest=/home/vagrant/.hushlogin
+        content=
+        owner=vagrant
+        group=vagrant
+        mode=0644
+
+- name: install bash_profile
+  copy: src=dot.bash_profile
+        dest=/home/vagrant/.bash_profile
+        owner=vagrant
+        group=vagrant
+        mode=0644

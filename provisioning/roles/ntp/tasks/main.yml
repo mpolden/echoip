@@ -1,0 +1,15 @@
+---
+- name: set timezone
+  copy: src=timezone
+        dest=/etc/timezone
+        owner=root
+        group=root
+        mode=0644
+  notify:
+    - update timezone
+
+- name: install ntp
+  apt: pkg=ntp state=latest
+
+- name: make sure ntp is running
+  service: name=ntp state=running enabled=yes
