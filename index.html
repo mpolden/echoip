@@ -2,67 +2,71 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>What is my IP address &mdash; ifconfig.co</title>
+    <title>What is my IP address? &mdash; ifconfig.co</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lookup my IP address">
+    <meta name="description" content="What is my IP address?">
     <link href="//fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
     <style>
       body {
         font-family: "Oswald", sans-serif;
+        font-size: 12px;
       }
       .response {
         font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
-        font-size: 12px;
+      }
+      .content {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 1024px;
       }
       #wrapper {
-        margin: 0 auto;
+        margin-bottom: 10px;
         text-align: center;
+      }
+      .ip {
+        border: 1px solid #cbcbcb;
+        background: #f2f2f2;
+        font-size: 36px;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-        <div id="wrapper">
-          <h1>What is my IP address?</h1>
-          <p>Your IP address is:</p>
-          <h2>{{ .IP }}</h2>
-          <select id="select-command">
-            <option value="curl">curl</option>
-            <option value="wget -qO -">wget</option>
-            <option value="fetch -qo -">fetch</option>
-          </select>
-        </div>
+    <div class="content">
+      <div id="wrapper">
+        <h1>What is my IP address?</h1>
+        <h2>Your IP:</h2>
+        <p><code class="ip">{{ .IP }}</code></p>
+        <select id="select-command">
+          <option value="curl">curl</option>
+          <option value="wget -qO -">wget</option>
+          <option value="fetch -qo -">fetch</option>
+        </select>
       </div>
-      <div class="row">
-        <div class="span12">
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th class="span4">Command</th>
-                <th>Response</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code><span class="command">curl</span> ifconfig.co</code></td>
-                <td class="response">{{ .IP }}</td>
-              </tr>
-              {{ if $self := . }}
-              {{ range $key, $value := .Header }}
-              <tr>
-                <td><code><span class="command">curl</span> ifconfig.co/{{ ToLower $key }}</code></td>
-                <td class="response">{{ index $self.Header $key 0 }}</td>
-              </tr>
-              {{end}}
-              {{end}}
-              <td><code><span class="command">curl</span> ifconfig.co/all.json</code></td>
-              <td><pre class="response">{{ .JSON }}</pre></td>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <table class="pure-table pure-table-bordered pure-table-striped">
+        <thead>
+          <tr>
+            <th style="width: 160px">Command</th>
+            <th>Response</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code><span class="command">curl</span> ifconfig.co</code></td>
+            <td class="response">{{ .IP }}</td>
+          </tr>
+          {{ if $self := . }}
+          {{ range $key, $value := .Header }}
+          <tr>
+            <td><code><span class="command">curl</span> ifconfig.co/{{ ToLower $key }}</code></td>
+            <td class="response">{{ index $self.Header $key 0 }}</td>
+          </tr>
+          {{end}}
+          {{end}}
+          <td><code><span class="command">curl</span> ifconfig.co/all.json</code></td>
+          <td><pre class="response">{{ .JSON }}</pre></td>
+        </tbody>
+      </table>
     </div>
     <a href="https://github.com/martinp/ifconfig"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
     <script src="/assets/js/app.js"></script>
