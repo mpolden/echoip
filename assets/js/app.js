@@ -1,14 +1,14 @@
 /*jslint es5: true, indent: 2, browser: true*/
-/*global jQuery: true*/
 
-(function ($) {
+(function () {
   'use strict';
-
-  $(document).ready(function () {
-   $('#select-command').on('change', function () {
-    $('.command').text($(this).val());
-   });
-  });
-
-})(jQuery);
-
+  var onLoad = function (event) {
+    var select = document.querySelector('#select-command');
+    select.addEventListener('change', function () {
+      [].forEach.call(document.querySelectorAll('.command'), function (el) {
+        el.innerHTML = this.value;
+      }, this);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', onLoad);
+})();
