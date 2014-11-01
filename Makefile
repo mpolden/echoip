@@ -6,7 +6,7 @@ clean:
 	rm -f -- $(TARGET)
 
 fmt:
-	gofmt -tabs=false -tabwidth=4 -w=true *.go
+	gofmt -w=true *.go
 
 install:
 	go build $(TARGET).go
