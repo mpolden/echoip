@@ -1,0 +1,6 @@
+---
+base:
+  '*':
+    - ntp
+    - dev
+    - golang
