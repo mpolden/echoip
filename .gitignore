@@ -1,5 +1,3 @@
-ifconfig
-*.lock
-*.pid
-*.log
-cmd.js
+bin/
+pkg/
+src/

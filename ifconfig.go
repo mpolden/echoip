@@ -12,16 +12,16 @@ import (
 	"strings"
 )
 
+var agentExp = regexp.MustCompile("^(?i)(curl|wget|fetch\\slibfetch)\\/.*$")
+
 type Client struct {
 	IP     net.IP
 	JSON   string
 	Header http.Header
 }
 
-func isCli(userAgent string) bool {
-	match, _ := regexp.MatchString("^(?i)(curl|wget|fetch\\slibfetch)\\/.*$",
-		userAgent)
-	return match
+func isCLI(userAgent string) bool {
+	return agentExp.MatchString(userAgent)
 }
 
 func parseRealIP(req *http.Request) net.IP {
@@ -40,7 +40,7 @@ func pathToKey(path string) string {
 	return re.ReplaceAllLiteralString(strings.ToLower(path), "")
 }
 
-func isJson(req *http.Request) bool {
+func isJSON(req *http.Request) bool {
 	return strings.HasSuffix(req.URL.Path, ".json") ||
 		strings.Contains(req.Header.Get("Accept"), "application/json")
 }
@@ -54,7 +54,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	ip := parseRealIP(req)
 	header := pathToKey(req.URL.Path)
 
-	if isJson(req) {
+	if isJSON(req) {
 		if header == "all" {
 			b, _ := json.MarshalIndent(req.Header, "", "  ")
 			io.WriteString(w, fmt.Sprintf("%s\n", b))
@@ -65,7 +65,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
 			b, _ := json.MarshalIndent(m, "", "  ")
 			io.WriteString(w, fmt.Sprintf("%s\n", b))
 		}
-	} else if isCli(req.UserAgent()) {
+	} else if isCLI(req.UserAgent()) {
 		if header == "" || header == "ip" {
 			io.WriteString(w, fmt.Sprintf("%s\n", ip))
 		} else {

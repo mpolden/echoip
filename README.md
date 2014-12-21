@@ -29,13 +29,10 @@ Features
 * Open source
 * Fast
 * Supports typical CLI tools (curl, wget and fetch)
+* JSON output (optional)
 
 Why?
 ====
 * To scratch an itch
 * An excuse to use Go for something
 * Faster than ifconfig.me and has IPv6 support
-
-Code style
-==========
-    $ gofmt -tabs=false -tabwidth=4

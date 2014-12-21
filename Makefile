@@ -1,15 +1,13 @@
-TARGET = ifconfig
+NAME = ifconfig
 
-all: install
-
-clean:
-	rm -f -- $(TARGET)
+all: test build
 
 fmt:
 	gofmt -w=true *.go
 
-install:
-	go build $(TARGET).go
+build:
+	@mkdir bin
+	go build -o bin/$(NAME)
 
 test:
 	go test
