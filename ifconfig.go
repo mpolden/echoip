@@ -36,8 +36,8 @@ func parseRealIP(req *http.Request) net.IP {
 }
 
 func pathToKey(path string) string {
-	re := regexp.MustCompile("^\\/|\\.json$")
-	return re.ReplaceAllLiteralString(strings.ToLower(path), "")
+	trimmed := strings.TrimSuffix(strings.TrimPrefix(path, "/"), ".json")
+	return strings.ToLower(trimmed)
 }
 
 func isJSON(req *http.Request) bool {

@@ -19,3 +19,15 @@ func TestIsCLI(t *testing.T) {
 		t.Errorf("Expected false for %s", browserUserAgent)
 	}
 }
+
+func TestPathToKey(t *testing.T) {
+	if key := pathToKey("/ip"); key != "ip" {
+		t.Fatalf("Expected 'ip', got '%s'", key)
+	}
+	if key := pathToKey("/User-Agent"); key != "user-agent" {
+		t.Fatalf("Expected 'user-agent', got '%s'", key)
+	}
+	if key := pathToKey("/all.json"); key != "all" {
+		t.Fatalf("Expected 'all', got '%s'", key)
+	}
+}
