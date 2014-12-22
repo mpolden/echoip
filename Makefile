@@ -1,9 +1,12 @@
 NAME = ifconfig
 
-all: test build
+all: deps test build
 
 fmt:
 	gofmt -w=true *.go
+
+deps:
+	go get -d -v
 
 build:
 	@mkdir bin
