@@ -2,7 +2,9 @@ FROM golang:onbuild
 
 EXPOSE 8080
 
-ADD ./assets /go/bin/assets
-ADD ./index.html /go/bin/
+ADD http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz /var/tmp/
+ADD index.html /go/bin/
+RUN gunzip /var/tmp/GeoLite2-Country.mmdb.gz
 
+CMD ["-f", "/var/tmp/GeoLite2-Country.mmdb"]
 ENTRYPOINT ["/go/bin/app"]
