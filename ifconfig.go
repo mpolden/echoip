@@ -3,11 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jessevdk/go-flags"
+	"github.com/oschwald/geoip2-golang"
 	"html/template"
 	"io"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -18,6 +21,10 @@ type Client struct {
 	IP     net.IP
 	JSON   string
 	Header http.Header
+}
+
+type Ifconfig struct {
+	DB *geoip2.Reader
 }
 
 func isCLI(userAgent string) bool {
@@ -45,33 +52,67 @@ func isJSON(req *http.Request) bool {
 		strings.Contains(req.Header.Get("Accept"), "application/json")
 }
 
-func handler(w http.ResponseWriter, req *http.Request) {
+func (i *Ifconfig) LookupCountry(ip net.IP) (string, error) {
+	if i.DB == nil {
+		return "", nil
+	}
+	record, err := i.DB.Country(ip)
+	if err != nil {
+		return "", err
+	}
+	country, exists := record.Country.Names["en"]
+	if !exists {
+		return "", fmt.Errorf("no localized name for country: %+v",
+			record)
+	}
+	return country, nil
+}
+
+func (i *Ifconfig) JSON(req *http.Request, key string) (string, error) {
+	var header http.Header
+	if key == "all" {
+		header = req.Header
+	} else {
+		header = http.Header{
+			key: []string{req.Header.Get(key)},
+		}
+	}
+	b, err := json.MarshalIndent(header, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+func (i *Ifconfig) Plain(req *http.Request, key string, ip net.IP) string {
+	if key == "" || key == "ip" {
+		return fmt.Sprintf("%s\n", ip)
+	}
+	return fmt.Sprintf("%s\n", req.Header.Get(key))
+}
+
+func (i *Ifconfig) handler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
 		http.Error(w, "Invalid request method", 405)
 		return
 	}
-
 	ip := parseRealIP(req)
-	header := pathToKey(req.URL.Path)
-
+	key := pathToKey(req.URL.Path)
+	country, err := i.LookupCountry(ip)
+	if err != nil {
+		log.Print(err)
+	}
+	req.Header["X-Ip-Country"] = []string{country}
 	if isJSON(req) {
-		if header == "all" {
-			b, _ := json.MarshalIndent(req.Header, "", "  ")
-			io.WriteString(w, fmt.Sprintf("%s\n", b))
-		} else {
-			m := map[string]string{
-				header: req.Header.Get(header),
-			}
-			b, _ := json.MarshalIndent(m, "", "  ")
-			io.WriteString(w, fmt.Sprintf("%s\n", b))
+		out, err := i.JSON(req, key)
+		if err != nil {
+			log.Print(err)
+			http.Error(w, "Failed to marshal JSON", 500)
+			return
 		}
+		io.WriteString(w, out)
 	} else if isCLI(req.UserAgent()) {
-		if header == "" || header == "ip" {
-			io.WriteString(w, fmt.Sprintf("%s\n", ip))
-		} else {
-			value := req.Header.Get(header)
-			io.WriteString(w, fmt.Sprintf("%s\n", value))
-		}
+		io.WriteString(w, i.Plain(req, key, ip))
 	} else {
 		funcMap := template.FuncMap{
 			"ToLower": strings.ToLower,
@@ -80,18 +121,49 @@ func handler(w http.ResponseWriter, req *http.Request) {
 			New("index.html").
 			Funcs(funcMap).
 			ParseFiles("index.html")
-		b, _ := json.MarshalIndent(req.Header, "", "  ")
+		b, err := json.MarshalIndent(req.Header, "", "  ")
+		if err != nil {
+			log.Print(err)
+			http.Error(w, "Failed to marshal JSON", 500)
+			return
+		}
 		client := &Client{IP: ip, JSON: string(b), Header: req.Header}
 		t.Execute(w, client)
 	}
 }
 
+func Create(path string) (*Ifconfig, error) {
+	if path == "" {
+		log.Print("Path to GeoIP database not given. Country lookup will be disabled")
+		return &Ifconfig{}, nil
+	}
+	db, err := geoip2.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	return &Ifconfig{DB: db}, nil
+}
+
 func main() {
+	var opts struct {
+		DBPath string `short:"f" long:"file" description:"Path to GeoIP database" value-name:"FILE" default:""`
+		Listen string `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
+	}
+	_, err := flags.ParseArgs(&opts, os.Args)
+	if err != nil {
+		os.Exit(1)
+	}
+	i, err := Create(opts.DBPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	http.Handle("/assets/", http.StripPrefix("/assets/",
 		http.FileServer(http.Dir("assets/"))))
-	http.HandleFunc("/", handler)
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
+	http.HandleFunc("/", i.handler)
+
+	log.Printf("Listening on %s", opts.Listen)
+	if err := http.ListenAndServe(opts.Listen, nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
