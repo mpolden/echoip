@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="What is my IP address?">
     <link href="//fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
     <style>
       body {
         font-family: "Oswald", sans-serif;
@@ -37,38 +37,35 @@
         <h1>What is my IP address?</h1>
         <h2>Your IP:</h2>
         <p><code class="ip">{{ .IP }}</code></p>
-        <select id="select-command">
-          <option value="curl">curl</option>
-          <option value="wget -qO -">wget</option>
-          <option value="fetch -qo -">fetch</option>
-        </select>
+        <a href="?cmd=curl" class="pure-button{{ if eq .Cmd.Name "curl" }} pure-button-active pure-button-primary{{end}}">curl</a>
+        <a href="?cmd=wget" class="pure-button{{ if eq .Cmd.Name "wget" }} pure-button-active pure-button-primary{{end}}">wget</a>
+        <a href="?cmd=fetch" class="pure-button{{ if eq .Cmd.Name "fetch" }} pure-button-active pure-button-primary{{end}}">fetch</a>
       </div>
       <table class="pure-table pure-table-bordered pure-table-striped">
         <thead>
           <tr>
-            <th style="width: 160px">Command</th>
+            <th style="width: 350px">Command</th>
             <th>Response</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><code><span class="command">curl</span> ifconfig.co</code></td>
+            <td><code><span class="command">{{ .Cmd.String }}</span> ifconfig.co</code></td>
             <td class="response">{{ .IP }}</td>
           </tr>
           {{ if $self := . }}
           {{ range $key, $value := .Header }}
           <tr>
-            <td><code><span class="command">curl</span> ifconfig.co/{{ ToLower $key }}</code></td>
+            <td><code><span class="command">{{ $self.Cmd.String }}</span> ifconfig.co/{{ ToLower $key }}</code></td>
             <td class="response">{{ index $self.Header $key 0 }}</td>
           </tr>
           {{end}}
           {{end}}
-          <td><code><span class="command">curl</span> ifconfig.co/all.json</code></td>
+          <td><code><span class="command">{{ .Cmd.String }}</span> ifconfig.co/all.json</code></td>
           <td><pre class="response">{{ .JSON }}</pre></td>
         </tbody>
       </table>
     </div>
     <a href="https://github.com/martinp/ifconfig"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
-    <script src="/assets/js/app.js"></script>
   </body>
 </html>

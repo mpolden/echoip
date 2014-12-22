@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"net/url"
+	"testing"
+)
 
 func TestIsCLI(t *testing.T) {
 	userAgents := []string{"curl/7.26.0", "Wget/1.13.4 (linux-gnu)",
@@ -29,5 +32,28 @@ func TestPathToKey(t *testing.T) {
 	}
 	if key := pathToKey("/all.json"); key != "all" {
 		t.Fatalf("Expected 'all', got '%s'", key)
+	}
+}
+
+func TestLookupCmd(t *testing.T) {
+	values := url.Values{"cmd": []string{"curl"}}
+	if v := lookupCmd(values); v.Name != "curl" {
+		t.Fatalf("Expected 'curl', got '%s'", v)
+	}
+	values = url.Values{"cmd": []string{"foo"}}
+	if v := lookupCmd(values); v.Name != "curl" {
+		t.Fatalf("Expected 'curl', got '%s'", v)
+	}
+	values = url.Values{}
+	if v := lookupCmd(values); v.Name != "curl" {
+		t.Fatalf("Expected 'curl', got '%s'", v)
+	}
+	values = url.Values{"cmd": []string{"wget"}}
+	if v := lookupCmd(values); v.Name != "wget" {
+		t.Fatalf("Expected 'wget', got '%s'", v)
+	}
+	values = url.Values{"cmd": []string{"fetch"}}
+	if v := lookupCmd(values); v.Name != "fetch" {
+		t.Fatalf("Expected 'fetch', got '%s'", v)
 	}
 }

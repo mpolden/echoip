@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -21,10 +22,20 @@ type Client struct {
 	IP     net.IP
 	JSON   string
 	Header http.Header
+	Cmd
+}
+
+type Cmd struct {
+	Name string
+	Args string
 }
 
 type Ifconfig struct {
 	DB *geoip2.Reader
+}
+
+func (c *Cmd) String() string {
+	return c.Name + " " + c.Args
 }
 
 func isCLI(userAgent string) bool {
@@ -91,6 +102,22 @@ func (i *Ifconfig) Plain(req *http.Request, key string, ip net.IP) string {
 	return fmt.Sprintf("%s\n", req.Header.Get(key))
 }
 
+func lookupCmd(values url.Values) Cmd {
+	cmd, exists := values["cmd"]
+	if !exists || len(cmd) == 0 {
+		return Cmd{Name: "curl"}
+	}
+	switch cmd[0] {
+	case "curl":
+		return Cmd{Name: "curl"}
+	case "fetch":
+		return Cmd{Name: "fetch", Args: "-qo -"}
+	case "wget":
+		return Cmd{Name: "wget", Args: "-qO -"}
+	}
+	return Cmd{Name: "curl"}
+}
+
 func (i *Ifconfig) handler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
 		http.Error(w, "Invalid request method", 405)
@@ -98,6 +125,7 @@ func (i *Ifconfig) handler(w http.ResponseWriter, req *http.Request) {
 	}
 	ip := parseRealIP(req)
 	key := pathToKey(req.URL.Path)
+	cmd := lookupCmd(req.URL.Query())
 	country, err := i.LookupCountry(ip)
 	if err != nil {
 		log.Print(err)
@@ -127,7 +155,12 @@ func (i *Ifconfig) handler(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "Failed to marshal JSON", 500)
 			return
 		}
-		client := &Client{IP: ip, JSON: string(b), Header: req.Header}
+		client := &Client{
+			IP:     ip,
+			JSON:   string(b),
+			Header: req.Header,
+			Cmd:    cmd,
+		}
 		t.Execute(w, client)
 	}
 }
@@ -158,10 +191,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.Handle("/assets/", http.StripPrefix("/assets/",
-		http.FileServer(http.Dir("assets/"))))
 	http.HandleFunc("/", i.handler)
-
 	log.Printf("Listening on %s", opts.Listen)
 	if err := http.ListenAndServe(opts.Listen, nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
