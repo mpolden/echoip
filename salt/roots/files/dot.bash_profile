@@ -1,4 +1,3 @@
-test -d $HOME/.local/bin || mkdir -p $HOME/.local/bin
-export PATH=/vagrant/bin:$HOME/.local/bin:$PATH
-export GOPATH=/vagrant
-cd /vagrant
+export GOPATH=/go
+export PATH=${GOPATH}/bin:$HOME/.local/bin:$PATH
+cd ${GOPATH}/src/github.com/martinp/ifconfig

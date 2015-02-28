@@ -2,7 +2,7 @@ curl:
   pkg:
     - installed
 
-curl -L https://storage.googleapis.com/golang/go1.4.linux-amd64.tar.gz | tar -zxC /usr/local:
+curl -L https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar -zxC /usr/local:
   cmd.run:
     - unless: test -d /usr/local/go
 
