@@ -73,8 +73,11 @@ func (i *Ifconfig) LookupCountry(ip net.IP) (string, error) {
 	}
 	country, exists := record.Country.Names["en"]
 	if !exists {
-		return "", fmt.Errorf("no localized name for country: %+v",
-			record)
+		country, exists = record.RegisteredCountry.Names["en"]
+		if !exists {
+			return "", fmt.Errorf(
+				"could not determine country for IP: %s", ip)
+		}
 	}
 	return country, nil
 }
