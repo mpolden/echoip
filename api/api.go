@@ -29,6 +29,7 @@ type API struct {
 	db       *geoip2.Reader
 	CORS     bool
 	Template string
+	Logger   *log.Logger
 }
 
 func New() *API { return &API{} }
@@ -109,17 +110,23 @@ func (a *API) LookupCountry(ip net.IP) (string, error) {
 	return "", fmt.Errorf("could not determine country for IP: %s", ip)
 }
 
+func (a *API) handleError(w http.ResponseWriter, err error) {
+	a.Logger.Print(err)
+	w.WriteHeader(http.StatusInternalServerError)
+	io.WriteString(w, "Internal server error")
+}
+
 func (a *API) defaultHandler(w http.ResponseWriter, r *http.Request) {
 	cmd := cmdFromQueryParams(r.URL.Query())
 	funcMap := template.FuncMap{"ToLower": strings.ToLower}
 	t, err := template.New(filepath.Base(a.Template)).Funcs(funcMap).ParseFiles(a.Template)
 	if err != nil {
-		log.Print(err)
+		a.handleError(w, err)
 		return
 	}
 	b, err := json.MarshalIndent(r.Header, "", "  ")
 	if err != nil {
-		log.Print(err)
+		a.handleError(w, err)
 		return
 	}
 
@@ -131,7 +138,8 @@ func (a *API) defaultHandler(w http.ResponseWriter, r *http.Request) {
 	}{r.Header.Get(IP_HEADER), string(b), r.Header, cmd}
 
 	if err := t.Execute(w, &data); err != nil {
-		log.Print(err)
+		a.handleError(w, err)
+		return
 	}
 }
 
@@ -143,7 +151,7 @@ func (a *API) jsonHandler(w http.ResponseWriter, r *http.Request) {
 	value := map[string]string{key: r.Header.Get(key)}
 	b, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
-		log.Print(err)
+		a.handleError(w, err)
 		return
 	}
 	w.Write(b)
