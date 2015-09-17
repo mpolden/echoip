@@ -116,6 +116,11 @@ func (a *API) handleError(w http.ResponseWriter, err error) {
 	io.WriteString(w, "Internal server error")
 }
 
+func handleUnknownHeader(w http.ResponseWriter, key string) {
+	w.WriteHeader(http.StatusBadRequest)
+	io.WriteString(w, "Bad request: Unknown header: "+key)
+}
+
 func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	cmd := cmdFromQueryParams(r.URL.Query())
 	funcMap := template.FuncMap{"ToLower": strings.ToLower}
@@ -148,6 +153,10 @@ func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		key = IP_HEADER
 	}
 	value := map[string]string{key: r.Header.Get(key)}
+	if value[key] == "" {
+		handleUnknownHeader(w, key)
+		return
+	}
 	b, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
 		a.handleError(w, err)
@@ -162,6 +171,10 @@ func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) {
 		key = IP_HEADER
 	}
 	value := r.Header.Get(key)
+	if value == "" {
+		handleUnknownHeader(w, key)
+		return
+	}
 	if !strings.HasSuffix(value, "\n") {
 		value += "\n"
 	}
