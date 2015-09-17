@@ -13,3 +13,6 @@ test:
 
 install:
 	go install
+
+get-geoip-db:
+	curl -s http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz | gunzip > GeoLite2-Country.mmdb
