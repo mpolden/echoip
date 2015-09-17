@@ -1,5 +1,7 @@
 # ifconfig.co: Simple IP address lookup service
 
+[![Build Status](https://travis-ci.org/martinp/ifconfigd.svg)](https://travis-ci.org/martinp/ifconfigd)
+
 A simple service for looking up your IP address. This is the code that powers
 http://ifconfig.co
 
