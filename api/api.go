@@ -93,7 +93,7 @@ func headerKeyFromRequest(r *http.Request) string {
 	return key
 }
 
-func (a *API) LookupCountry(ip net.IP) (string, error) {
+func (a *API) lookupCountry(ip net.IP) (string, error) {
 	if a.db == nil {
 		return "", nil
 	}
@@ -116,7 +116,7 @@ func (a *API) handleError(w http.ResponseWriter, err error) {
 	io.WriteString(w, "Internal server error")
 }
 
-func (a *API) defaultHandler(w http.ResponseWriter, r *http.Request) {
+func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	cmd := cmdFromQueryParams(r.URL.Query())
 	funcMap := template.FuncMap{"ToLower": strings.ToLower}
 	t, err := template.New(filepath.Base(a.Template)).Funcs(funcMap).ParseFiles(a.Template)
@@ -139,11 +139,10 @@ func (a *API) defaultHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := t.Execute(w, &data); err != nil {
 		a.handleError(w, err)
-		return
 	}
 }
 
-func (a *API) jsonHandler(w http.ResponseWriter, r *http.Request) {
+func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	key := headerKeyFromRequest(r)
 	if key == "" {
 		key = IP_HEADER
@@ -157,7 +156,7 @@ func (a *API) jsonHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (a *API) cliHandler(w http.ResponseWriter, r *http.Request) {
+func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) {
 	key := headerKeyFromRequest(r)
 	if key == "" {
 		key = IP_HEADER
@@ -180,7 +179,7 @@ func (a *API) requestFilter(next http.Handler) http.Handler {
 			r.Header.Set(IP_HEADER, err.Error())
 		} else {
 			r.Header.Set(IP_HEADER, ip.String())
-			country, err := a.LookupCountry(ip)
+			country, err := a.lookupCountry(ip)
 			if err != nil {
 				r.Header.Set(COUNTRY_HEADER, err.Error())
 			} else {
@@ -199,16 +198,16 @@ func (a *API) Handlers() http.Handler {
 	r := mux.NewRouter()
 
 	// JSON
-	r.HandleFunc("/", a.jsonHandler).Methods("GET").Headers("Accept", "application/json")
-	r.HandleFunc("/{key}", a.jsonHandler).Methods("GET").Headers("Accept", "application/json")
-	r.HandleFunc("/{key}.json", a.jsonHandler).Methods("GET")
+	r.HandleFunc("/", a.JSONHandler).Methods("GET").Headers("Accept", "application/json")
+	r.HandleFunc("/{key}", a.JSONHandler).Methods("GET").Headers("Accept", "application/json")
+	r.HandleFunc("/{key}.json", a.JSONHandler).Methods("GET")
 
 	// CLI
-	r.HandleFunc("/", a.cliHandler).Methods("GET").MatcherFunc(cliMatcher)
-	r.HandleFunc("/{key}", a.cliHandler).Methods("GET").MatcherFunc(cliMatcher)
+	r.HandleFunc("/", a.CLIHandler).Methods("GET").MatcherFunc(cliMatcher)
+	r.HandleFunc("/{key}", a.CLIHandler).Methods("GET").MatcherFunc(cliMatcher)
 
 	// Default
-	r.HandleFunc("/", a.defaultHandler).Methods("GET")
+	r.HandleFunc("/", a.DefaultHandler).Methods("GET")
 
 	// Pass all requests through the request filter
 	return a.requestFilter(r)
