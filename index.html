@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="What is my IP address?">
     <link href="//fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
     <style>
       body {
         font-family: "Oswald", sans-serif;
@@ -61,8 +61,6 @@
           </tr>
           {{end}}
           {{end}}
-          <td><code><span class="command">{{ .Cmd.String }}</span> ifconfig.co/all.json</code></td>
-          <td><pre class="response">{{ .JSON }}</pre></td>
         </tbody>
       </table>
     </div>

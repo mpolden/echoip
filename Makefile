@@ -1,19 +1,15 @@
-NAME = ifconfig
+NAME=ifconfigd
 
-all: deps test build
-
-fmt:
-	gofmt -w=true *.go
+all: deps test install
 
 deps:
 	go get -d -v
 
-build:
-	@mkdir -p bin
-	go build -o bin/$(NAME)
+fmt:
+	go fmt ./...
 
 test:
-	go test
+	go test ./...
 
-docker-image:
-	docker build -t martinp/ifconfig .
+install:
+	go install
