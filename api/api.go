@@ -156,6 +156,17 @@ func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
+func (a *API) JSONAllHandler(w http.ResponseWriter, r *http.Request) *appError {
+	contentType := APPLICATION_JSON
+	b, err := json.MarshalIndent(r.Header, "", "  ")
+	if err != nil {
+		return internalServerError(err).WithContentType(contentType)
+	}
+	w.Header().Set("Content-Type", contentType)
+	w.Write(b)
+	return nil
+}
+
 func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
 	_, v, err := headerPairFromRequest(r)
 	if err != nil {
@@ -230,6 +241,8 @@ func (a *API) Handlers() http.Handler {
 
 	// JSON
 	r.Handle("/", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
+	r.Handle("/all", appHandler(a.JSONAllHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
+	r.Handle("/all.json", appHandler(a.JSONAllHandler)).Methods("GET")
 	r.Handle("/{header}", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
 	r.Handle("/{header}.json", appHandler(a.JSONHandler)).Methods("GET")
 

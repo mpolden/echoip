@@ -39,6 +39,10 @@ func TestGetIP(t *testing.T) {
 		return fmt.Sprintf("{\n  \"%s\": \"%s\"\n}", k, v)
 	}
 	s := httptest.NewServer(New().Handlers())
+	jsonAll := "{\n  \"Accept-Encoding\": [\n    \"gzip\"\n  ]," +
+		"\n  \"X-Ifconfig-Country\": [\n    \"\"\n  ]," +
+		"\n  \"X-Ifconfig-Ip\": [\n    \"127.0.0.1\"\n  ]\n}"
+
 	var tests = []struct {
 		url       string
 		json      bool
@@ -53,7 +57,9 @@ func TestGetIP(t *testing.T) {
 		{s.URL, true, toJSON("x-ifconfig-ip", "127.0.0.1"), "", 200},
 		{s.URL + "/foo", false, "no value found for: foo", "curl/7.26.0", 404},
 		{s.URL + "/foo", true, "{\n  \"error\": \"no value found for: foo\"\n}", "curl/7.26.0", 404},
+		{s.URL + "/all.json", false, jsonAll, "", 200},
 	}
+
 	for _, tt := range tests {
 		out, status, err := httpGet(tt.url, tt.json, tt.userAgent)
 		if err != nil {
