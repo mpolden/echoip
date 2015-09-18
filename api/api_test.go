@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -11,10 +12,10 @@ import (
 	"testing"
 )
 
-func httpGet(url string, json bool, userAgent string) (string, error) {
+func httpGet(url string, json bool, userAgent string) (string, int, error) {
 	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	if json {
 		r.Header.Set("Accept", "application/json")
@@ -22,17 +23,18 @@ func httpGet(url string, json bool, userAgent string) (string, error) {
 	r.Header.Set("User-Agent", userAgent)
 	res, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	defer res.Body.Close()
 	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
-	return string(data), nil
+	return string(data), res.StatusCode, nil
 }
 
 func TestGetIP(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
 	toJSON := func(k string, v string) string {
 		return fmt.Sprintf("{\n  \"%s\": \"%s\"\n}", k, v)
 	}
@@ -42,17 +44,23 @@ func TestGetIP(t *testing.T) {
 		json      bool
 		out       string
 		userAgent string
+		status    int
 	}{
-		{s.URL, false, "127.0.0.1\n", "curl/7.26.0"},
-		{s.URL, false, "127.0.0.1\n", "Wget/1.13.4 (linux-gnu)"},
-		{s.URL, false, "127.0.0.1\n", "fetch libfetch/2.0"},
-		{s.URL + "/x-ifconfig-ip.json", false, toJSON("x-ifconfig-ip", "127.0.0.1"), ""},
-		{s.URL, true, toJSON("x-ifconfig-ip", "127.0.0.1"), ""},
+		{s.URL, false, "127.0.0.1\n", "curl/7.26.0", 200},
+		{s.URL, false, "127.0.0.1\n", "Wget/1.13.4 (linux-gnu)", 200},
+		{s.URL, false, "127.0.0.1\n", "fetch libfetch/2.0", 200},
+		{s.URL + "/x-ifconfig-ip.json", false, toJSON("x-ifconfig-ip", "127.0.0.1"), "", 200},
+		{s.URL, true, toJSON("x-ifconfig-ip", "127.0.0.1"), "", 200},
+		{s.URL + "/foo", false, "no value found for: foo", "curl/7.26.0", 404},
+		{s.URL + "/foo", true, "{\n  \"error\": \"no value found for: foo\"\n}", "curl/7.26.0", 404},
 	}
 	for _, tt := range tests {
-		out, err := httpGet(tt.url, tt.json, tt.userAgent)
+		out, status, err := httpGet(tt.url, tt.json, tt.userAgent)
 		if err != nil {
 			t.Fatal(err)
+		}
+		if status != tt.status {
+			t.Errorf("Expected %d, got %d", tt.status, status)
 		}
 		if out != tt.out {
 			t.Errorf("Expected %q, got %q", tt.out, out)

@@ -19,8 +19,10 @@ import (
 )
 
 const (
-	IP_HEADER      = "x-ifconfig-ip"
-	COUNTRY_HEADER = "x-ifconfig-country"
+	IP_HEADER        = "x-ifconfig-ip"
+	COUNTRY_HEADER   = "x-ifconfig-country"
+	TEXT_PLAIN       = "text/plain; charset=utf-8"
+	APPLICATION_JSON = "application/json"
 )
 
 var cliUserAgentExp = regexp.MustCompile("^(?i)(curl|wget|fetch\\slibfetch)\\/.*$")
@@ -29,7 +31,6 @@ type API struct {
 	db       *geoip2.Reader
 	CORS     bool
 	Template string
-	Logger   *log.Logger
 }
 
 func New() *API { return &API{} }
@@ -84,13 +85,17 @@ func ipFromRequest(r *http.Request) (net.IP, error) {
 	return ip, nil
 }
 
-func headerKeyFromRequest(r *http.Request) string {
+func headerPairFromRequest(r *http.Request) (string, string, error) {
 	vars := mux.Vars(r)
-	key, ok := vars["key"]
+	header, ok := vars["header"]
 	if !ok {
-		return ""
+		header = IP_HEADER
 	}
-	return key
+	value := r.Header.Get(header)
+	if value == "" {
+		return "", "", fmt.Errorf("no value found for: %s", header)
+	}
+	return header, value, nil
 }
 
 func (a *API) lookupCountry(ip net.IP) (string, error) {
@@ -110,29 +115,16 @@ func (a *API) lookupCountry(ip net.IP) (string, error) {
 	return "", fmt.Errorf("could not determine country for IP: %s", ip)
 }
 
-func (a *API) handleError(w http.ResponseWriter, err error) {
-	a.Logger.Print(err)
-	w.WriteHeader(http.StatusInternalServerError)
-	io.WriteString(w, "Internal server error")
-}
-
-func handleUnknownHeader(w http.ResponseWriter, key string) {
-	w.WriteHeader(http.StatusBadRequest)
-	io.WriteString(w, "Bad request: Unknown header: "+key)
-}
-
-func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) {
+func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 	cmd := cmdFromQueryParams(r.URL.Query())
 	funcMap := template.FuncMap{"ToLower": strings.ToLower}
 	t, err := template.New(filepath.Base(a.Template)).Funcs(funcMap).ParseFiles(a.Template)
 	if err != nil {
-		a.handleError(w, err)
-		return
+		return internalServerError(err)
 	}
 	b, err := json.MarshalIndent(r.Header, "", "  ")
 	if err != nil {
-		a.handleError(w, err)
-		return
+		return internalServerError(err)
 	}
 
 	var data = struct {
@@ -143,42 +135,37 @@ func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	}{r.Header.Get(IP_HEADER), string(b), r.Header, cmd}
 
 	if err := t.Execute(w, &data); err != nil {
-		a.handleError(w, err)
+		return internalServerError(err)
 	}
+	return nil
 }
 
-func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) {
-	key := headerKeyFromRequest(r)
-	if key == "" {
-		key = IP_HEADER
+func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
+	k, v, err := headerPairFromRequest(r)
+	contentType := APPLICATION_JSON
+	if err != nil {
+		return notFound(err).WithContentType(contentType)
 	}
-	value := map[string]string{key: r.Header.Get(key)}
-	if value[key] == "" {
-		handleUnknownHeader(w, key)
-		return
-	}
+	value := map[string]string{k: v}
 	b, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
-		a.handleError(w, err)
-		return
+		return internalServerError(err).WithContentType(contentType)
 	}
+	w.Header().Set("Content-Type", contentType)
 	w.Write(b)
+	return nil
 }
 
-func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) {
-	key := headerKeyFromRequest(r)
-	if key == "" {
-		key = IP_HEADER
+func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
+	_, v, err := headerPairFromRequest(r)
+	if err != nil {
+		return notFound(err)
 	}
-	value := r.Header.Get(key)
-	if value == "" {
-		handleUnknownHeader(w, key)
-		return
+	if !strings.HasSuffix(v, "\n") {
+		v += "\n"
 	}
-	if !strings.HasSuffix(value, "\n") {
-		value += "\n"
-	}
-	io.WriteString(w, value)
+	io.WriteString(w, v)
+	return nil
 }
 
 func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
@@ -207,20 +194,51 @@ func (a *API) requestFilter(next http.Handler) http.Handler {
 	})
 }
 
+type appHandler func(http.ResponseWriter, *http.Request) *appError
+
+func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if e := fn(w, r); e != nil { // e is *appError
+		if e.Error != nil {
+			log.Print(e.Error)
+		}
+		contentType := e.ContentType
+		if contentType == "" {
+			contentType = TEXT_PLAIN
+		}
+		response := e.Response
+		if response == "" {
+			response = e.Error.Error()
+		}
+		if e.IsJSON() {
+			var data = struct {
+				Error string `json:"error"`
+			}{response}
+			b, err := json.MarshalIndent(data, "", "  ")
+			if err != nil {
+				panic(err)
+			}
+			response = string(b)
+		}
+		w.Header().Set("Content-Type", contentType)
+		w.WriteHeader(e.Code)
+		io.WriteString(w, response)
+	}
+}
+
 func (a *API) Handlers() http.Handler {
 	r := mux.NewRouter()
 
 	// JSON
-	r.HandleFunc("/", a.JSONHandler).Methods("GET").Headers("Accept", "application/json")
-	r.HandleFunc("/{key}", a.JSONHandler).Methods("GET").Headers("Accept", "application/json")
-	r.HandleFunc("/{key}.json", a.JSONHandler).Methods("GET")
+	r.Handle("/", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
+	r.Handle("/{header}", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
+	r.Handle("/{header}.json", appHandler(a.JSONHandler)).Methods("GET")
 
 	// CLI
-	r.HandleFunc("/", a.CLIHandler).Methods("GET").MatcherFunc(cliMatcher)
-	r.HandleFunc("/{key}", a.CLIHandler).Methods("GET").MatcherFunc(cliMatcher)
+	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	r.Handle("/{header}", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
 
 	// Default
-	r.HandleFunc("/", a.DefaultHandler).Methods("GET")
+	r.Handle("/", appHandler(a.DefaultHandler)).Methods("GET")
 
 	// Pass all requests through the request filter
 	return a.requestFilter(r)

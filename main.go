@@ -33,9 +33,8 @@ func main() {
 
 	a.CORS = opts.CORS
 	a.Template = opts.Template
-	a.Logger = log.New(os.Stderr, "", log.LstdFlags)
 
-	a.Logger.Printf("Listening on %s", opts.Listen)
+	log.Printf("Listening on %s", opts.Listen)
 	if err := a.ListenAndServe(opts.Listen); err != nil {
 		log.Fatal(err)
 	}
