@@ -21,6 +21,7 @@ import (
 const (
 	IP_HEADER        = "x-ifconfig-ip"
 	COUNTRY_HEADER   = "x-ifconfig-country"
+	HOSTNAME_HEADER  = "x-ifconfig-hostname"
 	TEXT_PLAIN       = "text/plain; charset=utf-8"
 	APPLICATION_JSON = "application/json"
 )
@@ -28,9 +29,10 @@ const (
 var cliUserAgentExp = regexp.MustCompile("^(?i)(curl|wget|fetch\\slibfetch)\\/.*$")
 
 type API struct {
-	db       *geoip2.Reader
-	CORS     bool
-	Template string
+	db            *geoip2.Reader
+	CORS          bool
+	ReverseLookup bool
+	Template      string
 }
 
 func New() *API { return &API{} }
@@ -195,6 +197,14 @@ func (a *API) requestFilter(next http.Handler) http.Handler {
 				r.Header.Set(COUNTRY_HEADER, err.Error())
 			} else {
 				r.Header.Set(COUNTRY_HEADER, country)
+			}
+		}
+		if a.ReverseLookup {
+			hostname, err := net.LookupAddr(ip.String())
+			if err != nil {
+				r.Header.Set(HOSTNAME_HEADER, err.Error())
+			} else {
+				r.Header.Set(HOSTNAME_HEADER, strings.Join(hostname, ", "))
 			}
 		}
 		if a.CORS {
