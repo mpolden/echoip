@@ -9,8 +9,24 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
+
+func newTestAPI() *API {
+	return &API{
+		lookupAddr: func(string) ([]string, error) {
+			return []string{"localhost"}, nil
+		},
+		lookupCountry: func(ip net.IP) (string, error) {
+			return "Elbonia", nil
+		},
+		ipFromRequest: func(*http.Request) (net.IP, error) {
+			return net.ParseIP("127.0.0.1"), nil
+		},
+		ReverseLookup: true,
+	}
+}
 
 func httpGet(url string, json bool, userAgent string) (string, int, error) {
 	r, err := http.NewRequest("GET", url, nil)
@@ -38,9 +54,10 @@ func TestGetIP(t *testing.T) {
 	toJSON := func(k string, v string) string {
 		return fmt.Sprintf("{\n  \"%s\": \"%s\"\n}", k, v)
 	}
-	s := httptest.NewServer(New().Handlers())
+	s := httptest.NewServer(newTestAPI().Handlers())
 	jsonAll := "{\n  \"Accept-Encoding\": [\n    \"gzip\"\n  ]," +
-		"\n  \"X-Ifconfig-Country\": [\n    \"\"\n  ]," +
+		"\n  \"X-Ifconfig-Country\": [\n    \"Elbonia\"\n  ]," +
+		"\n  \"X-Ifconfig-Hostname\": [\n    \"localhost\"\n  ]," +
 		"\n  \"X-Ifconfig-Ip\": [\n    \"127.0.0.1\"\n  ]\n}"
 
 	var tests = []struct {
@@ -71,6 +88,21 @@ func TestGetIP(t *testing.T) {
 		if out != tt.out {
 			t.Errorf("Expected %q, got %q", tt.out, out)
 		}
+	}
+}
+
+func TestGetIPWithoutReverse(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+	api := newTestAPI()
+	api.ReverseLookup = false
+	s := httptest.NewServer(api.Handlers())
+
+	out, _, err := httpGet(s.URL, false, "curl/7.26.0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if header := "X-Ifconfig-Hostname"; strings.Contains(out, header) {
+		t.Errorf("Expected response to not contain %q", header)
 	}
 }
 
