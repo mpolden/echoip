@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,7 +11,9 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"html/template"
 
@@ -28,13 +31,30 @@ const (
 
 var cliUserAgentExp = regexp.MustCompile(`^(?i)((curl|wget|fetch\slibfetch|Go-http-client)\/.*|Go\s1\.1\spackage\shttp)$`)
 
+var errNoRedirect = errors.New("no redirect")
+
+func dontRedirect(*http.Request, []*http.Request) error {
+	return errNoRedirect
+}
+
+func isError(err error) error {
+	if e, ok := err.(*url.Error); ok {
+		if e.Err == errNoRedirect {
+			return nil
+		}
+	}
+	return err
+}
+
 type API struct {
 	CORS          bool
 	ReverseLookup bool
 	Template      string
+	TestIP        bool
 	lookupAddr    func(string) ([]string, error)
 	lookupCountry func(net.IP) (string, error)
 	ipFromRequest func(*http.Request) (net.IP, error)
+	client        *http.Client
 }
 
 func New() *API {
@@ -42,6 +62,18 @@ func New() *API {
 		lookupAddr:    net.LookupAddr,
 		lookupCountry: func(ip net.IP) (string, error) { return "", nil },
 		ipFromRequest: ipFromRequest,
+		client: &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyFromEnvironment,
+				ResponseHeaderTimeout: 15 * time.Second,
+				Dial: (&net.Dialer{
+					Timeout: 10 * time.Second,
+				}).Dial,
+				TLSHandshakeTimeout: 10 * time.Second,
+			},
+			Timeout:       15 * time.Second,
+			CheckRedirect: dontRedirect,
+		},
 	}
 }
 
@@ -193,6 +225,37 @@ func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
+func (a *API) TestHandler(w http.ResponseWriter, r *http.Request) *appError {
+	s := r.URL.Path[len("/test/"):]
+	port, err := strconv.ParseUint(s, 10, 16)
+	if err != nil {
+		return errBadRequest
+	}
+
+	ip, err := ipFromRequest(r)
+	if err != nil {
+		return errBadRequest
+	}
+
+	u := url.URL{
+		Scheme: "http",
+		Host:   net.JoinHostPort(ip.String(), strconv.FormatUint(port, 10)),
+		Path:   "/",
+	}
+
+	resp, err := a.client.Get(u.String())
+	if err = isError(err); err != nil {
+		return errGone
+	}
+	defer resp.Body.Close()
+
+	if n := resp.StatusCode / 100; n != 2 && n != 3 {
+		return errGone
+	}
+
+	return nil
+}
+
 func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
 	return cliUserAgentExp.MatchString(r.UserAgent())
 }
@@ -269,6 +332,9 @@ func (a *API) Handlers() http.Handler {
 
 	// CLI
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	if a.TestIP {
+		r.Handle("/test/{port}", appHandler(a.TestHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	}
 	r.Handle("/{header}", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
 
 	// Default
