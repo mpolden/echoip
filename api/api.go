@@ -141,12 +141,19 @@ func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 		return internalServerError(err)
 	}
 
+	IsV6 := true
+	ip := net.ParseIP(r.Header.Get(IP_HEADER))
+	if ip.To4() != nil {
+		IsV6 = false
+	}
+
 	var data = struct {
 		IP     string
+		IsV6   bool
 		JSON   string
 		Header http.Header
 		Cmd
-	}{r.Header.Get(IP_HEADER), string(b), r.Header, cmd}
+	}{ip.String(), IsV6, string(b), r.Header, cmd}
 
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
