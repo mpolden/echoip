@@ -28,6 +28,9 @@
         margin-top: 10px;
         text-align: center;
       }
+      #footer a {
+	margin: 0 10px;
+      }
       .ip {
         border: 1px solid #cbcbcb;
         background: #f2f2f2;
@@ -71,9 +74,8 @@
       </table>
     </div>
     <div id="footer">
-    {{ if .IsV6 }}
       <a href="http://v4.ifconfig.co">IPv4 page</a>
-    {{end}}
+      <a href="http://v6.ifconfig.co">IPv6 page</a>
     </div>
     <a href="https://github.com/martinp/ifconfigd"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
   </body>
