@@ -13,13 +13,13 @@ func main() {
 	var opts struct {
 		DBPath        string `short:"f" long:"file" description:"Path to GeoIP database" value-name:"FILE" default:""`
 		Listen        string `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
-		CORS          bool   `short:"x" long:"cors" description:"Allow requests from other domains" default:"false"`
-		ReverseLookup bool   `short:"r" long:"reverselookup" description:"Perform reverse hostname lookups" default:"false"`
+		CORS          bool   `short:"x" long:"cors" description:"Allow requests from other domains"`
+		ReverseLookup bool   `short:"r" long:"reverselookup" description:"Perform reverse hostname lookups"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	var a *api.API
