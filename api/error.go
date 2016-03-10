@@ -1,12 +1,27 @@
 package api
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
+
+var (
+	errBadRequest = newAppError(http.StatusBadRequest)
+	errGone       = newAppError(http.StatusGone)
+)
 
 type appError struct {
 	Error       error
 	Response    string
 	Code        int
 	ContentType string
+}
+
+func newAppError(code int) *appError {
+	return &appError{
+		Error: errors.New(http.StatusText(code)),
+		Code:  code,
+	}
 }
 
 func internalServerError(err error) *appError {

@@ -15,6 +15,7 @@ func main() {
 		Listen        string `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
 		CORS          bool   `short:"x" long:"cors" description:"Allow requests from other domains"`
 		ReverseLookup bool   `short:"r" long:"reverselookup" description:"Perform reverse hostname lookups"`
+		TestIP        bool   `short:"s" long:"testip" description:"Enable IP reachability testing"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
@@ -35,6 +36,7 @@ func main() {
 	a.CORS = opts.CORS
 	a.ReverseLookup = opts.ReverseLookup
 	a.Template = opts.Template
+	a.TestIP = opts.TestIP
 
 	log.Printf("Listening on %s", opts.Listen)
 	if err := a.ListenAndServe(opts.Listen); err != nil {
