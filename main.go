@@ -15,6 +15,7 @@ func main() {
 		Listen        string `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
 		CORS          bool   `short:"x" long:"cors" description:"Allow requests from other domains"`
 		ReverseLookup bool   `short:"r" long:"reverse-lookup" description:"Perform reverse hostname lookups"`
+		PortTesting   bool   `short:"p" long:"port-testing" description:"Enable port testing"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
@@ -27,6 +28,10 @@ func main() {
 	if opts.ReverseLookup {
 		log.Println("Enabling reverse lookup")
 		api.EnableReverseLookup()
+	}
+	if opts.PortTesting {
+		log.Println("Enabling port testing")
+		api.EnablePortTesting()
 	}
 	if opts.DBPath != "" {
 		log.Printf("Enabling country lookup (using database: %s)\n", opts.DBPath)

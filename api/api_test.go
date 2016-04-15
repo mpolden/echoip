@@ -22,6 +22,9 @@ func newTestAPI() *API {
 		ipFromRequest: func(*http.Request) (net.IP, error) {
 			return net.ParseIP("127.0.0.1"), nil
 		},
+		testPort: func(net.IP, uint64) error {
+			return nil
+		},
 	}
 }
 

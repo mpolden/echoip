@@ -78,6 +78,20 @@ Date: Fri, 15 Apr 2016 17:26:53 GMT
     "ip": "{{ .IP }}"
 }            
         </pre>
+        <p>Testing port connectivity (only supports JSON output):</p>
+        <pre>
+http --json localhost:8080/port/8080
+HTTP/1.1 200 OK
+Content-Length: 47
+Content-Type: application/json
+Date: Fri, 15 Apr 2016 18:47:20 GMT
+
+{
+    "ip": "127.0.0.1",
+    "port": 8080,
+    "reachable": true
+}
+        </pre>
       </div>
     </div>
     <div class="pure-g">

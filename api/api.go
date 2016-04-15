@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	geoip2 "github.com/oschwald/geoip2-golang"
@@ -25,6 +27,7 @@ type API struct {
 	Template      string
 	lookupAddr    func(string) ([]string, error)
 	lookupCountry func(net.IP) (string, error)
+	testPort      func(net.IP, uint64) error
 	ipFromRequest func(*http.Request) (net.IP, error)
 }
 
@@ -34,10 +37,17 @@ type Response struct {
 	Hostname string `json:"hostname,omitempty"`
 }
 
+type TestPortResponse struct {
+	IP        net.IP `json:"ip"`
+	Port      uint64 `json:"port"`
+	Reachable bool   `json:"reachable"`
+}
+
 func New() *API {
 	return &API{
 		lookupAddr:    func(addr string) (names []string, err error) { return nil, nil },
 		lookupCountry: func(ip net.IP) (string, error) { return "", nil },
+		testPort:      func(ip net.IP, port uint64) error { return nil },
 		ipFromRequest: ipFromRequest,
 	}
 }
@@ -57,6 +67,10 @@ func (a *API) EnableReverseLookup() {
 	a.lookupAddr = net.LookupAddr
 }
 
+func (a *API) EnablePortTesting() {
+	a.testPort = testPort
+}
+
 func ipFromRequest(r *http.Request) (net.IP, error) {
 	var host string
 	realIP := r.Header.Get("X-Real-IP")
@@ -74,6 +88,14 @@ func ipFromRequest(r *http.Request) (net.IP, error) {
 		return nil, fmt.Errorf("could not parse IP: %s", host)
 	}
 	return ip, nil
+}
+
+func testPort(ip net.IP, port uint64) error {
+	address := fmt.Sprintf("%s:%d", ip, port)
+	if _, err := net.DialTimeout("tcp", address, 2*time.Second); err != nil {
+		return err
+	}
+	return nil
 }
 
 func lookupCountry(db *geoip2.Reader, ip net.IP) (string, error) {
@@ -130,6 +152,34 @@ func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := a.newResponse(r)
 	if err != nil {
 		return internalServerError(err).AsJSON()
+	}
+	b, err := json.Marshal(response)
+	if err != nil {
+		return internalServerError(err).AsJSON()
+	}
+	w.Header().Set("Content-Type", APPLICATION_JSON)
+	w.Write(b)
+	return nil
+}
+
+func (a *API) TestPortHandler(w http.ResponseWriter, r *http.Request) *appError {
+	vars := mux.Vars(r)
+	port, err := strconv.ParseUint(vars["port"], 10, 16)
+	if err != nil {
+		return badRequest(err).WithMessage("Invalid port: " + vars["port"]).AsJSON()
+	}
+	if port < 1 || port > 65355 {
+		return badRequest(nil).WithMessage("Invalid port: " + vars["port"]).AsJSON()
+	}
+	ip, err := a.ipFromRequest(r)
+	if err != nil {
+		return internalServerError(err).AsJSON()
+	}
+	err = testPort(ip, port)
+	response := TestPortResponse{
+		IP:        ip,
+		Port:      port,
+		Reachable: err == nil,
 	}
 	b, err := json.Marshal(response)
 	if err != nil {
@@ -217,6 +267,9 @@ func (a *API) Handlers() http.Handler {
 
 	// Browser
 	r.Handle("/", appHandler(a.DefaultHandler)).Methods("GET")
+
+	// Port testing
+	r.Handle("/port/{port:[0-9]+}", appHandler(a.TestPortHandler)).Methods("GET")
 
 	// Not found handler which returns JSON when appropriate
 	r.NotFoundHandler = appHandler(a.NotFoundHandler)

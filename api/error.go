@@ -21,6 +21,10 @@ func notFound(err error) *appError {
 	return &appError{Error: err, Code: http.StatusNotFound}
 }
 
+func badRequest(err error) *appError {
+	return &appError{Error: err, Code: http.StatusBadRequest}
+}
+
 func (e *appError) AsJSON() *appError {
 	e.ContentType = APPLICATION_JSON
 	return e
