@@ -1,14 +1,12 @@
 package api
 
 import (
-	"fmt"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
-	"reflect"
 	"strings"
 	"testing"
 )
@@ -24,7 +22,6 @@ func newTestAPI() *API {
 		ipFromRequest: func(*http.Request) (net.IP, error) {
 			return net.ParseIP("127.0.0.1"), nil
 		},
-		ReverseLookup: true,
 	}
 }
 
@@ -50,16 +47,15 @@ func httpGet(url string, json bool, userAgent string) (string, int, error) {
 }
 
 func TestGetIP(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
-	toJSON := func(k string, v string) string {
-		return fmt.Sprintf("{\n  \"%s\": \"%s\"\n}", k, v)
+	//log.SetOutput(ioutil.Discard)
+	toJSON := func(r Response) string {
+		b, err := json.Marshal(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(b)
 	}
 	s := httptest.NewServer(newTestAPI().Handlers())
-	jsonAll := "{\n  \"Accept-Encoding\": [\n    \"gzip\"\n  ]," +
-		"\n  \"X-Ifconfig-Country\": [\n    \"Elbonia\"\n  ]," +
-		"\n  \"X-Ifconfig-Hostname\": [\n    \"localhost\"\n  ]," +
-		"\n  \"X-Ifconfig-Ip\": [\n    \"127.0.0.1\"\n  ]\n}"
-
 	var tests = []struct {
 		url       string
 		json      bool
@@ -73,11 +69,9 @@ func TestGetIP(t *testing.T) {
 		{s.URL, false, "127.0.0.1\n", "Go 1.1 package http", 200},
 		{s.URL, false, "127.0.0.1\n", "Go-http-client/1.1", 200},
 		{s.URL, false, "127.0.0.1\n", "Go-http-client/2.0", 200},
-		{s.URL + "/x-ifconfig-ip.json", false, toJSON("x-ifconfig-ip", "127.0.0.1"), "", 200},
-		{s.URL, true, toJSON("x-ifconfig-ip", "127.0.0.1"), "", 200},
-		{s.URL + "/foo", false, "no value found for: foo", "curl/7.26.0", 404},
-		{s.URL + "/foo", true, "{\n  \"error\": \"no value found for: foo\"\n}", "curl/7.26.0", 404},
-		{s.URL + "/all.json", false, jsonAll, "", 200},
+		{s.URL, true, toJSON(Response{IP: net.ParseIP("127.0.0.1"), Country: "Elbonia", Hostname: "localhost"}), "", 200},
+		{s.URL + "/foo", false, "404 page not found", "curl/7.26.0", 404},
+		{s.URL + "/foo", true, "{\"error\":\"404 page not found\"}", "curl/7.26.0", 404},
 	}
 
 	for _, tt := range tests {
@@ -97,7 +91,6 @@ func TestGetIP(t *testing.T) {
 func TestGetIPWithoutReverse(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	api := newTestAPI()
-	api.ReverseLookup = false
 	s := httptest.NewServer(api.Handlers())
 
 	out, _, err := httpGet(s.URL, false, "curl/7.26.0")
@@ -124,25 +117,6 @@ func TestIPFromRequest(t *testing.T) {
 		}
 		if !ip.Equal(tt.out) {
 			t.Errorf("Expected %s, got %s", tt.out, ip)
-		}
-	}
-}
-
-func TestCmdFromParameters(t *testing.T) {
-	var tests = []struct {
-		in  url.Values
-		out Cmd
-	}{
-		{url.Values{}, Cmd{Name: "curl"}},
-		{url.Values{"cmd": []string{"foo"}}, Cmd{Name: "curl"}},
-		{url.Values{"cmd": []string{"curl"}}, Cmd{Name: "curl"}},
-		{url.Values{"cmd": []string{"fetch"}}, Cmd{Name: "fetch", Args: "-qo -"}},
-		{url.Values{"cmd": []string{"wget"}}, Cmd{Name: "wget", Args: "-qO -"}},
-	}
-	for _, tt := range tests {
-		cmd := cmdFromQueryParams(tt.in)
-		if !reflect.DeepEqual(cmd, tt.out) {
-			t.Errorf("Expected %+v, got %+v", tt.out, cmd)
 		}
 	}
 }

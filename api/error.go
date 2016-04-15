@@ -4,21 +4,25 @@ import "net/http"
 
 type appError struct {
 	Error       error
-	Response    string
+	Message     string
 	Code        int
 	ContentType string
 }
 
 func internalServerError(err error) *appError {
-	return &appError{Error: err, Response: "Internal server error", Code: http.StatusInternalServerError}
+	return &appError{
+		Error:   err,
+		Message: "Internal server error",
+		Code:    http.StatusInternalServerError,
+	}
 }
 
 func notFound(err error) *appError {
 	return &appError{Error: err, Code: http.StatusNotFound}
 }
 
-func (e *appError) WithContentType(contentType string) *appError {
-	e.ContentType = contentType
+func (e *appError) AsJSON() *appError {
+	e.ContentType = APPLICATION_JSON
 	return e
 }
 
@@ -27,8 +31,8 @@ func (e *appError) WithCode(code int) *appError {
 	return e
 }
 
-func (e *appError) WithResponse(response string) *appError {
-	e.Response = response
+func (e *appError) WithMessage(message string) *appError {
+	e.Message = message
 	return e
 }
 

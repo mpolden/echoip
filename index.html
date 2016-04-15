@@ -8,75 +8,80 @@
     <link href="//fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
     <style>
-      body {
+      html, .pure-g [class *= "pure-u"] {
         font-family: "Oswald", sans-serif;
-        font-size: 12px;
+        font-size: 15pt;
       }
-      .response {
+      pre {
         font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+        font-size: 12pt;
       }
-      .content {
+      body {
         margin-left: auto;
         margin-right: auto;
-        max-width: 1024px;
-      }
-      #wrapper {
-        margin-bottom: 10px;
-        text-align: center;
-      }
-      #footer {
-        margin-top: 10px;
-        text-align: center;
-      }
-      #footer a {
-	margin: 0 10px;
+        max-width: 80%;
       }
       .ip {
         border: 1px solid #cbcbcb;
         background: #f2f2f2;
         font-size: 36px;
       }
+      #footer {
+        font-size: 12pt;
+      }
     </style>
   </head>
   <body>
-    <div class="content">
-      <div id="wrapper">
+    <div class="pure-g">
+      <div class="pure-u-1-1">
         <h1>What is my IP address?</h1>
-        <h2>Your IP:</h2>
         <p><code class="ip">{{ .IP }}</code></p>
-        <a href="?cmd=curl" class="pure-button{{ if eq .Cmd.Name "curl" }} pure-button-active pure-button-primary{{end}}">curl</a>
-        <a href="?cmd=wget" class="pure-button{{ if eq .Cmd.Name "wget" }} pure-button-active pure-button-primary{{end}}">wget</a>
-        <a href="?cmd=fetch" class="pure-button{{ if eq .Cmd.Name "fetch" }} pure-button-active pure-button-primary{{end}}">fetch</a>
+        <p>Multiple command line HTTP clients are supported,
+          including <a href="https://curl.haxx.se/">curl</a>, <a href="https://www.gnu.org/software/wget/">GNU
+            Wget</a>
+          and <a href="https://www.freebsd.org/cgi/man.cgi?fetch(1)">fetch</a>.</p>
       </div>
-      <table class="pure-table pure-table-bordered pure-table-striped">
-        <thead>
-          <tr>
-            <th style="width: 350px">Command</th>
-            <th>Response</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code><span class="command">{{ .Cmd.String }}</span> ifconfig.co</code></td>
-            <td class="response">{{ .IP }}</td>
-          </tr>
-          {{ if $self := . }}
-          {{ range $key, $value := .Header }}
-          <tr>
-            <td><code><span class="command">{{ $self.Cmd.String }}</span> ifconfig.co/{{ ToLower $key }}</code></td>
-            <td class="response">{{ index $self.Header $key 0 }}</td>
-          </tr>
-          {{end}}
-          {{end}}
-          <td><code><span class="command">{{ .Cmd.String }}</span> ifconfig.co/all.json</code></td>
-          <td><pre class="response">{{ .JSON }}</pre></td>
-        </tbody>
-      </table>
     </div>
-    <div id="footer">
-      <a href="http://v4.ifconfig.co">IPv4 page</a>
-      <a href="http://v6.ifconfig.co">IPv6 page</a>
+    <div class="pure-g">
+      <div class="pure-u-1-2">
+        <p>CLI examples:</p>
+        <pre>
+$ curl ifconfig.co
+{{ .IP }}
+
+$ wget -qO- ifconfig.co
+{{ .IP }}
+
+$ fetch -qo- http://ifconfig.co
+{{ .IP }}
+        </pre>
+        <p>Country lookup:</p>
+        <pre>
+$ http ifconfig.co/country
+{{ .Country }}
+        </pre>
+      </div>
+      <div class="pure-u-1-2">
+        <p>JSON output:</p>
+        <pre>
+$ http --json ifconfig.co
+HTTP/1.1 200 OK
+Content-Length: 61
+Content-Type: application/json
+Date: Fri, 15 Apr 2016 17:26:53 GMT
+
+{
+    "country": "{{ .Country }}",
+    "ip": "{{ .IP }}"
+}            
+        </pre>
+      </div>
     </div>
-    <a href="https://github.com/martinp/ifconfigd"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    <div class="pure-g">
+      <div class="pure-u-1-1" id="footer">
+        <p>To force IPv4 lookup you can use the <a href="http://v4.ifconfig.co">v4 subdomain</a> (<a href="http://v6.ifconfig.co">or v6 for IPv6</a>).</p>
+      </div>
+    </div>
+    <a href="https://github.com/martinp/ipd"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
   </body>
 </html>
