@@ -29,6 +29,9 @@ type API struct {
 	lookupCountry func(net.IP) (string, error)
 	testPort      func(net.IP, uint64) error
 	ipFromRequest func(*http.Request) (net.IP, error)
+	reverseLookup bool
+	countryLookup bool
+	portTesting   bool
 }
 
 type Response struct {
@@ -60,15 +63,18 @@ func (a *API) EnableCountryLookup(filepath string) error {
 	a.lookupCountry = func(ip net.IP) (string, error) {
 		return lookupCountry(db, ip)
 	}
+	a.countryLookup = true
 	return nil
 }
 
 func (a *API) EnableReverseLookup() {
 	a.lookupAddr = net.LookupAddr
+	a.reverseLookup = true
 }
 
 func (a *API) EnablePortTesting() {
 	a.testPort = testPort
+	a.portTesting = true
 }
 
 func ipFromRequest(r *http.Request) (net.IP, error) {
@@ -199,7 +205,13 @@ func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err)
 	}
-	if err := t.Execute(w, &response); err != nil {
+	var data = struct {
+		Response
+		ReverseLookup bool
+		CountryLookup bool
+		PortTesting   bool
+	}{response, a.reverseLookup, a.countryLookup, a.portTesting}
+	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
 	}
 	return nil
