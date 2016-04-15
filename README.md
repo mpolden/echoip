@@ -1,6 +1,6 @@
 # ifconfig.co: Simple IP address lookup service
 
-[![Build Status](https://travis-ci.org/martinp/ifconfigd.svg)](https://travis-ci.org/martinp/ifconfigd)
+[![Build Status](https://travis-ci.org/martinp/ipd.svg)](https://travis-ci.org/martinp/ipd)
 
 A simple service for looking up your IP address. This is the code that powers
 http://ifconfig.co
@@ -70,12 +70,12 @@ The subdomain http://v4.ifconfig.co can be used to force IPv4 lookup.
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
 This application can be installed by using `go get`:
 
-`go get github.com/martinp/ifconfigd`
+`go get github.com/martinp/ipd`
 
 ### Usage
 
 ```
-ifconfigd -h
+ipd -h
 Usage:
   ifconfigd [OPTIONS]
 
