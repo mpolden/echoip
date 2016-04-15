@@ -1,4 +1,4 @@
-# ifconfig.co: Simple IP address lookup service
+# ipd
 
 [![Build Status](https://travis-ci.org/martinp/ipd.svg)](https://travis-ci.org/martinp/ipd)
 
@@ -13,34 +13,30 @@ Just the business, please:
 $ curl ifconfig.co
 127.0.0.1
 
-$ wget -qO - ifconfig.co
+$ http ifconfig.co
 127.0.0.1
 
-$ fetch -qo - ifconfig.co
+$ wget -qO- ifconfig.co
+127.0.0.1
+
+$ fetch -qo- http://ifconfig.co
 127.0.0.1
 ```
 
-A specific header:
+Country lookup:
 
 ```
-$ curl ifconfig.co/user-agent
-curl/7.43.0
-
-$ curl ifconfig.co/x-ifconfig-country
-Norway
+$ http ifconfig.co/country
+Home, Sweet Home
 ```
 
 As JSON:
 
 ```
-$ curl -H 'Accept: application/json' ifconfig.co
+$ http --json ifconfig.co
 {
-  "x-ifconfig-ip": "127.0.0.1"
-}
-
-$ curl ifconfig.co/x-config-ip.json
-{
-  "x-ifconfig-ip": "127.0.0.1"
+  "ip": "127.0.0.1",
+  "country": "Home, Sweet Home"
 }
 ```
 
@@ -53,9 +49,10 @@ The subdomain http://v4.ifconfig.co can be used to force IPv4 lookup.
 
 * Easy to remember domain name
 * Supports IPv4 and IPv6
-* Open source
+* Supports HTTPS
+* Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 * Fast
-* Supports typical CLI tools (curl, wget and fetch)
+* Supports typical CLI tools (curl, httpie, wget and fetch)
 * JSON output (optional)
 * Country lookup for IP address through the MaxMind GeoIP2 database
 
@@ -75,16 +72,18 @@ This application can be installed by using `go get`:
 ### Usage
 
 ```
-ipd -h
+$ ipd -h
 Usage:
-  ifconfigd [OPTIONS]
+  ipd [OPTIONS]
 
 Application Options:
-  -f, --file=FILE      Path to GeoIP database
-  -l, --listen=ADDR    Listening address (:8080)
-  -x, --cors           Allow requests from other domains (false)
-  -t, --template=      Path to template (index.html)
+  -f, --file=FILE          Path to GeoIP database
+  -l, --listen=ADDR        Listening address (default: :8080)
+  -x, --cors               Allow requests from other domains
+  -r, --reverse-lookup     Perform reverse hostname lookups
+  -p, --port-testing       Enable port testing
+  -t, --template=          Path to template (default: index.html)
 
 Help Options:
-  -h, --help           Show this help message
+  -h, --help               Show this help message
 ```
