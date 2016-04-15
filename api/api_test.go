@@ -97,8 +97,8 @@ func TestGetIPWithoutReverse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if header := "X-Ifconfig-Hostname"; strings.Contains(out, header) {
-		t.Errorf("Expected response to not contain %q", header)
+	if key := "hostname"; strings.Contains(out, key) {
+		t.Errorf("Expected response to not key %q", key)
 	}
 }
 
