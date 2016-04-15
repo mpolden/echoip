@@ -132,6 +132,7 @@ func TestCLIMatcher(t *testing.T) {
 		{"curl/7.26.0", true},
 		{"Wget/1.13.4 (linux-gnu)", true},
 		{"fetch libfetch/2.0", true},
+		{"HTTPie/0.9.3", true},
 		{browserUserAgent, false},
 	}
 	for _, tt := range tests {

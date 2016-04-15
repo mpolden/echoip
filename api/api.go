@@ -18,7 +18,7 @@ import (
 
 const APPLICATION_JSON = "application/json"
 
-var cliUserAgentExp = regexp.MustCompile(`^(?i)((curl|wget|fetch\slibfetch|Go-http-client)\/.*|Go\s1\.1\spackage\shttp)$`)
+var cliUserAgentExp = regexp.MustCompile(`^((curl|Wget|fetch\slibfetch|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp)$`)
 
 type API struct {
 	CORS          bool
