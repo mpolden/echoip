@@ -30,18 +30,8 @@ func (e *appError) AsJSON() *appError {
 	return e
 }
 
-func (e *appError) WithCode(code int) *appError {
-	e.Code = code
-	return e
-}
-
 func (e *appError) WithMessage(message string) *appError {
 	e.Message = message
-	return e
-}
-
-func (e *appError) WithError(err error) *appError {
-	e.Error = err
 	return e
 }
 
