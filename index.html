@@ -7,6 +7,7 @@
     <meta name="description" content="What is my IP address?">
     <link href="//fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/grids-responsive-min.css">
     <style>
       html, .pure-g [class *= "pure-u"] {
         font-family: "Roboto", sans-serif;
@@ -44,7 +45,7 @@
       </div>
     </div>
     <div class="pure-g">
-      <div class="pure-u-1-2">
+      <div class="pure-u-1 pure-u-md-1-2">
         <p>CLI examples:</p>
         <pre>
 $ curl ifconfig.co
@@ -67,7 +68,7 @@ $ http ifconfig.co/country
         </pre>
 {{ end }}
       </div>
-      <div class="pure-u-1-2">
+      <div class="pure-u-1 pure-u-md-1-2">
         <p>JSON output:</p>
         <pre>
 $ http --json ifconfig.co
