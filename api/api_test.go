@@ -1,13 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -49,37 +47,23 @@ func httpGet(url string, json bool, userAgent string) (string, int, error) {
 	return string(data), res.StatusCode, nil
 }
 
-func TestGetIP(t *testing.T) {
+func TestClIHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	toJSON := func(r Response) string {
-		b, err := json.Marshal(r)
-		if err != nil {
-			t.Fatal(err)
-		}
-		return string(b)
-	}
 	s := httptest.NewServer(newTestAPI().Handlers())
+
 	var tests = []struct {
-		url       string
-		json      bool
-		out       string
-		userAgent string
-		status    int
+		url    string
+		out    string
+		status int
 	}{
-		{s.URL, false, "127.0.0.1\n", "curl/7.26.0", 200},
-		{s.URL, false, "127.0.0.1\n", "Wget/1.13.4 (linux-gnu)", 200},
-		{s.URL, false, "127.0.0.1\n", "fetch libfetch/2.0", 200},
-		{s.URL, false, "127.0.0.1\n", "Go 1.1 package http", 200},
-		{s.URL, false, "127.0.0.1\n", "Go-http-client/1.1", 200},
-		{s.URL, false, "127.0.0.1\n", "Go-http-client/2.0", 200},
-		{s.URL + "/country", false, "Elbonia\n", "curl/7.26.0", 200},
-		{s.URL, true, toJSON(Response{IP: net.ParseIP("127.0.0.1"), Country: "Elbonia", Hostname: "localhost"}), "", 200},
-		{s.URL + "/foo", false, "404 page not found", "curl/7.26.0", 404},
-		{s.URL + "/foo", true, "{\"error\":\"404 page not found\"}", "curl/7.26.0", 404},
+		{s.URL, "127.0.0.1\n", 200},
+		{s.URL + "/ip", "127.0.0.1\n", 200},
+		{s.URL + "/country", "Elbonia\n", 200},
+		{s.URL + "/foo", "404 page not found", 404},
 	}
 
 	for _, tt := range tests {
-		out, status, err := httpGet(tt.url, tt.json, tt.userAgent)
+		out, status, err := httpGet(tt.url /* json = */, false, "curl/7.2.6.0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -92,17 +76,31 @@ func TestGetIP(t *testing.T) {
 	}
 }
 
-func TestGetIPWithoutReverse(t *testing.T) {
+func TestJSONHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	api := newTestAPI()
-	s := httptest.NewServer(api.Handlers())
+	s := httptest.NewServer(newTestAPI().Handlers())
 
-	out, _, err := httpGet(s.URL, false, "curl/7.26.0")
-	if err != nil {
-		t.Fatal(err)
+	var tests = []struct {
+		url    string
+		out    string
+		status int
+	}{
+		{s.URL, `{"ip":"127.0.0.1","country":"Elbonia","hostname":"localhost"}`, 200},
+		{s.URL + "/port/8080", `{"ip":"127.0.0.1","port":8080,"reachable":false}`, 200},
+		{s.URL + "/foo", `{"error":"404 page not found"}`, 404},
 	}
-	if key := "hostname"; strings.Contains(out, key) {
-		t.Errorf("Expected response to not key %q", key)
+
+	for _, tt := range tests {
+		out, status, err := httpGet(tt.url /* json = */, true, "curl/7.2.6.0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if status != tt.status {
+			t.Errorf("Expected %d, got %d", tt.status, status)
+		}
+		if out != tt.out {
+			t.Errorf("Expected %q, got %q", tt.out, out)
+		}
 	}
 }
 
@@ -137,6 +135,9 @@ func TestCLIMatcher(t *testing.T) {
 		{"Wget/1.13.4 (linux-gnu)", true},
 		{"fetch libfetch/2.0", true},
 		{"HTTPie/0.9.3", true},
+		{"Go 1.1 package http", true},
+		{"Go-http-client/1.1", true},
+		{"Go-http-client/2.0", true},
 		{browserUserAgent, false},
 	}
 	for _, tt := range tests {
