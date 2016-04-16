@@ -86,7 +86,7 @@ func TestJSONHandlers(t *testing.T) {
 		status int
 	}{
 		{s.URL, `{"ip":"127.0.0.1","country":"Elbonia","hostname":"localhost"}`, 200},
-		{s.URL + "/port/8080", `{"ip":"127.0.0.1","port":8080,"reachable":false}`, 200},
+		{s.URL + "/port/31337", `{"ip":"127.0.0.1","port":31337,"reachable":true}`, 200},
 		{s.URL + "/foo", `{"error":"404 page not found"}`, 404},
 	}
 

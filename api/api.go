@@ -98,7 +98,6 @@ func testPort(ip net.IP, port uint64) error {
 	conn, err := net.DialTimeout("tcp", address, 2*time.Second)
 	if err != nil {
 		return err
-
 	}
 	defer conn.Close()
 	return nil
@@ -186,7 +185,7 @@ func (a *API) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
-	err = testPort(ip, port)
+	err = a.testPort(ip, port)
 	response := TestPortResponse{
 		IP:        ip,
 		Port:      port,
