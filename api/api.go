@@ -98,9 +98,12 @@ func ipFromRequest(r *http.Request) (net.IP, error) {
 
 func testPort(ip net.IP, port uint64) error {
 	address := fmt.Sprintf("%s:%d", ip, port)
-	if _, err := net.DialTimeout("tcp", address, 2*time.Second); err != nil {
+	conn, err := net.DialTimeout("tcp", address, 2*time.Second)
+	if err != nil {
 		return err
+
 	}
+	defer conn.Close()
 	return nil
 }
 
@@ -173,7 +176,7 @@ func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
-func (a *API) TestPortHandler(w http.ResponseWriter, r *http.Request) *appError {
+func (a *API) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	vars := mux.Vars(r)
 	port, err := strconv.ParseUint(vars["port"], 10, 16)
 	if err != nil {
@@ -286,7 +289,7 @@ func (a *API) Handlers() http.Handler {
 	r.Handle("/", appHandler(a.DefaultHandler)).Methods("GET")
 
 	// Port testing
-	r.Handle("/port/{port:[0-9]+}", appHandler(a.TestPortHandler)).Methods("GET")
+	r.Handle("/port/{port:[0-9]+}", appHandler(a.PortHandler)).Methods("GET")
 
 	// Not found handler which returns JSON when appropriate
 	r.NotFoundHandler = appHandler(a.NotFoundHandler)
