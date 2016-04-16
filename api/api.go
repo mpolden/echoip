@@ -20,7 +20,9 @@ import (
 
 const APPLICATION_JSON = "application/json"
 
-var cliUserAgentExp = regexp.MustCompile(`^((curl|Wget|fetch\slibfetch|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp)$`)
+var USER_AGENT_RE = regexp.MustCompile(
+	`^(?:curl|Wget|fetch\slibfetch|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
+)
 
 type API struct {
 	CORS          bool
@@ -230,7 +232,7 @@ func (a *API) NotFoundHandler(w http.ResponseWriter, r *http.Request) *appError 
 }
 
 func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
-	return cliUserAgentExp.MatchString(r.UserAgent())
+	return USER_AGENT_RE.MatchString(r.UserAgent())
 }
 
 func (a *API) requestFilter(next http.Handler) http.Handler {
