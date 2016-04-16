@@ -25,8 +25,9 @@
         border: 1px solid #cbcbcb;
         background: #f2f2f2;
         font-size: 36px;
+        padding: 6px;
       }
-      #footer {
+      .footer {
         font-size: 12pt;
       }
     </style>
@@ -99,9 +100,13 @@ Date: Fri, 15 Apr 2016 18:47:20 GMT
 {{ end }}
       </div>
     </div>
-    <div class="pure-g">
-      <div class="pure-u-1-1" id="footer">
-        <p>To force IPv4 lookup you can use the <a href="http://v4.ifconfig.co">v4 subdomain</a> (<a href="http://v6.ifconfig.co">or v6 for IPv6</a>).</p>
+    <div class="pure-g footer">
+      <div class="pure-u-1-1 footer">
+        <p class="footer">
+          To force IPv4 lookup you can use
+          the <a href="http://v4.ifconfig.co">v4 subdomain</a>
+          (<a href="http://v6.ifconfig.co">or v6 for IPv6</a>).
+        </p>
       </div>
     </div>
     <a href="https://github.com/martinp/ipd"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
