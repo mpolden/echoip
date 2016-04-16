@@ -78,20 +78,17 @@ func (a *API) EnablePortTesting() {
 }
 
 func ipFromRequest(r *http.Request) (net.IP, error) {
-	var host string
-	realIP := r.Header.Get("X-Real-IP")
-	var err error
-	if realIP != "" {
-		host = realIP
-	} else {
-		host, _, err = net.SplitHostPort(r.RemoteAddr)
+	remoteIP := r.Header.Get("X-Real-IP")
+	if remoteIP == "" {
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
 			return nil, err
 		}
+		remoteIP = host
 	}
-	ip := net.ParseIP(host)
+	ip := net.ParseIP(remoteIP)
 	if ip == nil {
-		return nil, fmt.Errorf("could not parse IP: %s", host)
+		return nil, fmt.Errorf("could not parse IP: %s", remoteIP)
 	}
 	return ip, nil
 }
