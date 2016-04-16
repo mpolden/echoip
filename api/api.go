@@ -142,15 +142,20 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 }
 
 func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
+	ip, err := a.ipFromRequest(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	io.WriteString(w, ip.String()+"\n")
+	return nil
+}
+
+func (a *API) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := a.newResponse(r)
 	if err != nil {
 		return internalServerError(err)
 	}
-	if r.URL.Path == "/country" {
-		io.WriteString(w, response.Country+"\n")
-	} else {
-		io.WriteString(w, response.IP.String()+"\n")
-	}
+	io.WriteString(w, response.Country+"\n")
 	return nil
 }
 
@@ -275,7 +280,7 @@ func (a *API) Handlers() http.Handler {
 	// CLI
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
 	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
-	r.Handle("/country", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET").MatcherFunc(cliMatcher)
 
 	// Browser
 	r.Handle("/", appHandler(a.DefaultHandler)).Methods("GET")

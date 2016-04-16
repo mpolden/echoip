@@ -50,7 +50,7 @@ func httpGet(url string, json bool, userAgent string) (string, int, error) {
 }
 
 func TestGetIP(t *testing.T) {
-	//log.SetOutput(ioutil.Discard)
+	log.SetOutput(ioutil.Discard)
 	toJSON := func(r Response) string {
 		b, err := json.Marshal(r)
 		if err != nil {
@@ -72,6 +72,7 @@ func TestGetIP(t *testing.T) {
 		{s.URL, false, "127.0.0.1\n", "Go 1.1 package http", 200},
 		{s.URL, false, "127.0.0.1\n", "Go-http-client/1.1", 200},
 		{s.URL, false, "127.0.0.1\n", "Go-http-client/2.0", 200},
+		{s.URL + "/country", false, "Elbonia\n", "curl/7.26.0", 200},
 		{s.URL, true, toJSON(Response{IP: net.ParseIP("127.0.0.1"), Country: "Elbonia", Hostname: "localhost"}), "", 200},
 		{s.URL + "/foo", false, "404 page not found", "curl/7.26.0", 404},
 		{s.URL + "/foo", true, "{\"error\":\"404 page not found\"}", "curl/7.26.0", 404},
