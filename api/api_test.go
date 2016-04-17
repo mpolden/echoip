@@ -21,12 +21,7 @@ func (r *mockOracle) IsLookupCityEnabled() bool            { return true }
 func (r *mockOracle) IsLookupPortEnabled() bool            { return true }
 
 func newTestAPI() *API {
-	return &API{
-		oracle: &mockOracle{},
-		ipFromRequest: func(string, *http.Request) (net.IP, error) {
-			return net.ParseIP("127.0.0.1"), nil
-		},
-	}
+	return &API{oracle: &mockOracle{}}
 }
 
 func httpGet(url string, json bool, userAgent string) (string, int, error) {

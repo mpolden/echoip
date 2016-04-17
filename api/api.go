@@ -23,10 +23,9 @@ var USER_AGENT_RE = regexp.MustCompile(
 )
 
 type API struct {
-	Template      string
-	IPHeader      string
-	oracle        Oracle
-	ipFromRequest func(string, *http.Request) (net.IP, error)
+	Template string
+	IPHeader string
+	oracle   Oracle
 }
 
 type Response struct {
@@ -43,10 +42,7 @@ type TestPortResponse struct {
 }
 
 func New(oracle Oracle) *API {
-	return &API{
-		oracle:        oracle,
-		ipFromRequest: ipFromRequest,
-	}
+	return &API{oracle: oracle}
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
@@ -66,7 +62,7 @@ func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 }
 
 func (a *API) newResponse(r *http.Request) (Response, error) {
-	ip, err := a.ipFromRequest(a.IPHeader, r)
+	ip, err := ipFromRequest(a.IPHeader, r)
 	if err != nil {
 		return Response{}, err
 	}
@@ -91,7 +87,7 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 }
 
 func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
-	ip, err := a.ipFromRequest(a.IPHeader, r)
+	ip, err := ipFromRequest(a.IPHeader, r)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -140,7 +136,7 @@ func (a *API) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if port < 1 || port > 65355 {
 		return badRequest(nil).WithMessage("Invalid port: " + vars["port"]).AsJSON()
 	}
-	ip, err := a.ipFromRequest(a.IPHeader, r)
+	ip, err := ipFromRequest(a.IPHeader, r)
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
