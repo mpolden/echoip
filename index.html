@@ -71,7 +71,7 @@ $ http ifconfig.co/country
       <div class="pure-u-1 pure-u-md-1-2">
         <p>JSON output:</p>
         <pre>
-$ http --json ifconfig.co
+$ http ifconfig.co/json
 HTTP/1.1 200 OK
 Content-Length: 61
 Content-Type: application/json
@@ -81,7 +81,10 @@ Date: Fri, 15 Apr 2016 17:26:53 GMT
     "country": "{{ .Country }}",{{ end }}{{ if .ReverseLookup }}
     "hostname": "{{ .Hostname }}",{{ end }}
     "ip": "{{ .IP }}"
-}            
+}
+
+# or set Accept header to application/json:
+# http --json ifconfig.co
         </pre>
 {{ if .PortTesting }}
         <p>Testing port connectivity (only supports JSON output):</p>

@@ -277,6 +277,7 @@ func (a *API) Handlers() http.Handler {
 
 	// JSON
 	r.Handle("/", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
+	r.Handle("/json", appHandler(a.JSONHandler)).Methods("GET")
 
 	// CLI
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
