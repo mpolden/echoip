@@ -32,6 +32,7 @@ type API struct {
 type Response struct {
 	IP       net.IP `json:"ip"`
 	Country  string `json:"country,omitempty"`
+	City     string `json:"city,omitempty"`
 	Hostname string `json:"hostname,omitempty"`
 }
 
@@ -73,6 +74,10 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		log.Print(err)
 	}
+	city, err := a.oracle.LookupCity(ip)
+	if err != nil {
+		log.Print(err)
+	}
 	hostnames, err := a.oracle.LookupAddr(ip.String())
 	if err != nil {
 		log.Print(err)
@@ -80,6 +85,7 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	return Response{
 		IP:       ip,
 		Country:  country,
+		City:     city,
 		Hostname: strings.Join(hostnames, " "),
 	}, nil
 }
@@ -99,6 +105,15 @@ func (a *API) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appErro
 		return internalServerError(err)
 	}
 	io.WriteString(w, response.Country+"\n")
+	return nil
+}
+
+func (a *API) CLICityHandler(w http.ResponseWriter, r *http.Request) *appError {
+	response, err := a.newResponse(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	io.WriteString(w, response.City+"\n")
 	return nil
 }
 
@@ -223,6 +238,7 @@ func (a *API) Handlers() http.Handler {
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
 	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
 	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET").MatcherFunc(cliMatcher)
 
 	// Browser
 	r.Handle("/", appHandler(a.DefaultHandler)).Methods("GET")

@@ -15,5 +15,6 @@ deps:
 install:
 	go install
 
-get-geoip-db:
+get-geoip-dbs:
 	curl -s http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz | gunzip > GeoLite2-Country.mmdb
+	curl -s http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz | gunzip > GeoLite2-City.mmdb
