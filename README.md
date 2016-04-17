@@ -85,7 +85,6 @@ Application Options:
   -f, --country-db=FILE    Path to GeoIP country database
   -c, --city-db=FILE       Path to GeoIP city database
   -l, --listen=ADDR        Listening address (default: :8080)
-  -x, --cors               Allow requests from other domains
   -r, --reverse-lookup     Perform reverse hostname lookups
   -p, --port-lookup        Enable port lookup
   -t, --template=          Path to template (default: index.html)

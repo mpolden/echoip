@@ -23,7 +23,6 @@ var USER_AGENT_RE = regexp.MustCompile(
 )
 
 type API struct {
-	CORS          bool
 	Template      string
 	oracle        Oracle
 	ipFromRequest func(*http.Request) (net.IP, error)
@@ -190,16 +189,6 @@ func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
 	return USER_AGENT_RE.MatchString(r.UserAgent())
 }
 
-func (a *API) requestFilter(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if a.CORS {
-			w.Header().Set("Access-Control-Allow-Methods", "GET")
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
 type appHandler func(http.ResponseWriter, *http.Request) *appError
 
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -249,8 +238,7 @@ func (a *API) Handlers() http.Handler {
 	// Not found handler which returns JSON when appropriate
 	r.NotFoundHandler = appHandler(a.NotFoundHandler)
 
-	// Pass all requests through the request filter
-	return a.requestFilter(r)
+	return r
 }
 
 func (a *API) ListenAndServe(addr string) error {

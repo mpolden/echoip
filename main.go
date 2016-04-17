@@ -14,7 +14,6 @@ func main() {
 		CountryDBPath string `short:"f" long:"country-db" description:"Path to GeoIP country database" value-name:"FILE" default:""`
 		CityDBPath    string `short:"c" long:"city-db" description:"Path to GeoIP city database" value-name:"FILE" default:""`
 		Listen        string `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
-		CORS          bool   `short:"x" long:"cors" description:"Allow requests from other domains"`
 		ReverseLookup bool   `short:"r" long:"reverse-lookup" description:"Perform reverse hostname lookups"`
 		PortLookup    bool   `short:"p" long:"port-lookup" description:"Enable port lookup"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html"`
@@ -47,7 +46,6 @@ func main() {
 	}
 
 	api := api.New(oracle)
-	api.CORS = opts.CORS
 	api.Template = opts.Template
 
 	log.Printf("Listening on %s", opts.Listen)
