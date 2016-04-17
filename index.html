@@ -58,32 +58,24 @@ $ wget -qO- ifconfig.co
 {{ .IP }}
 
 $ fetch -qo- http://ifconfig.co
-{{ .IP }}
-        </pre>
+{{ .IP }}</pre>
 {{ if .IsLookupCountryEnabled }}
         <p>Country lookup:</p>
         <pre>
 $ http ifconfig.co/country
-{{ .Country }}
-        </pre>
+{{ .Country }}</pre>
 {{ end }}
 {{ if .IsLookupCityEnabled }}
         <p>City lookup:</p>
         <pre>
 $ http ifconfig.co/city
-{{ .City }}
-        </pre>
+{{ .City }}</pre>
 {{ end }}
       </div>
       <div class="pure-u-1 pure-u-md-1-2">
         <p>JSON output:</p>
         <pre>
 $ http ifconfig.co/json
-HTTP/1.1 200 OK
-Content-Length: 61
-Content-Type: application/json
-Date: Fri, 15 Apr 2016 17:26:53 GMT
-
 { {{ if .IsLookupCountryEnabled }}
     "country": "{{ .Country }}",{{ end }}{{ if .IsLookupCityEnabled }}
     "city": "{{ .City }}",{{ end }}{{ if .IsLookupAddrEnabled }}
@@ -91,24 +83,18 @@ Date: Fri, 15 Apr 2016 17:26:53 GMT
     "ip": "{{ .IP }}"
 }
 
-# or set Accept header to application/json:
-# http --json ifconfig.co
-        </pre>
-{{ if .IsLookupPortEnabled }}
-        <p>Testing port connectivity (only supports JSON output):</p>
-        <pre>
-http --json localhost:8080/port/8080
-HTTP/1.1 200 OK
-Content-Length: 47
-Content-Type: application/json
-Date: Fri, 15 Apr 2016 18:47:20 GMT
+# or set Accept header:
+# http ifconfig.co Accept:application/json</pre>
 
+{{ if .IsLookupPortEnabled }}
+        <p>Testing port connectivity:</p>
+        <pre>
+$ http ifconfig.co/port/8080
 {
-    "ip": "127.0.0.1",
+    "ip": "{{ .IP }}",
     "port": 8080,
-    "reachable": true
-}
-        </pre>
+    "reachable": false
+}</pre>
 {{ end }}
       </div>
     </div>
