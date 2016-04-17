@@ -74,7 +74,7 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		log.Print(err)
 	}
-	hostnames, err := a.oracle.LookupAddr(ip.String())
+	hostnames, err := a.oracle.LookupAddr(ip)
 	if err != nil {
 		log.Print(err)
 	}

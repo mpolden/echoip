@@ -3,13 +3,14 @@ package api
 import (
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/oschwald/geoip2-golang"
 )
 
 type Oracle interface {
-	LookupAddr(string) ([]string, error)
+	LookupAddr(net.IP) ([]string, error)
 	LookupCountry(net.IP) (string, error)
 	LookupCity(net.IP) (string, error)
 	LookupPort(net.IP, uint64) error
@@ -20,7 +21,7 @@ type Oracle interface {
 }
 
 type DefaultOracle struct {
-	lookupAddr           func(string) ([]string, error)
+	lookupAddr           func(net.IP) ([]string, error)
 	lookupCountry        func(net.IP) (string, error)
 	lookupCity           func(net.IP) (string, error)
 	lookupPort           func(net.IP, uint64) error
@@ -32,15 +33,15 @@ type DefaultOracle struct {
 
 func NewOracle() *DefaultOracle {
 	return &DefaultOracle{
-		lookupAddr:    func(string) ([]string, error) { return nil, nil },
+		lookupAddr:    func(net.IP) ([]string, error) { return nil, nil },
 		lookupCountry: func(net.IP) (string, error) { return "", nil },
 		lookupCity:    func(net.IP) (string, error) { return "", nil },
 		lookupPort:    func(net.IP, uint64) error { return nil },
 	}
 }
 
-func (r *DefaultOracle) LookupAddr(address string) ([]string, error) {
-	return r.lookupAddr(address)
+func (r *DefaultOracle) LookupAddr(ip net.IP) ([]string, error) {
+	return r.lookupAddr(ip)
 }
 
 func (r *DefaultOracle) LookupCountry(ip net.IP) (string, error) {
@@ -56,7 +57,7 @@ func (r *DefaultOracle) LookupPort(ip net.IP, port uint64) error {
 }
 
 func (r *DefaultOracle) EnableLookupAddr() {
-	r.lookupAddr = net.LookupAddr
+	r.lookupAddr = lookupAddr
 	r.lookupAddrEnabled = true
 }
 
@@ -93,6 +94,14 @@ func (r *DefaultOracle) IsLookupAddrEnabled() bool    { return r.lookupAddrEnabl
 func (r *DefaultOracle) IsLookupCountryEnabled() bool { return r.lookupCountryEnabled }
 func (r *DefaultOracle) IsLookupCityEnabled() bool    { return r.lookupCityEnabled }
 func (r *DefaultOracle) IsLookupPortEnabled() bool    { return r.lookupPortEnabled }
+
+func lookupAddr(ip net.IP) ([]string, error) {
+	names, err := net.LookupAddr(ip.String())
+	for i, _ := range names {
+		names[i] = strings.TrimRight(names[i], ".") // Always return unrooted name
+	}
+	return names, err
+}
 
 func lookupPort(ip net.IP, port uint64) error {
 	address := fmt.Sprintf("[%s]:%d", ip, port)

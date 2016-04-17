@@ -11,7 +11,7 @@ import (
 
 type mockOracle struct{}
 
-func (r *mockOracle) LookupAddr(string) ([]string, error)  { return []string{"localhost"}, nil }
+func (r *mockOracle) LookupAddr(net.IP) ([]string, error)  { return []string{"localhost"}, nil }
 func (r *mockOracle) LookupCountry(net.IP) (string, error) { return "Elbonia", nil }
 func (r *mockOracle) LookupCity(net.IP) (string, error)    { return "Bornyasherk", nil }
 func (r *mockOracle) LookupPort(net.IP, uint64) error      { return nil }
