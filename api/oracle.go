@@ -95,7 +95,7 @@ func (r *DefaultOracle) IsLookupCityEnabled() bool    { return r.lookupCityEnabl
 func (r *DefaultOracle) IsLookupPortEnabled() bool    { return r.lookupPortEnabled }
 
 func lookupPort(ip net.IP, port uint64) error {
-	address := fmt.Sprintf("%s:%d", ip, port)
+	address := fmt.Sprintf("[%s]:%d", ip, port)
 	conn, err := net.DialTimeout("tcp", address, 2*time.Second)
 	if err != nil {
 		return err
