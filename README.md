@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/martinp/ipd.svg)](https://travis-ci.org/martinp/ipd)
 
 A simple service for looking up your IP address. This is the code that powers
-http://ifconfig.co
+https://ifconfig.co
 
 ## Usage
 
@@ -23,11 +23,14 @@ $ fetch -qo- http://ifconfig.co
 127.0.0.1
 ```
 
-Country lookup:
+Country and city lookup:
 
 ```
 $ http ifconfig.co/country
-Home, Sweet Home
+Elbonia
+
+$ http ifconfig.co/city
+Bornyasherk
 ```
 
 As JSON:
@@ -35,15 +38,17 @@ As JSON:
 ```
 $ http --json ifconfig.co
 {
-  "ip": "127.0.0.1",
-  "country": "Home, Sweet Home"
+  "city": "Bornyasherk",
+  "country": "Elbonia",
+  "ip": "127.0.0.1"
 }
 ```
 
-Pass the appropriate flag (usually -4 and -6) to your tool to switch between
+Pass the appropriate flag (usually `-4` and `-6`) to your tool to switch between
 IPv4 and IPv6 lookup.
 
-The subdomain http://v4.ifconfig.co can be used to force IPv4 lookup.
+The subdomains https://v4.ifconfig.co and https://v6.ifconfig.co can be used to
+force IPv4 or IPv6 lookup.
 
 ## Features
 
@@ -52,9 +57,9 @@ The subdomain http://v4.ifconfig.co can be used to force IPv4 lookup.
 * Supports HTTPS
 * Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 * Fast
-* Supports typical CLI tools (curl, httpie, wget and fetch)
+* Supports typical CLI tools (`curl`, `httpie`, `wget` and `fetch`)
 * JSON output (optional)
-* Country lookup for IP address through the MaxMind GeoIP2 database
+* Country and city lookup through the MaxMind GeoIP database
 
 ## Why?
 
@@ -77,11 +82,12 @@ Usage:
   ipd [OPTIONS]
 
 Application Options:
-  -f, --file=FILE          Path to GeoIP database
+  -f, --country-db=FILE    Path to GeoIP country database
+  -c, --city-db=FILE       Path to GeoIP city database
   -l, --listen=ADDR        Listening address (default: :8080)
   -x, --cors               Allow requests from other domains
   -r, --reverse-lookup     Perform reverse hostname lookups
-  -p, --port-testing       Enable port testing
+  -p, --port-lookup        Enable port lookup
   -t, --template=          Path to template (default: index.html)
 
 Help Options:
