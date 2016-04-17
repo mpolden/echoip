@@ -9,19 +9,20 @@ import (
 	"testing"
 )
 
+type mockOracle struct{}
+
+func (r *mockOracle) LookupAddr(string) ([]string, error)  { return []string{"localhost"}, nil }
+func (r *mockOracle) LookupCountry(net.IP) (string, error) { return "Elbonia", nil }
+func (r *mockOracle) LookupPort(net.IP, uint64) error      { return nil }
+func (r *mockOracle) IsLookupAddrEnabled() bool            { return true }
+func (r *mockOracle) IsLookupCountryEnabled() bool         { return true }
+func (r *mockOracle) IsLookupPortEnabled() bool            { return true }
+
 func newTestAPI() *API {
 	return &API{
-		lookupAddr: func(string) ([]string, error) {
-			return []string{"localhost"}, nil
-		},
-		lookupCountry: func(ip net.IP) (string, error) {
-			return "Elbonia", nil
-		},
+		oracle: &mockOracle{},
 		ipFromRequest: func(*http.Request) (net.IP, error) {
 			return net.ParseIP("127.0.0.1"), nil
-		},
-		testPort: func(net.IP, uint64) error {
-			return nil
 		},
 	}
 }

@@ -15,7 +15,7 @@ func main() {
 		Listen        string `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
 		CORS          bool   `short:"x" long:"cors" description:"Allow requests from other domains"`
 		ReverseLookup bool   `short:"r" long:"reverse-lookup" description:"Perform reverse hostname lookups"`
-		PortTesting   bool   `short:"p" long:"port-testing" description:"Enable port testing"`
+		PortLookup    bool   `short:"p" long:"port-lookup" description:"Enable port lookup"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
@@ -23,22 +23,24 @@ func main() {
 		os.Exit(1)
 	}
 
-	api := api.New()
-	api.CORS = opts.CORS
+	oracle := api.NewOracle()
 	if opts.ReverseLookup {
 		log.Println("Enabling reverse lookup")
-		api.EnableReverseLookup()
+		oracle.EnableLookupAddr()
 	}
-	if opts.PortTesting {
-		log.Println("Enabling port testing")
-		api.EnablePortTesting()
+	if opts.PortLookup {
+		log.Println("Enabling port lookup")
+		oracle.EnableLookupPort()
 	}
 	if opts.DBPath != "" {
-		log.Printf("Enabling country lookup (using database: %s)\n", opts.DBPath)
-		if err := api.EnableCountryLookup(opts.DBPath); err != nil {
+		log.Printf("Enabling country lookup (using database: %s)", opts.DBPath)
+		if err := oracle.EnableLookupCountry(opts.DBPath); err != nil {
 			log.Fatal(err)
 		}
 	}
+
+	api := api.New(oracle)
+	api.CORS = opts.CORS
 	api.Template = opts.Template
 
 	log.Printf("Listening on %s", opts.Listen)

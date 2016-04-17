@@ -12,10 +12,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gorilla/mux"
-	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
 const APPLICATION_JSON = "application/json"
@@ -27,13 +25,8 @@ var USER_AGENT_RE = regexp.MustCompile(
 type API struct {
 	CORS          bool
 	Template      string
-	lookupAddr    func(string) ([]string, error)
-	lookupCountry func(net.IP) (string, error)
-	testPort      func(net.IP, uint64) error
+	oracle        Oracle
 	ipFromRequest func(*http.Request) (net.IP, error)
-	reverseLookup bool
-	countryLookup bool
-	portTesting   bool
 }
 
 type Response struct {
@@ -48,35 +41,11 @@ type TestPortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New() *API {
+func New(oracle Oracle) *API {
 	return &API{
-		lookupAddr:    func(addr string) (names []string, err error) { return nil, nil },
-		lookupCountry: func(ip net.IP) (string, error) { return "", nil },
-		testPort:      func(ip net.IP, port uint64) error { return nil },
+		oracle:        oracle,
 		ipFromRequest: ipFromRequest,
 	}
-}
-
-func (a *API) EnableCountryLookup(filepath string) error {
-	db, err := geoip2.Open(filepath)
-	if err != nil {
-		return err
-	}
-	a.lookupCountry = func(ip net.IP) (string, error) {
-		return lookupCountry(db, ip)
-	}
-	a.countryLookup = true
-	return nil
-}
-
-func (a *API) EnableReverseLookup() {
-	a.lookupAddr = net.LookupAddr
-	a.reverseLookup = true
-}
-
-func (a *API) EnablePortTesting() {
-	a.testPort = testPort
-	a.portTesting = true
 }
 
 func ipFromRequest(r *http.Request) (net.IP, error) {
@@ -95,43 +64,16 @@ func ipFromRequest(r *http.Request) (net.IP, error) {
 	return ip, nil
 }
 
-func testPort(ip net.IP, port uint64) error {
-	address := fmt.Sprintf("%s:%d", ip, port)
-	conn, err := net.DialTimeout("tcp", address, 2*time.Second)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	return nil
-}
-
-func lookupCountry(db *geoip2.Reader, ip net.IP) (string, error) {
-	if db == nil {
-		return "", nil
-	}
-	record, err := db.Country(ip)
-	if err != nil {
-		return "", err
-	}
-	if country, exists := record.Country.Names["en"]; exists {
-		return country, nil
-	}
-	if country, exists := record.RegisteredCountry.Names["en"]; exists {
-		return country, nil
-	}
-	return "Unknown", fmt.Errorf("could not determine country for IP: %s", ip)
-}
-
 func (a *API) newResponse(r *http.Request) (Response, error) {
 	ip, err := a.ipFromRequest(r)
 	if err != nil {
 		return Response{}, err
 	}
-	country, err := a.lookupCountry(ip)
+	country, err := a.oracle.LookupCountry(ip)
 	if err != nil {
 		log.Print(err)
 	}
-	hostnames, err := a.lookupAddr(ip.String())
+	hostnames, err := a.oracle.LookupAddr(ip.String())
 	if err != nil {
 		log.Print(err)
 	}
@@ -187,7 +129,7 @@ func (a *API) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
-	err = a.testPort(ip, port)
+	err = a.oracle.LookupPort(ip, port)
 	response := TestPortResponse{
 		IP:        ip,
 		Port:      port,
@@ -213,10 +155,8 @@ func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 	}
 	var data = struct {
 		Response
-		ReverseLookup bool
-		CountryLookup bool
-		PortTesting   bool
-	}{response, a.reverseLookup, a.countryLookup, a.portTesting}
+		Oracle
+	}{response, a.oracle}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
 	}
