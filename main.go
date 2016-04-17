@@ -17,6 +17,7 @@ func main() {
 		ReverseLookup bool   `short:"r" long:"reverse-lookup" description:"Perform reverse hostname lookups"`
 		PortLookup    bool   `short:"p" long:"port-lookup" description:"Enable port lookup"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html"`
+		IPHeader      string `short:"H" long:"trusted-header" description:"Header to trust for remote IP, if present (e.g. X-Real-IP)"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
@@ -44,9 +45,13 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	if opts.IPHeader != "" {
+		log.Printf("Trusting header %s to contain correct remote IP", opts.IPHeader)
+	}
 
 	api := api.New(oracle)
 	api.Template = opts.Template
+	api.IPHeader = opts.IPHeader
 
 	log.Printf("Listening on %s", opts.Listen)
 	if err := api.ListenAndServe(opts.Listen); err != nil {

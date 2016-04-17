@@ -88,6 +88,7 @@ Application Options:
   -r, --reverse-lookup     Perform reverse hostname lookups
   -p, --port-lookup        Enable port lookup
   -t, --template=          Path to template (default: index.html)
+  -H, --trusted-header=    Header to trust for remote IP, if present (e.g. X-Real-IP)
 
 Help Options:
   -h, --help               Show this help message

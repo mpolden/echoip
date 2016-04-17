@@ -23,7 +23,7 @@ func (r *mockOracle) IsLookupPortEnabled() bool            { return true }
 func newTestAPI() *API {
 	return &API{
 		oracle: &mockOracle{},
-		ipFromRequest: func(*http.Request) (net.IP, error) {
+		ipFromRequest: func(string, *http.Request) (net.IP, error) {
 			return net.ParseIP("127.0.0.1"), nil
 		},
 	}
@@ -110,19 +110,30 @@ func TestJSONHandlers(t *testing.T) {
 
 func TestIPFromRequest(t *testing.T) {
 	var tests = []struct {
-		in  *http.Request
-		out net.IP
+		remoteAddr    string
+		headerKey     string
+		headerValue   string
+		trustedHeader string
+		out           string
 	}{
-		{&http.Request{RemoteAddr: "1.3.3.7:9999"}, net.ParseIP("1.3.3.7")},
-		{&http.Request{Header: http.Header{"X-Real-Ip": []string{"1.3.3.7"}}}, net.ParseIP("1.3.3.7")},
+		{"127.0.0.1:9999", "", "", "", "127.0.0.1"},                          // No header given
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "", "127.0.0.1"},          // Trusted header is empty
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "X-Foo-Bar", "127.0.0.1"}, // Trusted header does not match
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "X-Real-IP", "1.3.3.7"},   // Trusted header matches
 	}
 	for _, tt := range tests {
-		ip, err := ipFromRequest(tt.in)
+		r := &http.Request{
+			RemoteAddr: tt.remoteAddr,
+			Header:     http.Header{},
+		}
+		r.Header.Add(tt.headerKey, tt.headerValue)
+		ip, err := ipFromRequest(tt.trustedHeader, r)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !ip.Equal(tt.out) {
-			t.Errorf("Expected %s, got %s", tt.out, ip)
+		out := net.ParseIP(tt.out)
+		if !ip.Equal(out) {
+			t.Errorf("Expected %s, got %s", out, ip)
 		}
 	}
 }
