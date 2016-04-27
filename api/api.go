@@ -35,7 +35,7 @@ type Response struct {
 	Hostname string `json:"hostname,omitempty"`
 }
 
-type TestPortResponse struct {
+type PortResponse struct {
 	IP        net.IP `json:"ip"`
 	Port      uint64 `json:"port"`
 	Reachable bool   `json:"reachable"`
@@ -86,6 +86,27 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	}, nil
 }
 
+func (a *API) newPortResponse(r *http.Request) (PortResponse, error) {
+	vars := mux.Vars(r)
+	port, err := strconv.ParseUint(vars["port"], 10, 16)
+	if err != nil {
+		return PortResponse{Port: port}, err
+	}
+	if port < 1 || port > 65355 {
+		return PortResponse{Port: port}, fmt.Errorf("invalid port: %d", port)
+	}
+	ip, err := ipFromRequest(a.IPHeader, r)
+	if err != nil {
+		return PortResponse{Port: port}, err
+	}
+	err = a.oracle.LookupPort(ip, port)
+	return PortResponse{
+		IP:        ip,
+		Port:      port,
+		Reachable: err == nil,
+	}, nil
+}
+
 func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
 	ip, err := ipFromRequest(a.IPHeader, r)
 	if err != nil {
@@ -128,23 +149,9 @@ func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 }
 
 func (a *API) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
-	vars := mux.Vars(r)
-	port, err := strconv.ParseUint(vars["port"], 10, 16)
+	response, err := a.newPortResponse(r)
 	if err != nil {
-		return badRequest(err).WithMessage("Invalid port: " + vars["port"]).AsJSON()
-	}
-	if port < 1 || port > 65355 {
-		return badRequest(nil).WithMessage("Invalid port: " + vars["port"]).AsJSON()
-	}
-	ip, err := ipFromRequest(a.IPHeader, r)
-	if err != nil {
-		return internalServerError(err).AsJSON()
-	}
-	err = a.oracle.LookupPort(ip, port)
-	response := TestPortResponse{
-		IP:        ip,
-		Port:      port,
-		Reachable: err == nil,
+		return badRequest(err).WithMessage(fmt.Sprintf("Invalid port: %d", response.Port)).AsJSON()
 	}
 	b, err := json.Marshal(response)
 	if err != nil {
