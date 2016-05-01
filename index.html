@@ -76,9 +76,9 @@ $ http ifconfig.co/city
         <p>JSON output:</p>
         <pre>
 $ http ifconfig.co/json
-{ {{ if .IsLookupCountryEnabled }}
-    "country": "{{ .Country }}",{{ end }}{{ if .IsLookupCityEnabled }}
-    "city": "{{ .City }}",{{ end }}{{ if .IsLookupAddrEnabled }}
+{ {{ if .IsLookupCityEnabled }}
+    "city": "{{ .City }}",{{ end }}{{ if .IsLookupCountryEnabled }}
+    "country": "{{ .Country }}",{{ end }}{{ if .IsLookupAddrEnabled }}
     "hostname": "{{ .Hostname }}",{{ end }}
     "ip": "{{ .IP }}"
 }
