@@ -16,9 +16,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const APPLICATION_JSON = "application/json"
+const jsonMediaType = "application/json"
 
-var USER_AGENT_RE = regexp.MustCompile(
+var userAgentPattern = regexp.MustCompile(
 	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
 )
 
@@ -143,7 +143,7 @@ func (a *API) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
-	w.Header().Set("Content-Type", APPLICATION_JSON)
+	w.Header().Set("Content-Type", jsonMediaType)
 	w.Write(b)
 	return nil
 }
@@ -157,7 +157,7 @@ func (a *API) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
-	w.Header().Set("Content-Type", APPLICATION_JSON)
+	w.Header().Set("Content-Type", jsonMediaType)
 	w.Write(b)
 	return nil
 }
@@ -183,14 +183,14 @@ func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 
 func (a *API) NotFoundHandler(w http.ResponseWriter, r *http.Request) *appError {
 	err := notFound(nil).WithMessage("404 page not found")
-	if r.Header.Get("accept") == APPLICATION_JSON {
+	if r.Header.Get("accept") == jsonMediaType {
 		err = err.AsJSON()
 	}
 	return err
 }
 
 func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
-	return USER_AGENT_RE.MatchString(r.UserAgent())
+	return userAgentPattern.MatchString(r.UserAgent())
 }
 
 type appHandler func(http.ResponseWriter, *http.Request) *appError
@@ -224,7 +224,7 @@ func (a *API) Handlers() http.Handler {
 	r := mux.NewRouter()
 
 	// JSON
-	r.Handle("/", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", APPLICATION_JSON)
+	r.Handle("/", appHandler(a.JSONHandler)).Methods("GET").Headers("Accept", jsonMediaType)
 	r.Handle("/json", appHandler(a.JSONHandler)).Methods("GET")
 
 	// CLI

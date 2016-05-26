@@ -26,7 +26,7 @@ func badRequest(err error) *appError {
 }
 
 func (e *appError) AsJSON() *appError {
-	e.ContentType = APPLICATION_JSON
+	e.ContentType = jsonMediaType
 	return e
 }
 
@@ -36,5 +36,5 @@ func (e *appError) WithMessage(message string) *appError {
 }
 
 func (e *appError) IsJSON() bool {
-	return e.ContentType == APPLICATION_JSON
+	return e.ContentType == jsonMediaType
 }
