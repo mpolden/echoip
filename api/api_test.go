@@ -151,6 +151,7 @@ func TestCLIMatcher(t *testing.T) {
 		{"Go 1.1 package http", true},
 		{"Go-http-client/1.1", true},
 		{"Go-http-client/2.0", true},
+		{"ddclient/3.8.3", true},
 		{browserUserAgent, false},
 	}
 	for _, tt := range tests {

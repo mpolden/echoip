@@ -19,7 +19,7 @@ import (
 const APPLICATION_JSON = "application/json"
 
 var USER_AGENT_RE = regexp.MustCompile(
-	`^(?:curl|Wget|fetch\slibfetch|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
+	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
 )
 
 type API struct {
