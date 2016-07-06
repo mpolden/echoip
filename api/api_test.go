@@ -3,6 +3,7 @@ package api
 import (
 	"io/ioutil"
 	"log"
+	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -84,7 +85,7 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","country":"Elbonia","city":"Bornyasherk","hostname":"localhost"}`, 200},
+		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","city":"Bornyasherk","hostname":"localhost"}`, 200},
 		{s.URL + "/port/foo", `{"error":"404 page not found"}`, 404},
 		{s.URL + "/port/0", `{"error":"Invalid port: 0"}`, 400},
 		{s.URL + "/port/65356", `{"error":"Invalid port: 65356"}`, 400},
@@ -158,6 +159,22 @@ func TestCLIMatcher(t *testing.T) {
 		r := &http.Request{Header: http.Header{"User-Agent": []string{tt.in}}}
 		if got := cliMatcher(r, nil); got != tt.out {
 			t.Errorf("Expected %t, got %t for %q", tt.out, got, tt.in)
+		}
+	}
+}
+
+func TestIPToDecimal(t *testing.T) {
+	var tests = []struct {
+		in  string
+		out *big.Int
+	}{
+		{"127.0.0.1", big.NewInt(2130706433)},
+		{"::1", big.NewInt(1)},
+	}
+	for _, tt := range tests {
+		i := ipToDecimal(net.ParseIP(tt.in))
+		if i.Cmp(tt.out) != 0 {
+			t.Errorf("Expected %d, got %d for IP %s", tt.out, i, tt.in)
 		}
 	}
 }

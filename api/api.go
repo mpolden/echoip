@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"math/big"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -29,10 +30,11 @@ type API struct {
 }
 
 type Response struct {
-	IP       net.IP `json:"ip"`
-	Country  string `json:"country,omitempty"`
-	City     string `json:"city,omitempty"`
-	Hostname string `json:"hostname,omitempty"`
+	IP        net.IP   `json:"ip"`
+	IPDecimal *big.Int `json:"ip_decimal"`
+	Country   string   `json:"country,omitempty"`
+	City      string   `json:"city,omitempty"`
+	Hostname  string   `json:"hostname,omitempty"`
 }
 
 type PortResponse struct {
@@ -43,6 +45,16 @@ type PortResponse struct {
 
 func New(oracle Oracle) *API {
 	return &API{oracle: oracle}
+}
+
+func ipToDecimal(ip net.IP) *big.Int {
+	i := big.NewInt(0)
+	if to4 := ip.To4(); to4 != nil {
+		i.SetBytes(to4)
+	} else {
+		i.SetBytes(ip)
+	}
+	return i
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
@@ -66,6 +78,7 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		return Response{}, err
 	}
+	ipDecimal := ipToDecimal(ip)
 	country, err := a.oracle.LookupCountry(ip)
 	if err != nil {
 		log.Print(err)
@@ -79,10 +92,11 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 		log.Print(err)
 	}
 	return Response{
-		IP:       ip,
-		Country:  country,
-		City:     city,
-		Hostname: strings.Join(hostnames, " "),
+		IP:        ip,
+		IPDecimal: ipDecimal,
+		Country:   country,
+		City:      city,
+		Hostname:  strings.Join(hostnames, " "),
 	}, nil
 }
 

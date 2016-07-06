@@ -80,7 +80,8 @@ $ http ifconfig.co/json
     "city": "{{ .City }}",{{ end }}{{ if .IsLookupCountryEnabled }}
     "country": "{{ .Country }}",{{ end }}{{ if .IsLookupAddrEnabled }}
     "hostname": "{{ .Hostname }}",{{ end }}
-    "ip": "{{ .IP }}"
+    "ip": "{{ .IP }}",
+    "ip_decimal": {{ .IPDecimal }}
 }
 
 # or set Accept header:
