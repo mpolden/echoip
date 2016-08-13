@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
+
+	"github.com/Sirupsen/logrus"
+
 	"math/big"
 	"net"
 	"net/http"
@@ -27,6 +29,7 @@ type API struct {
 	Template string
 	IPHeader string
 	oracle   Oracle
+	log      *logrus.Logger
 }
 
 type Response struct {
@@ -43,8 +46,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(oracle Oracle) *API {
-	return &API{oracle: oracle}
+func New(oracle Oracle, logger *logrus.Logger) *API {
+	return &API{oracle: oracle, log: logger}
 }
 
 func ipToDecimal(ip net.IP) *big.Int {
@@ -81,15 +84,15 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	ipDecimal := ipToDecimal(ip)
 	country, err := a.oracle.LookupCountry(ip)
 	if err != nil {
-		log.Print(err)
+		a.log.Debug(err)
 	}
 	city, err := a.oracle.LookupCity(ip)
 	if err != nil {
-		log.Print(err)
+		a.log.Debug(err)
 	}
 	hostnames, err := a.oracle.LookupAddr(ip)
 	if err != nil {
-		log.Print(err)
+		a.log.Debug(err)
 	}
 	return Response{
 		IP:        ip,
@@ -211,9 +214,6 @@ type appHandler func(http.ResponseWriter, *http.Request) *appError
 
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError
-		if e.Error != nil {
-			log.Print(e.Error)
-		}
 		// When Content-Type for error is JSON, we need to marshal the response into JSON
 		if e.IsJSON() {
 			var data = struct {
