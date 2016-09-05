@@ -22,7 +22,7 @@ import (
 const jsonMediaType = "application/json"
 
 var userAgentPattern = regexp.MustCompile(
-	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
+	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie|[pP]ython-\w+)\/.*|Go\s1\.1\spackage\shttp$`,
 )
 
 type API struct {
