@@ -46,24 +46,25 @@ func httpGet(url string, json bool, userAgent string) (string, int, error) {
 	return string(data), res.StatusCode, nil
 }
 
-func TestClIHandlers(t *testing.T) {
+func TestCLIHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	s := httptest.NewServer(newTestAPI().Handlers())
 
 	var tests = []struct {
-		url    string
-		out    string
-		status int
+		url       string
+		out       string
+		status    int
+		userAgent string
 	}{
-		{s.URL, "127.0.0.1\n", 200},
-		{s.URL + "/ip", "127.0.0.1\n", 200},
-		{s.URL + "/country", "Elbonia\n", 200},
-		{s.URL + "/city", "Bornyasherk\n", 200},
-		{s.URL + "/foo", "404 page not found", 404},
+		{s.URL, "127.0.0.1\n", 200, "curl/7.43.0"},
+		{s.URL + "/ip", "127.0.0.1\n", 200, ""},
+		{s.URL + "/country", "Elbonia\n", 200, ""},
+		{s.URL + "/city", "Bornyasherk\n", 200, ""},
+		{s.URL + "/foo", "404 page not found", 404, ""},
 	}
 
 	for _, tt := range tests {
-		out, status, err := httpGet(tt.url /* json = */, false, "curl/7.2.6.0")
+		out, status, err := httpGet(tt.url /* json = */, false, tt.userAgent)
 		if err != nil {
 			t.Fatal(err)
 		}

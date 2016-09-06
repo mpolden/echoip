@@ -243,9 +243,9 @@ func (a *API) Handlers() http.Handler {
 
 	// CLI
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
-	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
-	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET").MatcherFunc(cliMatcher)
-	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET")
+	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET")
+	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET")
 
 	// Browser
 	r.Handle("/", appHandler(a.DefaultHandler)).Methods("GET")
