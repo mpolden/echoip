@@ -234,7 +234,7 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *API) Handlers() http.Handler {
+func (a *API) Router() http.Handler {
 	r := mux.NewRouter()
 
 	// JSON
@@ -257,9 +257,4 @@ func (a *API) Handlers() http.Handler {
 	r.NotFoundHandler = appHandler(a.NotFoundHandler)
 
 	return r
-}
-
-func (a *API) ListenAndServe(addr string) error {
-	http.Handle("/", a.Handlers())
-	return http.ListenAndServe(addr, nil)
 }

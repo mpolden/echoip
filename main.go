@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	flags "github.com/jessevdk/go-flags"
 
 	"os"
@@ -63,7 +65,7 @@ func main() {
 	api.IPHeader = opts.IPHeader
 
 	log.Printf("Listening on %s", opts.Listen)
-	if err := api.ListenAndServe(opts.Listen); err != nil {
+	if err := http.ListenAndServe(opts.Listen, api.Router()); err != nil {
 		log.Fatal(err)
 	}
 }

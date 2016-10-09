@@ -48,7 +48,7 @@ func httpGet(url string, json bool, userAgent string) (string, int, error) {
 
 func TestCLIHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	s := httptest.NewServer(newTestAPI().Handlers())
+	s := httptest.NewServer(newTestAPI().Router())
 
 	var tests = []struct {
 		url       string
@@ -79,7 +79,7 @@ func TestCLIHandlers(t *testing.T) {
 
 func TestJSONHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	s := httptest.NewServer(newTestAPI().Handlers())
+	s := httptest.NewServer(newTestAPI().Router())
 
 	var tests = []struct {
 		url    string
