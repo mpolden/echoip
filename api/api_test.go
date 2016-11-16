@@ -25,13 +25,13 @@ func newTestAPI() *API {
 	return &API{oracle: &mockOracle{}}
 }
 
-func httpGet(url string, json bool, userAgent string) (string, int, error) {
+func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
 	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", 0, err
 	}
-	if json {
-		r.Header.Set("Accept", "application/json")
+	if acceptMediaType != "" {
+		r.Header.Set("Accept", acceptMediaType)
 	}
 	r.Header.Set("User-Agent", userAgent)
 	res, err := http.DefaultClient.Do(r)
@@ -51,20 +51,22 @@ func TestCLIHandlers(t *testing.T) {
 	s := httptest.NewServer(newTestAPI().Router())
 
 	var tests = []struct {
-		url       string
-		out       string
-		status    int
-		userAgent string
+		url             string
+		out             string
+		status          int
+		userAgent       string
+		acceptMediaType string
 	}{
-		{s.URL, "127.0.0.1\n", 200, "curl/7.43.0"},
-		{s.URL + "/ip", "127.0.0.1\n", 200, ""},
-		{s.URL + "/country", "Elbonia\n", 200, ""},
-		{s.URL + "/city", "Bornyasherk\n", 200, ""},
-		{s.URL + "/foo", "404 page not found", 404, ""},
+		{s.URL, "127.0.0.1\n", 200, "curl/7.43.0", ""},
+		{s.URL, "127.0.0.1\n", 200, "foo/bar", textMediaType},
+		{s.URL + "/ip", "127.0.0.1\n", 200, "", ""},
+		{s.URL + "/country", "Elbonia\n", 200, "", ""},
+		{s.URL + "/city", "Bornyasherk\n", 200, "", ""},
+		{s.URL + "/foo", "404 page not found", 404, "", ""},
 	}
 
 	for _, tt := range tests {
-		out, status, err := httpGet(tt.url /* json = */, false, tt.userAgent)
+		out, status, err := httpGet(tt.url, tt.acceptMediaType, tt.userAgent)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -95,7 +97,7 @@ func TestJSONHandlers(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		out, status, err := httpGet(tt.url /* json = */, true, "curl/7.2.6.0")
+		out, status, err := httpGet(tt.url, jsonMediaType, "curl/7.2.6.0")
 		if err != nil {
 			t.Fatal(err)
 		}

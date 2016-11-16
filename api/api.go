@@ -19,7 +19,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const jsonMediaType = "application/json"
+const (
+	jsonMediaType = "application/json"
+	textMediaType = "text/plain"
+)
 
 var userAgentPattern = regexp.MustCompile(
 	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
@@ -243,6 +246,7 @@ func (a *API) Router() http.Handler {
 
 	// CLI
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
+	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").Headers("Accept", textMediaType)
 	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET")
 	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET")
 	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET")
