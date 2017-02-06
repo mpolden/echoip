@@ -11,11 +11,9 @@
     <style>
       html, .pure-g [class *= "pure-u"] {
         font-family: "Roboto", sans-serif;
-        font-size: 15pt;
       }
       pre {
         font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
-        font-size: 12pt;
       }
       body {
         margin-left: auto;
@@ -27,9 +25,6 @@
         background: #f2f2f2;
         font-size: 36px;
         padding: 6px;
-      }
-      .footer {
-        font-size: 12pt;
       }
     </style>
   </head>
@@ -46,7 +41,7 @@
     </div>
     <div class="pure-g">
       <div class="pure-u-1 pure-u-md-1-2">
-        <p>CLI examples:</p>
+        <h2>CLI examples:</h2>
         <pre>
 $ curl ifconfig.co
 {{ .IP }}
@@ -60,20 +55,20 @@ $ wget -qO- ifconfig.co
 $ fetch -qo- https://ifconfig.co
 {{ .IP }}</pre>
 {{ if .IsLookupCountryEnabled }}
-        <p>Country lookup:</p>
+        <h2>Country lookup:</h2>
         <pre>
 $ http ifconfig.co/country
 {{ .Country }}</pre>
 {{ end }}
 {{ if .IsLookupCityEnabled }}
-        <p>City lookup:</p>
+        <h2>City lookup:</h2>
         <pre>
 $ http ifconfig.co/city
 {{ .City }}</pre>
 {{ end }}
       </div>
       <div class="pure-u-1 pure-u-md-1-2">
-        <p>JSON output:</p>
+        <h2>JSON output:</h2>
         <pre>
 $ http ifconfig.co/json
 { {{ if .IsLookupCityEnabled }}
@@ -82,13 +77,16 @@ $ http ifconfig.co/json
     "hostname": "{{ .Hostname }}",{{ end }}
     "ip": "{{ .IP }}",
     "ip_decimal": {{ .IPDecimal }}
-}
+}</pre>
 
-# or set Accept header:
-# http ifconfig.co Accept:application/json</pre>
-
+        <p>Setting the Accept header to application/json also works.</p>
+        <h2>Plain output:</h2>
+        <p>Always returns the IP address including a trailing newline, regardless of user agent.</p>
+        <pre>
+$ http ifconfig.co/ip
+{{ .IP }}</pre>
 {{ if .IsLookupPortEnabled }}
-        <p>Testing port connectivity:</p>
+        <h2>Testing port connectivity:</h2>
         <pre>
 $ http ifconfig.co/port/8080
 {
@@ -102,9 +100,11 @@ $ http ifconfig.co/port/8080
     <div class="pure-g footer">
       <div class="pure-u-1-1 footer">
         <p class="footer">
-          To force IPv4 lookup you can use
-          the <a href="https://v4.ifconfig.co">v4 subdomain</a>
-          (<a href="https://v6.ifconfig.co">or v6 for IPv6</a>).
+          <small>
+            To force IPv4 lookup you can use
+            the <a href="https://v4.ifconfig.co">v4 subdomain</a>
+            (<a href="https://v6.ifconfig.co">or v6 for IPv6</a>).
+          </small>
         </p>
       </div>
     </div>
