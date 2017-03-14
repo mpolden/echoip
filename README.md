@@ -1,6 +1,6 @@
 # ipd
 
-[![Build Status](https://travis-ci.org/martinp/ipd.svg)](https://travis-ci.org/martinp/ipd)
+[![Build Status](https://travis-ci.org/mpolden/ipd.svg)](https://travis-ci.org/mpolden/ipd)
 
 A simple service for looking up your IP address. This is the code that powers
 https://ifconfig.co
