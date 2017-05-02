@@ -68,6 +68,15 @@ This application can be installed by using `go get`:
 
 `go get github.com/martinp/ipd`
 
+## Docker
+
+```
+$ docker build -t ipd .
+$ docker run -d -p 9999:8080 ipd
+$ curl localhost:9999
+...
+````
+
 ### Usage
 
 ```
