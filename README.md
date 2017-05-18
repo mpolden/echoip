@@ -66,7 +66,7 @@ $ http --json ifconfig.co
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
 This application can be installed by using `go get`:
 
-`go get github.com/martinp/ipd`
+`go get github.com/mpolden/ipd`
 
 ### Usage
 
