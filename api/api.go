@@ -25,7 +25,16 @@ const (
 )
 
 var userAgentPattern = regexp.MustCompile(
-	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
+	`^` +
+	`curl` +
+	`|Wget` +
+	`|fetch\slibfetch` +
+	`|ddclient` +
+	`|HTTPie` +
+	`|Go-http-client` +
+	`|Go\s\d\.\d\spackage\shttp` +
+	`|Mozilla/\d\.\d.*WindowsPowerShell/(\d+\.\d+)?` +
+	`.*$`,
 )
 
 type API struct {

@@ -156,6 +156,9 @@ func TestCLIMatcher(t *testing.T) {
 		{"Go-http-client/1.1", true},
 		{"Go-http-client/2.0", true},
 		{"ddclient/3.8.3", true},
+		{"Mozilla/5.0 (Windows NT; Windows NT 6.1; en-US) WindowsPowerShell/3.0", true},
+		{"Mozilla/5.0 (Windows NT; Windows NT 6.2; en-US) WindowsPowerShell/4.0", true},
+		{"Mozilla/5.0 (Windows NT; Darwin 16.4.0 Darwin Kernel Version 16.4.0: Thu Dec 22 22:53:21 PST 2016; root:xnu-3789.41.3~3/RELEASE_X86_64; en-US) WindowsPowerShell/6.0.0", true},
 		{browserUserAgent, false},
 	}
 	for _, tt := range tests {
