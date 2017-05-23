@@ -156,6 +156,9 @@ func TestCLIMatcher(t *testing.T) {
 		{"Go-http-client/1.1", true},
 		{"Go-http-client/2.0", true},
 		{"ddclient/3.8.3", true},
+		{"Python-urllib/2.7", true},
+		{"python-urllib/3.5", true},
+		{"python-requests/2.11", true},
 		{browserUserAgent, false},
 	}
 	for _, tt := range tests {
