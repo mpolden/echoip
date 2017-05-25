@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"io"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"math/big"
 	"net"
