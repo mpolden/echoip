@@ -6,13 +6,13 @@ import (
 	"html/template"
 	"io"
 
+	"github.com/mpolden/ipd/useragent"
 	"github.com/sirupsen/logrus"
 
 	"math/big"
 	"net"
 	"net/http"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -22,10 +22,6 @@ import (
 const (
 	jsonMediaType = "application/json"
 	textMediaType = "text/plain"
-)
-
-var userAgentPattern = regexp.MustCompile(
-	`^(?:curl|Wget|fetch\slibfetch|ddclient|Go-http-client|HTTPie)\/.*|Go\s1\.1\spackage\shttp$`,
 )
 
 type API struct {
@@ -210,7 +206,12 @@ func (a *API) NotFoundHandler(w http.ResponseWriter, r *http.Request) *appError 
 }
 
 func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
-	return userAgentPattern.MatchString(r.UserAgent())
+	ua := useragent.Parse(r.UserAgent())
+	switch ua.Product {
+	case "curl", "HTTPie", "Wget", "fetch libfetch", "Go", "Go-http-client", "ddclient":
+		return true
+	}
+	return false
 }
 
 type appHandler func(http.ResponseWriter, *http.Request) *appError
