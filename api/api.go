@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 
 	"github.com/mpolden/ipd/useragent"
 	"github.com/sirupsen/logrus"
@@ -128,7 +127,7 @@ func (a *API) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err)
 	}
-	io.WriteString(w, ip.String()+"\n")
+	fmt.Fprintln(w, ip.String())
 	return nil
 }
 
@@ -137,7 +136,7 @@ func (a *API) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return internalServerError(err)
 	}
-	io.WriteString(w, response.Country+"\n")
+	fmt.Fprintln(w, response.Country)
 	return nil
 }
 
@@ -146,7 +145,7 @@ func (a *API) CLICityHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err)
 	}
-	io.WriteString(w, response.City+"\n")
+	fmt.Fprintln(w, response.City)
 	return nil
 }
 
@@ -234,7 +233,7 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", e.ContentType)
 		}
 		w.WriteHeader(e.Code)
-		io.WriteString(w, e.Message)
+		fmt.Fprint(w, e.Message)
 	}
 }
 
