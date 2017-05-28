@@ -10,6 +10,8 @@ func TestParse(t *testing.T) {
 		out UserAgent
 	}{
 		{"", UserAgent{}},
+		{"curl/", UserAgent{Product: "curl"}},
+		{"curl/foo", UserAgent{Product: "curl", Comment: "foo"}},
 		{"curl/7.26.0", UserAgent{Product: "curl", Version: "7.26.0"}},
 		{"Wget/1.13.4 (linux-gnu)", UserAgent{Product: "Wget", Version: "1.13.4", Comment: "(linux-gnu)"}},
 		{"Wget", UserAgent{Product: "Wget"}},

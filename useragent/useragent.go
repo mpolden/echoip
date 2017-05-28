@@ -15,7 +15,7 @@ func Parse(s string) UserAgent {
 	var version, comment string
 	if len(parts) > 1 {
 		// If first character is a number, treat it as version
-		if parts[1][0] >= 48 && parts[1][0] <= 57 {
+		if len(parts[1]) > 0 && parts[1][0] >= 48 && parts[1][0] <= 57 {
 			rest := strings.SplitN(parts[1], " ", 2)
 			version = rest[0]
 			if len(rest) > 1 {
