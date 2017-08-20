@@ -188,9 +188,10 @@ func (a *API) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 		return internalServerError(err)
 	}
 	var data = struct {
+		HOST string
 		Response
 		Oracle
-	}{response, a.oracle}
+	}{r.Host, response, a.oracle}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
 	}
