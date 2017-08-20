@@ -1,0 +1,61 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
+			"path": "github.com/gorilla/context",
+			"revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
+			"revisionTime": "2016-08-17T18:46:32Z"
+		},
+		{
+			"checksumSHA1": "hIbmXmNbwyP44fi1hh6zJrMcYws=",
+			"path": "github.com/gorilla/mux",
+			"revision": "ac112f7d75a0714af1bd86ab17749b31f7809640",
+			"revisionTime": "2017-07-03T15:07:09Z"
+		},
+		{
+			"checksumSHA1": "SQiqMYFp63MKuzJZpce0Lp5Sc/c=",
+			"path": "github.com/jessevdk/go-flags",
+			"revision": "6cf8f02b4ae8ba723ddc64dcfd403e530c06d927",
+			"revisionTime": "2017-07-22T07:29:52Z"
+		},
+		{
+			"checksumSHA1": "um5Gw7FZwz/GoxIXVIlSL1NigXk=",
+			"path": "github.com/oschwald/geoip2-golang",
+			"revision": "5b1dc16861f81d05d9836bb21c2d0d65282fc0b8",
+			"revisionTime": "2017-04-23T21:58:58Z"
+		},
+		{
+			"checksumSHA1": "N6I3i0LIjQckurgTeH3b2A5YTec=",
+			"path": "github.com/oschwald/maxminddb-golang",
+			"revision": "d19f6d453e836d12ee8fe895d0494421e93ef8c1",
+			"revisionTime": "2017-05-03T13:30:35Z"
+		},
+		{
+			"checksumSHA1": "6DpDCdROX0ufAvH18JFLu97cupQ=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "68806b4b77355d6c8577a2c8bbc6d547a5272491",
+			"revisionTime": "2017-08-17T08:55:56Z"
+		},
+		{
+			"checksumSHA1": "nqWNlnMmVpt628zzvyo6Yv2CX5Q=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "eb71ad9bd329b5ac0fd0148dd99bd62e8be8e035",
+			"revisionTime": "2017-08-07T10:11:13Z"
+		},
+		{
+			"checksumSHA1": "2N+zaafLJbM/BcU+j+/BER6Yiwk=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "43e60d72a8e2bd92ee98319ba9a384a0e9837c08",
+			"revisionTime": "2017-08-16T15:16:36Z"
+		},
+		{
+			"checksumSHA1": "LkAsnLUlAZSg3lRYk7BEyNfog3A=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "43e60d72a8e2bd92ee98319ba9a384a0e9837c08",
+			"revisionTime": "2017-08-16T15:16:36Z"
+		}
+	],
+	"rootPath": "github.com/mpolden/ipd"
+}
