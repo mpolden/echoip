@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>What is my IP address? &mdash; ifconfig.co</title>
+    <title>What is my IP address? &mdash; {{ .Host }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="What is my IP address?">
     <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
@@ -44,37 +44,37 @@
       <div class="pure-u-1 pure-u-md-1-2">
         <h2>CLI examples:</h2>
         <pre>
-$ curl ifconfig.co
+$ curl {{ .Host }}
 {{ .IP }}
 
-$ http -b ifconfig.co
+$ http -b {{ .Host }}
 {{ .IP }}
 
-$ wget -qO- ifconfig.co
+$ wget -qO- {{ .Host }}
 {{ .IP }}
 
-$ fetch -qo- https://ifconfig.co
+$ fetch -qo- https://{{ .Host }}
 {{ .IP }}
 
-$ bat -print=b ifconfig.co/ip
+$ bat -print=b {{ .Host }}/ip
 {{ .IP }}</pre>
 {{ if .IsLookupCountryEnabled }}
         <h2>Country lookup:</h2>
         <pre>
-$ http ifconfig.co/country
+$ http {{ .Host }}/country
 {{ .Country }}</pre>
 {{ end }}
 {{ if .IsLookupCityEnabled }}
         <h2>City lookup:</h2>
         <pre>
-$ http ifconfig.co/city
+$ http {{ .Host }}/city
 {{ .City }}</pre>
 {{ end }}
       </div>
       <div class="pure-u-1 pure-u-md-1-2">
         <h2>JSON output:</h2>
         <pre>
-$ http ifconfig.co/json
+$ http {{ .Host }}/json
 { {{ if .IsLookupCityEnabled }}
     "city": "{{ .City }}",{{ end }}{{ if .IsLookupCountryEnabled }}
     "country": "{{ .Country }}",{{ end }}{{ if .IsLookupAddrEnabled }}
@@ -87,12 +87,12 @@ $ http ifconfig.co/json
         <h2>Plain output:</h2>
         <p>Always returns the IP address including a trailing newline, regardless of user agent.</p>
         <pre>
-$ http ifconfig.co/ip
+$ http {{ .Host }}/ip
 {{ .IP }}</pre>
 {{ if .IsLookupPortEnabled }}
         <h2>Testing port connectivity:</h2>
         <pre>
-$ http ifconfig.co/port/8080
+$ http {{ .Host }}/port/8080
 {
     "ip": "{{ .IP }}",
     "port": 8080,
