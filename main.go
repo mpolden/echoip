@@ -64,7 +64,7 @@ func main() {
 	api.Template = opts.Template
 	api.IPHeader = opts.IPHeader
 
-	log.Printf("Listening on %s", opts.Listen)
+	log.Printf("Listening on http://%s", opts.Listen)
 	if err := http.ListenAndServe(opts.Listen, api.Router()); err != nil {
 		log.Fatal(err)
 	}
