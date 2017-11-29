@@ -21,6 +21,9 @@ $ wget -qO- ifconfig.co
 
 $ fetch -qo- http://ifconfig.co
 127.0.0.1
+
+$ bat -print=b ifconfig.co/ip
+127.0.0.1
 ```
 
 Country and city lookup:

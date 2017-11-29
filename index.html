@@ -54,6 +54,9 @@ $ wget -qO- ifconfig.co
 {{ .IP }}
 
 $ fetch -qo- https://ifconfig.co
+{{ .IP }}
+
+$ bat -print=b ifconfig.co/ip
 {{ .IP }}</pre>
 {{ if .IsLookupCountryEnabled }}
         <h2>Country lookup:</h2>
