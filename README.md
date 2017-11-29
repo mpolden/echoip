@@ -71,6 +71,15 @@ This application can be installed by using `go get`:
 
 `go get github.com/mpolden/ipd`
 
+If you get the error $GOPATH not set. For more details see: go help gopath when trying to do **go get github.com/mpolden/ipd**, simply enter this into a terminal:
+```sh
+mkdir ~/.go
+echo "GOPATH=$HOME/.go" >> ~/.bashrc
+echo "export GOPATH" >> ~/.bashrc
+echo "PATH=\$PATH:\$GOPATH/bin # Add GOPATH/bin to PATH for scripting" >> ~/.bashrc
+source ~/.bashrc
+```
+
 ### Usage
 
 ```
