@@ -71,6 +71,9 @@ This application can be installed by using `go get`:
 
 `go get github.com/mpolden/ipd`
 
+For more information on building a Go project, see the [official Go
+documentation](https://golang.org/doc/code.html).
+
 ### Usage
 
 ```
