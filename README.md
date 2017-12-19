@@ -48,9 +48,16 @@ $ http --json ifconfig.co
 }
 ```
 
+Pass the appropriate flag (usually `-4` and `-6`) to your tool to switch between
+IPv4 and IPv6 lookup.
+
+The subdomains https://v4.ifconfig.co and https://v6.ifconfig.co can be used to
+force IPv4 or IPv6 lookup.
+
 ## Features
 
 * Easy to remember domain name
+* Supports IPv4 and IPv6
 * Supports HTTPS
 * Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 * Fast
@@ -62,7 +69,7 @@ $ http --json ifconfig.co
 
 * To scratch an itch
 * An excuse to use Go for something
-* Faster than ifconfig.me
+* Faster than ifconfig.me and has IPv6 support
 
 ## Building
 
