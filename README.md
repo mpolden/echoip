@@ -32,7 +32,7 @@ Country and city lookup:
 $ http ifconfig.co/country
 Elbonia
 
-$ http ifconfig.co/iso
+$ http ifconfig.co/country-iso
 EB
 
 $ http ifconfig.co/city

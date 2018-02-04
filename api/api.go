@@ -34,7 +34,7 @@ type Response struct {
 	IP         net.IP   `json:"ip"`
 	IPDecimal  *big.Int `json:"ip_decimal"`
 	Country    string   `json:"country,omitempty"`
-	CountryISO string   `json:"isoCountry,omitempty"`
+	CountryISO string   `json:"country_iso,omitempty"`
 	City       string   `json:"city,omitempty"`
 	Hostname   string   `json:"hostname,omitempty"`
 }
@@ -85,7 +85,7 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		a.log.Debug(err)
 	}
-	iso, err := a.oracle.LookupCountryISO(ip)
+	countryISO, err := a.oracle.LookupCountryISO(ip)
 	if err != nil {
 		a.log.Debug(err)
 	}
@@ -101,7 +101,7 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 		IP:         ip,
 		IPDecimal:  ipDecimal,
 		Country:    country,
-		CountryISO: iso,
+		CountryISO: countryISO,
 		City:       city,
 		Hostname:   strings.Join(hostnames, " "),
 	}, nil
@@ -265,7 +265,7 @@ func (a *API) Router() http.Handler {
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").Headers("Accept", textMediaType)
 	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET")
 	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET")
-	r.Handle("/iso", appHandler(a.CLICountryISOHandler)).Methods("GET")
+	r.Handle("/country-iso", appHandler(a.CLICountryISOHandler)).Methods("GET")
 	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET")
 
 	// Browser

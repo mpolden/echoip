@@ -142,7 +142,6 @@ func lookupCountryISO(db *geoip2.Reader, ip net.IP) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	if record.Country.IsoCode != "" {
 		return record.Country.IsoCode, nil
 	}
