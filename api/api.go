@@ -34,7 +34,7 @@ type Response struct {
 	IP         net.IP   `json:"ip"`
 	IPDecimal  *big.Int `json:"ip_decimal"`
 	Country    string   `json:"country,omitempty"`
-	CountryISO string   `json:"iso,omitempty"`
+	CountryISO string   `json:"isoCountry,omitempty"`
 	City       string   `json:"city,omitempty"`
 	Hostname   string   `json:"hostname,omitempty"`
 }

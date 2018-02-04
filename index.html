@@ -82,7 +82,7 @@ $ http {{ .Host }}/json
 { {{ if .IsLookupCityEnabled }}
     "city": "{{ .City }}",
     "country": "{{ .Country }}",
-    "iso": "{{ .CountryISO }}",{{ end }}{{ if .IsLookupAddrEnabled }}
+    "isoCountry": "{{ .CountryISO }}",{{ end }}{{ if .IsLookupAddrEnabled }}
     "hostname": "{{ .Hostname }}",{{ end }}
     "ip": "{{ .IP }}",
     "ip_decimal": {{ .IPDecimal }}
