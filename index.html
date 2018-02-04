@@ -76,8 +76,9 @@ $ http {{ .Host }}/city
         <pre>
 $ http {{ .Host }}/json
 { {{ if .IsLookupCityEnabled }}
-    "city": "{{ .City }}",{{ end }}{{ if .IsLookupCountryEnabled }}
-    "country": "{{ .Country }}",{{ end }}{{ if .IsLookupAddrEnabled }}
+    "city": "{{ .City }}",
+    "country": "{{ .Country }}",
+    "iso": "{{ .CountryISO }}",{{ end }}{{ if .IsLookupAddrEnabled }}
     "hostname": "{{ .Hostname }}",{{ end }}
     "ip": "{{ .IP }}",
     "ip_decimal": {{ .IPDecimal }}
@@ -98,6 +99,13 @@ $ http {{ .Host }}/port/8080
     "port": 8080,
     "reachable": false
 }</pre>
+{{ end }}
+      </div>
+{{ if .IsLookupCityEnabled }}
+      <div class="pure-u-1 pure-u-md-1-1">
+        <h2>MAP</h2>
+        <p><img src="https://maps.googleapis.com/maps/api/staticmap?size=600x200&amp;scale=2&amp;markers=color%3Aorange%7Clabel%3AS%7c{{ .City }},{{ .Country }}" width="600" height="200"/>
+        </p>
 {{ end }}
       </div>
       <div class="pure-u-1 pure-u-md-1-1">
