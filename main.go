@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"./api"
+	"github.com/mpolden/ipd/api"
 )
 
 func main() {
