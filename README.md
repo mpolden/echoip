@@ -46,7 +46,7 @@ $ http --json ifconfig.co
 {
   "city": "Bornyasherk",
   "country": "Elbonia",
-  "isoCountry": "EB",
+  "country_iso": "EB",
   "ip": "127.0.0.1",
   "ip_decimal": 2130706433
 }
