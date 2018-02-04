@@ -63,6 +63,10 @@ $ bat -print=b {{ .Host }}/ip
         <pre>
 $ http {{ .Host }}/country
 {{ .Country }}</pre>
+        <h2>Country ISO lookup:</h2>
+        <pre>
+$ http {{ .Host }}/iso
+{{ .CountryISO }}</pre>
 {{ end }}
 {{ if .IsLookupCityEnabled }}
         <h2>City lookup:</h2>

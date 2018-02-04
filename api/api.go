@@ -146,6 +146,15 @@ func (a *API) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appErro
 	return nil
 }
 
+func (a *API) CLICountryISOHandler(w http.ResponseWriter, r *http.Request) *appError {
+	response, err := a.newResponse(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	fmt.Fprintln(w, response.CountryISO)
+	return nil
+}
+
 func (a *API) CLICityHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := a.newResponse(r)
 	if err != nil {
@@ -256,6 +265,7 @@ func (a *API) Router() http.Handler {
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").Headers("Accept", textMediaType)
 	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET")
 	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET")
+	r.Handle("/iso", appHandler(a.CLICountryISOHandler)).Methods("GET")
 	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET")
 
 	// Browser
