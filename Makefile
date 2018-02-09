@@ -18,7 +18,7 @@ deps:
 	go get -d -v ./...
 
 install:
-	go install
+	go install ./...
 
 databases := GeoLite2-City GeoLite2-Country
 
