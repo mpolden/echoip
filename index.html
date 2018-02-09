@@ -62,9 +62,8 @@ $ bat -print=b {{ .Host }}/ip
         <h2>Country lookup:</h2>
         <pre>
 $ http {{ .Host }}/country
-{{ .Country }}</pre>
-        <h2>Short country code (ISO 3166-1 alpha-2) lookup:</h2>
-        <pre>
+{{ .Country }}
+
 $ http {{ .Host }}/country-iso
 {{ .CountryISO }}</pre>
 {{ end }}
