@@ -31,11 +31,12 @@ type API struct {
 }
 
 type Response struct {
-	IP        net.IP   `json:"ip"`
-	IPDecimal *big.Int `json:"ip_decimal"`
-	Country   string   `json:"country,omitempty"`
-	City      string   `json:"city,omitempty"`
-	Hostname  string   `json:"hostname,omitempty"`
+	IP         net.IP   `json:"ip"`
+	IPDecimal  *big.Int `json:"ip_decimal"`
+	Country    string   `json:"country,omitempty"`
+	CountryISO string   `json:"country_iso,omitempty"`
+	City       string   `json:"city,omitempty"`
+	Hostname   string   `json:"hostname,omitempty"`
 }
 
 type PortResponse struct {
@@ -84,6 +85,10 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		a.log.Debug(err)
 	}
+	countryISO, err := a.oracle.LookupCountryISO(ip)
+	if err != nil {
+		a.log.Debug(err)
+	}
 	city, err := a.oracle.LookupCity(ip)
 	if err != nil {
 		a.log.Debug(err)
@@ -93,11 +98,12 @@ func (a *API) newResponse(r *http.Request) (Response, error) {
 		a.log.Debug(err)
 	}
 	return Response{
-		IP:        ip,
-		IPDecimal: ipDecimal,
-		Country:   country,
-		City:      city,
-		Hostname:  strings.Join(hostnames, " "),
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    country,
+		CountryISO: countryISO,
+		City:       city,
+		Hostname:   strings.Join(hostnames, " "),
 	}, nil
 }
 
@@ -137,6 +143,15 @@ func (a *API) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appErro
 		return internalServerError(err)
 	}
 	fmt.Fprintln(w, response.Country)
+	return nil
+}
+
+func (a *API) CLICountryISOHandler(w http.ResponseWriter, r *http.Request) *appError {
+	response, err := a.newResponse(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	fmt.Fprintln(w, response.CountryISO)
 	return nil
 }
 
@@ -250,6 +265,7 @@ func (a *API) Router() http.Handler {
 	r.Handle("/", appHandler(a.CLIHandler)).Methods("GET").Headers("Accept", textMediaType)
 	r.Handle("/ip", appHandler(a.CLIHandler)).Methods("GET")
 	r.Handle("/country", appHandler(a.CLICountryHandler)).Methods("GET")
+	r.Handle("/country-iso", appHandler(a.CLICountryISOHandler)).Methods("GET")
 	r.Handle("/city", appHandler(a.CLICityHandler)).Methods("GET")
 
 	// Browser

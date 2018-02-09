@@ -32,6 +32,9 @@ Country and city lookup:
 $ http ifconfig.co/country
 Elbonia
 
+$ http ifconfig.co/country-iso
+EB
+
 $ http ifconfig.co/city
 Bornyasherk
 ```
@@ -43,6 +46,7 @@ $ http --json ifconfig.co
 {
   "city": "Bornyasherk",
   "country": "Elbonia",
+  "country_iso": "EB",
   "ip": "127.0.0.1",
   "ip_decimal": 2130706433
 }

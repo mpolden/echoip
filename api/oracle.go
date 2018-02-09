@@ -12,6 +12,7 @@ import (
 type Oracle interface {
 	LookupAddr(net.IP) ([]string, error)
 	LookupCountry(net.IP) (string, error)
+	LookupCountryISO(net.IP) (string, error)
 	LookupCity(net.IP) (string, error)
 	LookupPort(net.IP, uint64) error
 	IsLookupAddrEnabled() bool
@@ -23,6 +24,7 @@ type Oracle interface {
 type DefaultOracle struct {
 	lookupAddr           func(net.IP) ([]string, error)
 	lookupCountry        func(net.IP) (string, error)
+	lookupCountryISO     func(net.IP) (string, error)
 	lookupCity           func(net.IP) (string, error)
 	lookupPort           func(net.IP, uint64) error
 	lookupAddrEnabled    bool
@@ -33,10 +35,11 @@ type DefaultOracle struct {
 
 func NewOracle() *DefaultOracle {
 	return &DefaultOracle{
-		lookupAddr:    func(net.IP) ([]string, error) { return nil, nil },
-		lookupCountry: func(net.IP) (string, error) { return "", nil },
-		lookupCity:    func(net.IP) (string, error) { return "", nil },
-		lookupPort:    func(net.IP, uint64) error { return nil },
+		lookupAddr:       func(net.IP) ([]string, error) { return nil, nil },
+		lookupCountry:    func(net.IP) (string, error) { return "", nil },
+		lookupCountryISO: func(net.IP) (string, error) { return "", nil },
+		lookupCity:       func(net.IP) (string, error) { return "", nil },
+		lookupPort:       func(net.IP, uint64) error { return nil },
 	}
 }
 
@@ -46,6 +49,10 @@ func (r *DefaultOracle) LookupAddr(ip net.IP) ([]string, error) {
 
 func (r *DefaultOracle) LookupCountry(ip net.IP) (string, error) {
 	return r.lookupCountry(ip)
+}
+
+func (r *DefaultOracle) LookupCountryISO(ip net.IP) (string, error) {
+	return r.lookupCountryISO(ip)
 }
 
 func (r *DefaultOracle) LookupCity(ip net.IP) (string, error) {
@@ -68,6 +75,9 @@ func (r *DefaultOracle) EnableLookupCountry(filepath string) error {
 	}
 	r.lookupCountry = func(ip net.IP) (string, error) {
 		return lookupCountry(db, ip)
+	}
+	r.lookupCountryISO = func(ip net.IP) (string, error) {
+		return lookupCountryISO(db, ip)
 	}
 	r.lookupCountryEnabled = true
 	return nil
@@ -125,6 +135,20 @@ func lookupCountry(db *geoip2.Reader, ip net.IP) (string, error) {
 		return country, nil
 	}
 	return "Unknown", fmt.Errorf("could not determine country for IP: %s", ip)
+}
+
+func lookupCountryISO(db *geoip2.Reader, ip net.IP) (string, error) {
+	record, err := db.City(ip)
+	if err != nil {
+		return "", err
+	}
+	if record.Country.IsoCode != "" {
+		return record.Country.IsoCode, nil
+	}
+	if record.RegisteredCountry.IsoCode != "" {
+		return record.RegisteredCountry.IsoCode, nil
+	}
+	return "Unknown", fmt.Errorf("could not determine country ISO Code for IP: %s", ip)
 }
 
 func lookupCity(db *geoip2.Reader, ip net.IP) (string, error) {

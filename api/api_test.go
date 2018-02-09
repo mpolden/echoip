@@ -12,14 +12,15 @@ import (
 
 type mockOracle struct{}
 
-func (r *mockOracle) LookupAddr(net.IP) ([]string, error)  { return []string{"localhost"}, nil }
-func (r *mockOracle) LookupCountry(net.IP) (string, error) { return "Elbonia", nil }
-func (r *mockOracle) LookupCity(net.IP) (string, error)    { return "Bornyasherk", nil }
-func (r *mockOracle) LookupPort(net.IP, uint64) error      { return nil }
-func (r *mockOracle) IsLookupAddrEnabled() bool            { return true }
-func (r *mockOracle) IsLookupCountryEnabled() bool         { return true }
-func (r *mockOracle) IsLookupCityEnabled() bool            { return true }
-func (r *mockOracle) IsLookupPortEnabled() bool            { return true }
+func (r *mockOracle) LookupAddr(net.IP) ([]string, error)     { return []string{"localhost"}, nil }
+func (r *mockOracle) LookupCountry(net.IP) (string, error)    { return "Elbonia", nil }
+func (r *mockOracle) LookupCountryISO(net.IP) (string, error) { return "EB", nil }
+func (r *mockOracle) LookupCity(net.IP) (string, error)       { return "Bornyasherk", nil }
+func (r *mockOracle) LookupPort(net.IP, uint64) error         { return nil }
+func (r *mockOracle) IsLookupAddrEnabled() bool               { return true }
+func (r *mockOracle) IsLookupCountryEnabled() bool            { return true }
+func (r *mockOracle) IsLookupCityEnabled() bool               { return true }
+func (r *mockOracle) IsLookupPortEnabled() bool               { return true }
 
 func newTestAPI() *API {
 	return &API{oracle: &mockOracle{}}
@@ -61,6 +62,7 @@ func TestCLIHandlers(t *testing.T) {
 		{s.URL, "127.0.0.1\n", 200, "foo/bar", textMediaType},
 		{s.URL + "/ip", "127.0.0.1\n", 200, "", ""},
 		{s.URL + "/country", "Elbonia\n", 200, "", ""},
+		{s.URL + "/country-iso", "EB\n", 200, "", ""},
 		{s.URL + "/city", "Bornyasherk\n", 200, "", ""},
 		{s.URL + "/foo", "404 page not found", 404, "", ""},
 	}
@@ -88,7 +90,7 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","city":"Bornyasherk","hostname":"localhost"}`, 200},
+		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_iso":"EB","city":"Bornyasherk","hostname":"localhost"}`, 200},
 		{s.URL + "/port/foo", `{"error":"404 page not found"}`, 404},
 		{s.URL + "/port/0", `{"error":"Invalid port: 0"}`, 400},
 		{s.URL + "/port/65356", `{"error":"Invalid port: 65356"}`, 400},
