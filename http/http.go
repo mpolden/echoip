@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 
+	"github.com/mpolden/ipd/iputil"
+	"github.com/mpolden/ipd/iputil/db"
 	"github.com/mpolden/ipd/useragent"
 	"github.com/sirupsen/logrus"
 
@@ -23,11 +25,16 @@ const (
 	textMediaType = "text/plain"
 )
 
+type LookupAddr func(net.IP) ([]string, error)
+type LookupPort func(net.IP, uint64) error
+
 type Server struct {
-	Template string
-	IPHeader string
-	oracle   Oracle
-	log      *logrus.Logger
+	Template   string
+	IPHeader   string
+	lookupAddr LookupAddr
+	lookupPort LookupPort
+	db         db.Database
+	log        *logrus.Logger
 }
 
 type Response struct {
@@ -45,18 +52,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(oracle Oracle, logger *logrus.Logger) *Server {
-	return &Server{oracle: oracle, log: logger}
-}
-
-func ipToDecimal(ip net.IP) *big.Int {
-	i := big.NewInt(0)
-	if to4 := ip.To4(); to4 != nil {
-		i.SetBytes(to4)
-	} else {
-		i.SetBytes(ip)
-	}
-	return i
+func New(db db.Database, lookupAddr LookupAddr, lookupPort LookupPort, logger *logrus.Logger) *Server {
+	return &Server{lookupAddr: lookupAddr, lookupPort: lookupPort, db: db, log: logger}
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
@@ -80,28 +77,24 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		return Response{}, err
 	}
-	ipDecimal := ipToDecimal(ip)
-	country, err := s.oracle.LookupCountry(ip)
+	ipDecimal := iputil.ToDecimal(ip)
+	country, err := s.db.Country(ip)
 	if err != nil {
 		s.log.Debug(err)
 	}
-	countryISO, err := s.oracle.LookupCountryISO(ip)
+	city, err := s.db.City(ip)
 	if err != nil {
 		s.log.Debug(err)
 	}
-	city, err := s.oracle.LookupCity(ip)
-	if err != nil {
-		s.log.Debug(err)
-	}
-	hostnames, err := s.oracle.LookupAddr(ip)
+	hostnames, err := s.lookupAddr(ip)
 	if err != nil {
 		s.log.Debug(err)
 	}
 	return Response{
 		IP:         ip,
 		IPDecimal:  ipDecimal,
-		Country:    country,
-		CountryISO: countryISO,
+		Country:    country.Name,
+		CountryISO: country.ISO,
 		City:       city,
 		Hostname:   strings.Join(hostnames, " "),
 	}, nil
@@ -120,7 +113,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	if err != nil {
 		return PortResponse{Port: port}, err
 	}
-	err = s.oracle.LookupPort(ip, port)
+	err = s.lookupPort(ip, port)
 	return PortResponse{
 		IP:        ip,
 		Port:      port,
@@ -201,11 +194,23 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return internalServerError(err)
 	}
+	json, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return internalServerError(err)
+	}
 	var data = struct {
-		Host string
 		Response
-		Oracle
-	}{r.Host, response, s.oracle}
+		Host string
+		JSON string
+		Port bool
+		Map  bool
+	}{
+		response,
+		r.Host,
+		string(json),
+		s.lookupPort != nil,
+		response.Country != "" && response.City != "",
+	}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
 	}

@@ -5,9 +5,9 @@
     <title>What is my IP address? &mdash; {{ .Host }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="What is my IP address?">
-    <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/pure-min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/grids-responsive-min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/pure-min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/grids-responsive-min.css">
     <style>
       html, .pure-g [class *= "pure-u"] {
         font-family: "Open Sans", sans-serif;
@@ -58,7 +58,7 @@ $ fetch -qo- https://{{ .Host }}
 
 $ bat -print=b {{ .Host }}/ip
 {{ .IP }}</pre>
-{{ if .IsLookupCountryEnabled }}
+{{ if .Country }}
         <h2>Country lookup</h2>
         <pre>
 $ http {{ .Host }}/country
@@ -67,7 +67,7 @@ $ http {{ .Host }}/country
 $ http {{ .Host }}/country-iso
 {{ .CountryISO }}</pre>
 {{ end }}
-{{ if .IsLookupCityEnabled }}
+{{ if .City }}
         <h2>City lookup</h2>
         <pre>
 $ http {{ .Host }}/city
@@ -78,22 +78,14 @@ $ http {{ .Host }}/city
         <h2>JSON output</h2>
         <pre>
 $ http {{ .Host }}/json
-{ {{ if .IsLookupCityEnabled }}
-  "city": "{{ .City }}",
-  "country": "{{ .Country }}",
-  "country_iso": "{{ .CountryISO }}",{{ end }}{{ if .IsLookupAddrEnabled }}
-  "hostname": "{{ .Hostname }}",{{ end }}
-  "ip": "{{ .IP }}",
-  "ip_decimal": {{ .IPDecimal }}
-}</pre>
-
+{{ .JSON }}</pre>
         <p>Setting the Accept header to application/json also works.</p>
         <h2>Plain output</h2>
         <p>Always returns the IP address including a trailing newline, regardless of user agent.</p>
         <pre>
 $ http {{ .Host }}/ip
 {{ .IP }}</pre>
-{{ if .IsLookupPortEnabled }}
+{{ if .Port }}
         <h2>Port testing</h2>
         <pre>
 $ http {{ .Host }}/port/8080
@@ -104,13 +96,13 @@ $ http {{ .Host }}/port/8080
 }</pre>
 {{ end }}
       </div>
-{{ if .IsLookupCountryEnabled }}{{ if ne .Country "Unknown"}}{{ if .IsLookupCityEnabled }}{{ if ne .City "Unknown"}}
+{{ if .Map }}
       <div class="pure-u-1 pure-u-md-1-2">
         <h2>Map</h2>
         <p><img src="https://maps.googleapis.com/maps/api/staticmap?size=500x166&amp;scale=2&amp;markers=color%3Aorange%7Clabel%3AS%7c{{ .City }},{{ .Country }}" width="500" height="166"/>
         </p>
-{{ end }}{{ end }}{{ end }}{{ end }}
       </div>
+{{ end }}
       <div class="pure-u-1 pure-u-md-1-2">
         <h2>FAQ</h2>
         <h3>How do I force IPv4 or IPv6 lookup?</h3>

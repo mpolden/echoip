@@ -3,27 +3,25 @@ package http
 import (
 	"io/ioutil"
 	"log"
-	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/mpolden/ipd/iputil/db"
 )
 
-type mockOracle struct{}
+type database struct{}
 
-func (r *mockOracle) LookupAddr(net.IP) ([]string, error)     { return []string{"localhost"}, nil }
-func (r *mockOracle) LookupCountry(net.IP) (string, error)    { return "Elbonia", nil }
-func (r *mockOracle) LookupCountryISO(net.IP) (string, error) { return "EB", nil }
-func (r *mockOracle) LookupCity(net.IP) (string, error)       { return "Bornyasherk", nil }
-func (r *mockOracle) LookupPort(net.IP, uint64) error         { return nil }
-func (r *mockOracle) IsLookupAddrEnabled() bool               { return true }
-func (r *mockOracle) IsLookupCountryEnabled() bool            { return true }
-func (r *mockOracle) IsLookupCityEnabled() bool               { return true }
-func (r *mockOracle) IsLookupPortEnabled() bool               { return true }
+func lookupAddr(net.IP) ([]string, error) { return []string{"localhost"}, nil }
+func lookupPort(net.IP, uint64) error     { return nil }
+func (d *database) Country(net.IP) (db.Country, error) {
+	return db.Country{Name: "Elbonia", ISO: "EB"}, nil
+}
+func (d *database) City(net.IP) (string, error) { return "Bornyasherk", nil }
 
 func newTestAPI() *Server {
-	return &Server{oracle: &mockOracle{}}
+	return &Server{db: &database{}, lookupAddr: lookupAddr, lookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -165,22 +163,6 @@ func TestCLIMatcher(t *testing.T) {
 		r := &http.Request{Header: http.Header{"User-Agent": []string{tt.in}}}
 		if got := cliMatcher(r, nil); got != tt.out {
 			t.Errorf("Expected %t, got %t for %q", tt.out, got, tt.in)
-		}
-	}
-}
-
-func TestIPToDecimal(t *testing.T) {
-	var tests = []struct {
-		in  string
-		out *big.Int
-	}{
-		{"127.0.0.1", big.NewInt(2130706433)},
-		{"::1", big.NewInt(1)},
-	}
-	for _, tt := range tests {
-		i := ipToDecimal(net.ParseIP(tt.in))
-		if i.Cmp(tt.out) != 0 {
-			t.Errorf("Expected %d, got %d for IP %s", tt.out, i, tt.in)
 		}
 	}
 }

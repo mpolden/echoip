@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/mpolden/ipd/http"
+	"github.com/mpolden/ipd/iputil"
+	"github.com/mpolden/ipd/iputil/db"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,32 +34,28 @@ func main() {
 	}
 	log.Level = level
 
-	oracle := http.NewOracle()
+	ipDb := db.Empty()
+	if opts.CountryDBPath != "" || opts.CityDBPath != "" {
+		ipDb, err = db.Open(opts.CountryDBPath, opts.CityDBPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	var lookupAddr http.LookupAddr
+	var lookupPort http.LookupPort
 	if opts.ReverseLookup {
 		log.Println("Enabling reverse lookup")
-		oracle.EnableLookupAddr()
+		lookupAddr = iputil.LookupAddr
 	}
 	if opts.PortLookup {
 		log.Println("Enabling port lookup")
-		oracle.EnableLookupPort()
-	}
-	if opts.CountryDBPath != "" {
-		log.Printf("Enabling country lookup (using database: %s)", opts.CountryDBPath)
-		if err := oracle.EnableLookupCountry(opts.CountryDBPath); err != nil {
-			log.Fatal(err)
-		}
-	}
-	if opts.CityDBPath != "" {
-		log.Printf("Enabling city lookup (using database: %s)", opts.CityDBPath)
-		if err := oracle.EnableLookupCity(opts.CityDBPath); err != nil {
-			log.Fatal(err)
-		}
+		lookupPort = iputil.LookupPort
 	}
 	if opts.IPHeader != "" {
 		log.Printf("Trusting header %s to contain correct remote IP", opts.IPHeader)
 	}
 
-	server := http.New(oracle, log)
+	server := http.New(ipDb, lookupAddr, lookupPort, log)
 	server.Template = opts.Template
 	server.IPHeader = opts.IPHeader
 
