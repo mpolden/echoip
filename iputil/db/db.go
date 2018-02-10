@@ -88,5 +88,5 @@ func (g *geoip) City(ip net.IP) (string, error) {
 }
 
 func (g *geoip) IsEmpty() bool {
-	return g.country != nil || g.city != nil
+	return g.country == nil && g.city == nil
 }
