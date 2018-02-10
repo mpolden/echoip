@@ -1,15 +1,12 @@
 package main
 
 import (
-	"net/http"
-
 	flags "github.com/jessevdk/go-flags"
 
 	"os"
 
+	"github.com/mpolden/ipd/http"
 	"github.com/sirupsen/logrus"
-
-	"github.com/mpolden/ipd/api"
 )
 
 func main() {
@@ -35,7 +32,7 @@ func main() {
 	}
 	log.Level = level
 
-	oracle := api.NewOracle()
+	oracle := http.NewOracle()
 	if opts.ReverseLookup {
 		log.Println("Enabling reverse lookup")
 		oracle.EnableLookupAddr()
@@ -60,12 +57,12 @@ func main() {
 		log.Printf("Trusting header %s to contain correct remote IP", opts.IPHeader)
 	}
 
-	api := api.New(oracle, log)
-	api.Template = opts.Template
-	api.IPHeader = opts.IPHeader
+	server := http.New(oracle, log)
+	server.Template = opts.Template
+	server.IPHeader = opts.IPHeader
 
 	log.Printf("Listening on http://%s", opts.Listen)
-	if err := http.ListenAndServe(opts.Listen, api.Router()); err != nil {
+	if err := server.ListenAndServe(opts.Listen); err != nil {
 		log.Fatal(err)
 	}
 }

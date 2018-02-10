@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"io/ioutil"
@@ -22,8 +22,8 @@ func (r *mockOracle) IsLookupCountryEnabled() bool            { return true }
 func (r *mockOracle) IsLookupCityEnabled() bool               { return true }
 func (r *mockOracle) IsLookupPortEnabled() bool               { return true }
 
-func newTestAPI() *API {
-	return &API{oracle: &mockOracle{}}
+func newTestAPI() *Server {
+	return &Server{oracle: &mockOracle{}}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -49,7 +49,7 @@ func httpGet(url string, acceptMediaType string, userAgent string) (string, int,
 
 func TestCLIHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	s := httptest.NewServer(newTestAPI().Router())
+	s := httptest.NewServer(newTestAPI().Handler())
 
 	var tests = []struct {
 		url             string
@@ -83,7 +83,7 @@ func TestCLIHandlers(t *testing.T) {
 
 func TestJSONHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	s := httptest.NewServer(newTestAPI().Router())
+	s := httptest.NewServer(newTestAPI().Handler())
 
 	var tests = []struct {
 		url    string
