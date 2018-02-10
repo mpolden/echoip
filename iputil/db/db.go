@@ -31,10 +31,7 @@ func (d *empty) IsEmpty() bool                      { return true }
 func Empty() Database { return &empty{} }
 
 func Open(countryDB, cityDB string) (Database, error) {
-	var (
-		country *geoip2.Reader
-		city    *geoip2.Reader
-	)
+	var country, city *geoip2.Reader
 	if countryDB != "" {
 		r, err := geoip2.Open(countryDB)
 		if err != nil {
