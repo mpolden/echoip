@@ -9,6 +9,7 @@ import (
 type Database interface {
 	Country(net.IP) (Country, error)
 	City(net.IP) (string, error)
+	IsEmpty() bool
 }
 
 type Country struct {
@@ -25,6 +26,7 @@ type empty struct{}
 
 func (d *empty) Country(ip net.IP) (Country, error) { return Country{}, nil }
 func (d *empty) City(ip net.IP) (string, error)     { return "", nil }
+func (d *empty) IsEmpty() bool                      { return true }
 
 func Empty() Database { return &empty{} }
 
@@ -86,4 +88,8 @@ func (g *geoip) City(ip net.IP) (string, error) {
 		return city, nil
 	}
 	return "", nil
+}
+
+func (g *geoip) IsEmpty() bool {
+	return g.country != nil || g.city != nil
 }

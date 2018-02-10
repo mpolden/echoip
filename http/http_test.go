@@ -11,17 +11,20 @@ import (
 	"github.com/mpolden/ipd/iputil/db"
 )
 
-type database struct{}
-
 func lookupAddr(net.IP) ([]string, error) { return []string{"localhost"}, nil }
 func lookupPort(net.IP, uint64) error     { return nil }
-func (d *database) Country(net.IP) (db.Country, error) {
+
+type testDb struct{}
+
+func (t *testDb) Country(net.IP) (db.Country, error) {
 	return db.Country{Name: "Elbonia", ISO: "EB"}, nil
 }
-func (d *database) City(net.IP) (string, error) { return "Bornyasherk", nil }
 
-func newTestAPI() *Server {
-	return &Server{db: &database{}, lookupAddr: lookupAddr, lookupPort: lookupPort}
+func (t *testDb) City(net.IP) (string, error) { return "Bornyasherk", nil }
+func (t *testDb) IsEmpty() bool               { return false }
+
+func testServer() *Server {
+	return &Server{db: &testDb{}, lookupAddr: lookupAddr, lookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -47,7 +50,7 @@ func httpGet(url string, acceptMediaType string, userAgent string) (string, int,
 
 func TestCLIHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	s := httptest.NewServer(newTestAPI().Handler())
+	s := httptest.NewServer(testServer().Handler())
 
 	var tests = []struct {
 		url             string
@@ -79,9 +82,43 @@ func TestCLIHandlers(t *testing.T) {
 	}
 }
 
+func TestDisabledHandlers(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+	server := testServer()
+	server.lookupPort = nil
+	server.lookupAddr = nil
+	server.db = db.Empty()
+	s := httptest.NewServer(server.Handler())
+
+	var tests = []struct {
+		url    string
+		out    string
+		status int
+	}{
+		{s.URL + "/port/1337", "404 page not found", 404},
+		{s.URL + "/country", "404 page not found", 404},
+		{s.URL + "/country-iso", "404 page not found", 404},
+		{s.URL + "/city", "404 page not found", 404},
+		{s.URL + "/json", `{"ip":"127.0.0.1","ip_decimal":2130706433}`, 200},
+	}
+
+	for _, tt := range tests {
+		out, status, err := httpGet(tt.url, "", "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if status != tt.status {
+			t.Errorf("Expected %d, got %d", tt.status, status)
+		}
+		if out != tt.out {
+			t.Errorf("Expected %q, got %q", tt.out, out)
+		}
+	}
+}
+
 func TestJSONHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
-	s := httptest.NewServer(newTestAPI().Handler())
+	s := httptest.NewServer(testServer().Handler())
 
 	var tests = []struct {
 		url    string

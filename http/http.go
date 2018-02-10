@@ -52,8 +52,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db db.Database, lookupAddr LookupAddr, lookupPort LookupPort, logger *logrus.Logger) *Server {
-	return &Server{lookupAddr: lookupAddr, lookupPort: lookupPort, db: db, log: logger}
+func New(db db.Database, lookupAddr LookupAddr, lookupPort LookupPort, log *logrus.Logger) *Server {
+	return &Server{lookupAddr: lookupAddr, lookupPort: lookupPort, db: db, log: log}
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
@@ -86,9 +86,13 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		s.log.Debug(err)
 	}
-	hostnames, err := s.lookupAddr(ip)
-	if err != nil {
-		s.log.Debug(err)
+	var hostnames []string
+	if s.lookupAddr != nil {
+		h, err := s.lookupAddr(ip)
+		if err != nil {
+			s.log.Debug(err)
+		}
+		hostnames = h
 	}
 	return Response{
 		IP:         ip,
@@ -269,15 +273,19 @@ func (s *Server) Handler() http.Handler {
 	r.Handle("/", appHandler(s.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
 	r.Handle("/", appHandler(s.CLIHandler)).Methods("GET").Headers("Accept", textMediaType)
 	r.Handle("/ip", appHandler(s.CLIHandler)).Methods("GET")
-	r.Handle("/country", appHandler(s.CLICountryHandler)).Methods("GET")
-	r.Handle("/country-iso", appHandler(s.CLICountryISOHandler)).Methods("GET")
-	r.Handle("/city", appHandler(s.CLICityHandler)).Methods("GET")
+	if !s.db.IsEmpty() {
+		r.Handle("/country", appHandler(s.CLICountryHandler)).Methods("GET")
+		r.Handle("/country-iso", appHandler(s.CLICountryISOHandler)).Methods("GET")
+		r.Handle("/city", appHandler(s.CLICityHandler)).Methods("GET")
+	}
 
 	// Browser
 	r.Handle("/", appHandler(s.DefaultHandler)).Methods("GET")
 
 	// Port testing
-	r.Handle("/port/{port:[0-9]+}", appHandler(s.PortHandler)).Methods("GET")
+	if s.lookupPort != nil {
+		r.Handle("/port/{port:[0-9]+}", appHandler(s.PortHandler)).Methods("GET")
+	}
 
 	// Not found handler which returns JSON when appropriate
 	r.NotFoundHandler = appHandler(s.NotFoundHandler)
