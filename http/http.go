@@ -10,10 +10,8 @@ import (
 	"github.com/mpolden/ipd/useragent"
 	"github.com/sirupsen/logrus"
 
-	"math/big"
 	"net"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -38,12 +36,12 @@ type Server struct {
 }
 
 type Response struct {
-	IP         net.IP   `json:"ip"`
-	IPDecimal  *big.Int `json:"ip_decimal"`
-	Country    string   `json:"country,omitempty"`
-	CountryISO string   `json:"country_iso,omitempty"`
-	City       string   `json:"city,omitempty"`
-	Hostname   string   `json:"hostname,omitempty"`
+	IP         net.IP `json:"ip"`
+	IPDecimal  uint64 `json:"ip_decimal"`
+	Country    string `json:"country,omitempty"`
+	CountryISO string `json:"country_iso,omitempty"`
+	City       string `json:"city,omitempty"`
+	Hostname   string `json:"hostname,omitempty"`
 }
 
 type PortResponse struct {
@@ -194,7 +192,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return internalServerError(err)
 	}
-	t, err := template.New(filepath.Base(s.Template)).ParseFiles(s.Template)
+	t, err := template.ParseFiles(s.Template)
 	if err != nil {
 		return internalServerError(err)
 	}

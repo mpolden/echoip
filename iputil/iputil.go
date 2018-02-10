@@ -26,12 +26,12 @@ func LookupPort(ip net.IP, port uint64) error {
 	return nil
 }
 
-func ToDecimal(ip net.IP) *big.Int {
+func ToDecimal(ip net.IP) uint64 {
 	i := big.NewInt(0)
 	if to4 := ip.To4(); to4 != nil {
 		i.SetBytes(to4)
 	} else {
 		i.SetBytes(ip)
 	}
-	return i
+	return i.Uint64()
 }
