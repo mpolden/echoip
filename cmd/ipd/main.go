@@ -7,7 +7,7 @@ import (
 
 	"github.com/mpolden/ipd/http"
 	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/db"
+	"github.com/mpolden/ipd/iputil/database"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,9 +34,9 @@ func main() {
 	}
 	log.Level = level
 
-	ipDb := db.Empty()
+	db := database.Empty()
 	if opts.CountryDBPath != "" || opts.CityDBPath != "" {
-		ipDb, err = db.Open(opts.CountryDBPath, opts.CityDBPath)
+		db, err = database.New(opts.CountryDBPath, opts.CityDBPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,7 +55,7 @@ func main() {
 		log.Printf("Trusting header %s to contain correct remote IP", opts.IPHeader)
 	}
 
-	server := http.New(ipDb, lookupAddr, lookupPort, log)
+	server := http.New(db, lookupAddr, lookupPort, log)
 	server.Template = opts.Template
 	server.IPHeader = opts.IPHeader
 

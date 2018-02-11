@@ -6,7 +6,7 @@ import (
 	"html/template"
 
 	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/db"
+	"github.com/mpolden/ipd/iputil/database"
 	"github.com/mpolden/ipd/useragent"
 	"github.com/sirupsen/logrus"
 
@@ -31,7 +31,7 @@ type Server struct {
 	IPHeader   string
 	lookupAddr LookupAddr
 	lookupPort LookupPort
-	db         db.Database
+	db         database.Client
 	log        *logrus.Logger
 }
 
@@ -50,7 +50,7 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db db.Database, lookupAddr LookupAddr, lookupPort LookupPort, log *logrus.Logger) *Server {
+func New(db database.Client, lookupAddr LookupAddr, lookupPort LookupPort, log *logrus.Logger) *Server {
 	return &Server{lookupAddr: lookupAddr, lookupPort: lookupPort, db: db, log: log}
 }
 

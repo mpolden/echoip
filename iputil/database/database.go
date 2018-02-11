@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"net"
@@ -6,7 +6,7 @@ import (
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
-type Database interface {
+type Client interface {
 	Country(net.IP) (Country, error)
 	City(net.IP) (string, error)
 	IsEmpty() bool
@@ -28,9 +28,9 @@ func (d *empty) Country(ip net.IP) (Country, error) { return Country{}, nil }
 func (d *empty) City(ip net.IP) (string, error)     { return "", nil }
 func (d *empty) IsEmpty() bool                      { return true }
 
-func Empty() Database { return &empty{} }
+func Empty() Client { return &empty{} }
 
-func Open(countryDB, cityDB string) (Database, error) {
+func New(countryDB, cityDB string) (Client, error) {
 	var country, city *geoip2.Reader
 	if countryDB != "" {
 		r, err := geoip2.Open(countryDB)

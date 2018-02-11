@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mpolden/ipd/iputil/db"
+	"github.com/mpolden/ipd/iputil/database"
 )
 
 func lookupAddr(net.IP) ([]string, error) { return []string{"localhost"}, nil }
@@ -16,8 +16,8 @@ func lookupPort(net.IP, uint64) error     { return nil }
 
 type testDb struct{}
 
-func (t *testDb) Country(net.IP) (db.Country, error) {
-	return db.Country{Name: "Elbonia", ISO: "EB"}, nil
+func (t *testDb) Country(net.IP) (database.Country, error) {
+	return database.Country{Name: "Elbonia", ISO: "EB"}, nil
 }
 
 func (t *testDb) City(net.IP) (string, error) { return "Bornyasherk", nil }
@@ -87,7 +87,7 @@ func TestDisabledHandlers(t *testing.T) {
 	server := testServer()
 	server.lookupPort = nil
 	server.lookupAddr = nil
-	server.db = db.Empty()
+	server.db = database.Empty()
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {
