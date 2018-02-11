@@ -34,30 +34,25 @@ func main() {
 	}
 	log.Level = level
 
-	db := database.Empty()
-	if opts.CountryDBPath != "" || opts.CityDBPath != "" {
-		db, err = database.New(opts.CountryDBPath, opts.CityDBPath)
-		if err != nil {
-			log.Fatal(err)
-		}
+	db, err := database.New(opts.CountryDBPath, opts.CityDBPath)
+	if err != nil {
+		log.Fatal(err)
 	}
-	var lookupAddr http.LookupAddr
-	var lookupPort http.LookupPort
+
+	server := http.New(db, log)
+	server.Template = opts.Template
+	server.IPHeader = opts.IPHeader
 	if opts.ReverseLookup {
 		log.Println("Enabling reverse lookup")
-		lookupAddr = iputil.LookupAddr
+		server.LookupAddr = iputil.LookupAddr
 	}
 	if opts.PortLookup {
 		log.Println("Enabling port lookup")
-		lookupPort = iputil.LookupPort
+		server.LookupPort = iputil.LookupPort
 	}
 	if opts.IPHeader != "" {
 		log.Printf("Trusting header %s to contain correct remote IP", opts.IPHeader)
 	}
-
-	server := http.New(db, lookupAddr, lookupPort, log)
-	server.Template = opts.Template
-	server.IPHeader = opts.IPHeader
 
 	log.Printf("Listening on http://%s", opts.Listen)
 	if err := server.ListenAndServe(opts.Listen); err != nil {

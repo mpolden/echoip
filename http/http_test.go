@@ -24,7 +24,7 @@ func (t *testDb) City(net.IP) (string, error) { return "Bornyasherk", nil }
 func (t *testDb) IsEmpty() bool               { return false }
 
 func testServer() *Server {
-	return &Server{db: &testDb{}, lookupAddr: lookupAddr, lookupPort: lookupPort}
+	return &Server{db: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -85,9 +85,9 @@ func TestCLIHandlers(t *testing.T) {
 func TestDisabledHandlers(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	server := testServer()
-	server.lookupPort = nil
-	server.lookupAddr = nil
-	server.db = database.Empty()
+	server.LookupPort = nil
+	server.LookupAddr = nil
+	server.db, _ = database.New("", "")
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {

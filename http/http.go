@@ -23,14 +23,11 @@ const (
 	textMediaType = "text/plain"
 )
 
-type LookupAddr func(net.IP) ([]string, error)
-type LookupPort func(net.IP, uint64) error
-
 type Server struct {
 	Template   string
 	IPHeader   string
-	lookupAddr LookupAddr
-	lookupPort LookupPort
+	LookupAddr func(net.IP) ([]string, error)
+	LookupPort func(net.IP, uint64) error
 	db         database.Client
 	log        *logrus.Logger
 }
@@ -50,8 +47,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db database.Client, lookupAddr LookupAddr, lookupPort LookupPort, log *logrus.Logger) *Server {
-	return &Server{lookupAddr: lookupAddr, lookupPort: lookupPort, db: db, log: log}
+func New(db database.Client, log *logrus.Logger) *Server {
+	return &Server{db: db, log: log}
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
@@ -85,8 +82,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		s.log.Debug(err)
 	}
 	var hostnames []string
-	if s.lookupAddr != nil {
-		h, err := s.lookupAddr(ip)
+	if s.LookupAddr != nil {
+		h, err := s.LookupAddr(ip)
 		if err != nil {
 			s.log.Debug(err)
 		}
@@ -115,7 +112,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	if err != nil {
 		return PortResponse{Port: port}, err
 	}
-	err = s.lookupPort(ip, port)
+	err = s.LookupPort(ip, port)
 	return PortResponse{
 		IP:        ip,
 		Port:      port,
@@ -210,7 +207,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		response,
 		r.Host,
 		string(json),
-		s.lookupPort != nil,
+		s.LookupPort != nil,
 		response.Country != "" && response.City != "",
 	}
 	if err := t.Execute(w, &data); err != nil {
@@ -281,7 +278,7 @@ func (s *Server) Handler() http.Handler {
 	r.Handle("/", appHandler(s.DefaultHandler)).Methods("GET")
 
 	// Port testing
-	if s.lookupPort != nil {
+	if s.LookupPort != nil {
 		r.Handle("/port/{port:[0-9]+}", appHandler(s.PortHandler)).Methods("GET")
 	}
 

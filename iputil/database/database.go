@@ -22,14 +22,6 @@ type geoip struct {
 	city    *geoip2.Reader
 }
 
-type empty struct{}
-
-func (d *empty) Country(ip net.IP) (Country, error) { return Country{}, nil }
-func (d *empty) City(ip net.IP) (string, error)     { return "", nil }
-func (d *empty) IsEmpty() bool                      { return true }
-
-func Empty() Client { return &empty{} }
-
 func New(countryDB, cityDB string) (Client, error) {
 	var country, city *geoip2.Reader
 	if countryDB != "" {
