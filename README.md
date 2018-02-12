@@ -80,7 +80,7 @@ force IPv4 or IPv6 lookup.
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
 This application can be installed by using `go get`:
 
-`go get github.com/mpolden/ipd`
+`go get github.com/mpolden/ipd/...`
 
 For more information on building a Go project, see the [official Go
 documentation](https://golang.org/doc/code.html).
