@@ -108,11 +108,16 @@ $ http {{ .Host }}/port/8080
         <h3>How do I force IPv4 or IPv6 lookup?</h3>
         <p>IPv4 or IPv6 lookup can be forced by using the <a href="//v4.ifconfig.co">v4</a> and <a href="//v6.ifconfig.co">v6<a> subdomains.</p>
 
-        <h3>Is using this service from automated scripts/tools permitted?</h3>
-        <p>Yes, as long as the rate limit is respected. <em>Please limit
-        automated requests to 1 request per minute</em>. No guarantee is made
-        for requests that exceed this limit. They may be rate-limited (with a
-        429 response code) or dropped entirely.</p>
+        <h3>Is automated use of this service permitted?</h3>
+        <p>
+          Yes, as long as the rate limit is respected. The rate limit is in
+          place to ensure a fair service for all.
+        </p>
+        <p>
+          <em>Please limit automated requests to 1 request per minute</em>. No
+          guarantee is made for requests that exceed this limit. They may be
+          rate-limited, with a 429 status code, or dropped entirely.
+        </p>
 
         <h3>Can I run my own service?</h3>
         <p>Yes, the source code and documentation is available on <a href="https://github.com/mpolden/ipd">GitHub</a>.</p>
