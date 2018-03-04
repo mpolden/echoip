@@ -202,13 +202,11 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		Host string
 		JSON string
 		Port bool
-		Map  bool
 	}{
 		response,
 		r.Host,
 		string(json),
 		s.LookupPort != nil,
-		response.Country != "" && response.City != "",
 	}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
