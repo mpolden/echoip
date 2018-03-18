@@ -9,7 +9,6 @@ import (
 	"github.com/mpolden/ipd/iputil"
 	"github.com/mpolden/ipd/iputil/database"
 	"github.com/mpolden/ipd/useragent"
-	"github.com/sirupsen/logrus"
 
 	"net"
 	"net/http"
@@ -28,7 +27,6 @@ type Server struct {
 	LookupAddr func(net.IP) ([]string, error)
 	LookupPort func(net.IP, uint64) error
 	db         database.Client
-	log        *logrus.Logger
 }
 
 type Response struct {
@@ -46,8 +44,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db database.Client, log *logrus.Logger) *Server {
-	return &Server{db: db, log: log}
+func New(db database.Client) *Server {
+	return &Server{db: db}
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
@@ -72,20 +70,11 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		return Response{}, err
 	}
 	ipDecimal := iputil.ToDecimal(ip)
-	country, err := s.db.Country(ip)
-	if err != nil {
-		s.log.Debug(err)
-	}
-	city, err := s.db.City(ip)
-	if err != nil {
-		s.log.Debug(err)
-	}
+	country, _ := s.db.Country(ip)
+	city, _ := s.db.City(ip)
 	var hostnames []string
 	if s.LookupAddr != nil {
-		h, err := s.LookupAddr(ip)
-		if err != nil {
-			s.log.Debug(err)
-		}
+		h, _ := s.LookupAddr(ip)
 		hostnames = h
 	}
 	return Response{

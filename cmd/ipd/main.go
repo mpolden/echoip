@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	flags "github.com/jessevdk/go-flags"
 
 	"os"
@@ -8,7 +10,6 @@ import (
 	"github.com/mpolden/ipd/http"
 	"github.com/mpolden/ipd/iputil"
 	"github.com/mpolden/ipd/iputil/database"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -20,26 +21,19 @@ func main() {
 		PortLookup    bool   `short:"p" long:"port-lookup" description:"Enable port lookup"`
 		Template      string `short:"t" long:"template" description:"Path to template" default:"index.html" value-name:"FILE"`
 		IPHeader      string `short:"H" long:"trusted-header" description:"Header to trust for remote IP, if present (e.g. X-Real-IP)" value-name:"NAME"`
-		LogLevel      string `short:"L" long:"log-level" description:"Log level to use" default:"info" choice:"debug" choice:"info" choice:"warn" choice:"error" choice:"fatal" choice:"panic"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	log := logrus.New()
-	level, err := logrus.ParseLevel(opts.LogLevel)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Level = level
-
+	log := log.New(os.Stderr, "ipd: ", 0)
 	db, err := database.New(opts.CountryDBPath, opts.CityDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := http.New(db, log)
+	server := http.New(db)
 	server.Template = opts.Template
 	server.IPHeader = opts.IPHeader
 	if opts.ReverseLookup {
