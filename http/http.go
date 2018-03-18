@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"path/filepath"
 
 	"github.com/mpolden/ipd/iputil"
 	"github.com/mpolden/ipd/iputil/database"
@@ -14,8 +15,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -100,8 +99,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 }
 
 func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
-	vars := mux.Vars(r)
-	port, err := strconv.ParseUint(vars["port"], 10, 16)
+	lastElement := filepath.Base(r.URL.Path)
+	port, err := strconv.ParseUint(lastElement, 10, 16)
 	if err != nil {
 		return PortResponse{Port: port}, err
 	}
@@ -214,7 +213,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	return nil
 }
 
-func (s *Server) NotFoundHandler(w http.ResponseWriter, r *http.Request) *appError {
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) *appError {
 	err := notFound(nil).WithMessage("404 page not found")
 	if r.Header.Get("accept") == jsonMediaType {
 		err = err.AsJSON()
@@ -222,7 +221,7 @@ func (s *Server) NotFoundHandler(w http.ResponseWriter, r *http.Request) *appErr
 	return err
 }
 
-func cliMatcher(r *http.Request, rm *mux.RouteMatch) bool {
+func cliMatcher(r *http.Request) bool {
 	ua := useragent.Parse(r.UserAgent())
 	switch ua.Product {
 	case "curl", "HTTPie", "Wget", "fetch libfetch", "Go", "Go-http-client", "ddclient":
@@ -256,34 +255,31 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Handler() http.Handler {
-	r := mux.NewRouter()
+	r := NewRouter()
 
 	// JSON
-	r.Handle("/", appHandler(s.JSONHandler)).Methods("GET").Headers("Accept", jsonMediaType)
-	r.Handle("/json", appHandler(s.JSONHandler)).Methods("GET")
+	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
+	r.Route("GET", "/json", s.JSONHandler)
 
 	// CLI
-	r.Handle("/", appHandler(s.CLIHandler)).Methods("GET").MatcherFunc(cliMatcher)
-	r.Handle("/", appHandler(s.CLIHandler)).Methods("GET").Headers("Accept", textMediaType)
-	r.Handle("/ip", appHandler(s.CLIHandler)).Methods("GET")
+	r.Route("GET", "/", s.CLIHandler).MatcherFunc(cliMatcher)
+	r.Route("GET", "/", s.CLIHandler).Header("Accept", textMediaType)
+	r.Route("GET", "/ip", s.CLIHandler)
 	if !s.db.IsEmpty() {
-		r.Handle("/country", appHandler(s.CLICountryHandler)).Methods("GET")
-		r.Handle("/country-iso", appHandler(s.CLICountryISOHandler)).Methods("GET")
-		r.Handle("/city", appHandler(s.CLICityHandler)).Methods("GET")
+		r.Route("GET", "/country", s.CLICountryHandler)
+		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
+		r.Route("GET", "/city", s.CLICityHandler)
 	}
 
 	// Browser
-	r.Handle("/", appHandler(s.DefaultHandler)).Methods("GET")
+	r.Route("GET", "/", s.DefaultHandler)
 
 	// Port testing
 	if s.LookupPort != nil {
-		r.Handle("/port/{port:[0-9]+}", appHandler(s.PortHandler)).Methods("GET")
+		r.RoutePrefix("GET", "/port/", s.PortHandler)
 	}
 
-	// Not found handler which returns JSON when appropriate
-	r.NotFoundHandler = appHandler(s.NotFoundHandler)
-
-	return r
+	return r.Handler()
 }
 
 func (s *Server) ListenAndServe(addr string) error {

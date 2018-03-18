@@ -126,7 +126,7 @@ func TestJSONHandlers(t *testing.T) {
 		status int
 	}{
 		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_iso":"EB","city":"Bornyasherk","hostname":"localhost"}`, 200},
-		{s.URL + "/port/foo", `{"error":"404 page not found"}`, 404},
+		{s.URL + "/port/foo", `{"error":"Invalid port: 0"}`, 400},
 		{s.URL + "/port/0", `{"error":"Invalid port: 0"}`, 400},
 		{s.URL + "/port/65356", `{"error":"Invalid port: 65356"}`, 400},
 		{s.URL + "/port/31337", `{"ip":"127.0.0.1","port":31337,"reachable":true}`, 200},
@@ -139,10 +139,10 @@ func TestJSONHandlers(t *testing.T) {
 			t.Fatal(err)
 		}
 		if status != tt.status {
-			t.Errorf("Expected %d, got %d", tt.status, status)
+			t.Errorf("Expected %d for %s, got %d", tt.status, tt.url, status)
 		}
 		if out != tt.out {
-			t.Errorf("Expected %q, got %q", tt.out, out)
+			t.Errorf("Expected %q for %s, got %q", tt.out, tt.url, out)
 		}
 	}
 }
@@ -198,7 +198,7 @@ func TestCLIMatcher(t *testing.T) {
 	}
 	for _, tt := range tests {
 		r := &http.Request{Header: http.Header{"User-Agent": []string{tt.in}}}
-		if got := cliMatcher(r, nil); got != tt.out {
+		if got := cliMatcher(r); got != tt.out {
 			t.Errorf("Expected %t, got %t for %q", tt.out, got, tt.in)
 		}
 	}
