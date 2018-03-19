@@ -10,11 +10,11 @@ type router struct {
 }
 
 type route struct {
-	method       string
-	path         string
-	prefix       bool
-	matcherFuncs []func(*http.Request) bool
-	handler      appHandler
+	method      string
+	path        string
+	prefix      bool
+	handler     appHandler
+	matcherFunc func(*http.Request) bool
 }
 
 func NewRouter() *router {
@@ -48,15 +48,14 @@ func (r *router) Handler() http.Handler {
 	})
 }
 
-func (r *route) Header(header, value string) *route {
-	return r.MatcherFunc(func(req *http.Request) bool {
+func (r *route) Header(header, value string) {
+	r.MatcherFunc(func(req *http.Request) bool {
 		return req.Header.Get(header) == value
 	})
 }
 
-func (r *route) MatcherFunc(f func(*http.Request) bool) *route {
-	r.matcherFuncs = append(r.matcherFuncs, f)
-	return r
+func (r *route) MatcherFunc(f func(*http.Request) bool) {
+	r.matcherFunc = f
 }
 
 func (r *route) match(req *http.Request) bool {
@@ -70,11 +69,5 @@ func (r *route) match(req *http.Request) bool {
 	} else if r.path != req.URL.Path {
 		return false
 	}
-	match := len(r.matcherFuncs) == 0
-	for _, f := range r.matcherFuncs {
-		if match = f(req); match {
-			break
-		}
-	}
-	return match
+	return r.matcherFunc == nil || r.matcherFunc(req)
 }
