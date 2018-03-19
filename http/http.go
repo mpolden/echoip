@@ -13,7 +13,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -24,7 +23,7 @@ const (
 type Server struct {
 	Template   string
 	IPHeader   string
-	LookupAddr func(net.IP) ([]string, error)
+	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
 	db         database.Client
 }
@@ -72,10 +71,9 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	ipDecimal := iputil.ToDecimal(ip)
 	country, _ := s.db.Country(ip)
 	city, _ := s.db.City(ip)
-	var hostnames []string
+	var hostname string
 	if s.LookupAddr != nil {
-		h, _ := s.LookupAddr(ip)
-		hostnames = h
+		hostname, _ = s.LookupAddr(ip)
 	}
 	return Response{
 		IP:         ip,
@@ -83,17 +81,14 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		Country:    country.Name,
 		CountryISO: country.ISO,
 		City:       city,
-		Hostname:   strings.Join(hostnames, " "),
+		Hostname:   hostname,
 	}, nil
 }
 
 func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	lastElement := filepath.Base(r.URL.Path)
 	port, err := strconv.ParseUint(lastElement, 10, 16)
-	if err != nil {
-		return PortResponse{Port: port}, err
-	}
-	if port < 1 || port > 65355 {
+	if err != nil || port < 1 || port > 65355 {
 		return PortResponse{Port: port}, fmt.Errorf("invalid port: %d", port)
 	}
 	ip, err := ipFromRequest(s.IPHeader, r)

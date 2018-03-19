@@ -11,8 +11,8 @@ import (
 	"github.com/mpolden/ipd/iputil/database"
 )
 
-func lookupAddr(net.IP) ([]string, error) { return []string{"localhost"}, nil }
-func lookupPort(net.IP, uint64) error     { return nil }
+func lookupAddr(net.IP) (string, error) { return "localhost", nil }
+func lookupPort(net.IP, uint64) error   { return nil }
 
 type testDb struct{}
 

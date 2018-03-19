@@ -8,12 +8,13 @@ import (
 	"time"
 )
 
-func LookupAddr(ip net.IP) ([]string, error) {
+func LookupAddr(ip net.IP) (string, error) {
 	names, err := net.LookupAddr(ip.String())
-	for i, _ := range names {
-		names[i] = strings.TrimRight(names[i], ".") // Always return unrooted name
+	if err != nil || len(names) == 0 {
+		return "", err
 	}
-	return names, err
+	// Always return unrooted name
+	return strings.TrimRight(names[0], "."), nil
 }
 
 func LookupPort(ip net.IP, port uint64) error {
