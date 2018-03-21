@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/mpolden/ipd.svg)](https://travis-ci.org/mpolden/ipd)
 
 A simple service for looking up your IP address. This is the code that powers
-https://ifconfig.co
+https://ifconfig.co.
 
 ## Usage
 
@@ -19,7 +19,7 @@ $ http ifconfig.co
 $ wget -qO- ifconfig.co
 127.0.0.1
 
-$ fetch -qo- http://ifconfig.co
+$ fetch -qo- https://ifconfig.co
 127.0.0.1
 
 $ bat -print=b ifconfig.co/ip
@@ -29,20 +29,20 @@ $ bat -print=b ifconfig.co/ip
 Country and city lookup:
 
 ```
-$ http ifconfig.co/country
+$ curl ifconfig.co/country
 Elbonia
 
-$ http ifconfig.co/country-iso
+$ curl ifconfig.co/country-iso
 EB
 
-$ http ifconfig.co/city
+$ curl ifconfig.co/city
 Bornyasherk
 ```
 
 As JSON:
 
 ```
-$ http --json ifconfig.co
+$ curl -H 'Accept: application/json' ifconfig.co  # or curl ifconfig.co/json
 {
   "city": "Bornyasherk",
   "country": "Elbonia",
@@ -52,8 +52,19 @@ $ http --json ifconfig.co
 }
 ```
 
-Pass the appropriate flag (usually `-4` and `-6`) to your tool to switch between
-IPv4 and IPv6 lookup.
+Port testing:
+
+```
+$ curl ifconfig.co/port/80
+{
+  "ip": "127.0.0.1",
+  "port": 80,
+  "reachable": false
+}
+```
+
+Pass the appropriate flag (usually `-4` and `-6`) to your client to switch
+between IPv4 and IPv6 lookup.
 
 The subdomains https://v4.ifconfig.co and https://v6.ifconfig.co can be used to
 force IPv4 or IPv6 lookup.
@@ -61,13 +72,14 @@ force IPv4 or IPv6 lookup.
 ## Features
 
 * Easy to remember domain name
-* Supports IPv4 and IPv6
-* Supports HTTPS
-* Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 * Fast
-* Supports typical CLI tools (`curl`, `httpie`, `wget` and `fetch`)
-* JSON output (optional)
-* Country and city lookup through the MaxMind GeoIP database
+* Supports IPv6
+* Supports HTTPS
+* Supports common command-line clients (e.g. `curl`, `httpie`, `wget` and `fetch`)
+* JSON output
+* Country and city lookup using the MaxMind GeoIP database
+* Port testing
+* Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 
 ## Why?
 
@@ -78,7 +90,7 @@ force IPv4 or IPv6 lookup.
 ## Building
 
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
-This application can be installed by using `go get`:
+This package can be installed with `go get`:
 
 `go get github.com/mpolden/ipd/...`
 
@@ -93,15 +105,14 @@ Usage:
   ipd [OPTIONS]
 
 Application Options:
-  -f, --country-db=FILE                                  Path to GeoIP country database
-  -c, --city-db=FILE                                     Path to GeoIP city database
-  -l, --listen=ADDR                                      Listening address (default: :8080)
-  -r, --reverse-lookup                                   Perform reverse hostname lookups
-  -p, --port-lookup                                      Enable port lookup
-  -t, --template=FILE                                    Path to template (default: index.html)
-  -H, --trusted-header=NAME                              Header to trust for remote IP, if present (e.g. X-Real-IP)
-  -L, --log-level=[debug|info|warn|error|fatal|panic]    Log level to use (default: info)
+  -f, --country-db=FILE        Path to GeoIP country database
+  -c, --city-db=FILE           Path to GeoIP city database
+  -l, --listen=ADDR            Listening address (default: :8080)
+  -r, --reverse-lookup         Perform reverse hostname lookups
+  -p, --port-lookup            Enable port lookup
+  -t, --template=FILE          Path to template (default: index.html)
+  -H, --trusted-header=NAME    Header to trust for remote IP, if present (e.g. X-Real-IP)
 
 Help Options:
-  -h, --help                                             Show this help message
+  -h, --help                   Show this help message
 ```
