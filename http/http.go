@@ -33,8 +33,11 @@ type Response struct {
 	IPDecimal  uint64 `json:"ip_decimal"`
 	Country    string `json:"country,omitempty"`
 	CountryISO string `json:"country_iso,omitempty"`
+	IsInEuropeanUnion bool `json:"is_in_european_union,omitempty"`
 	City       string `json:"city,omitempty"`
 	Hostname   string `json:"hostname,omitempty"`
+	LocationLatitude float64 `json:"location_latitude,omitempty"`
+	LocationLongitude float64 `json:"location_longitude,omitempty"`
 }
 
 type PortResponse struct {
@@ -80,8 +83,11 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		IPDecimal:  ipDecimal,
 		Country:    country.Name,
 		CountryISO: country.ISO,
-		City:       city,
+		IsInEuropeanUnion: country.IsInEuropeanUnion,
+		City:       city.Name,
 		Hostname:   hostname,
+		LocationLatitude: city.Latitude,
+		LocationLongitude: city.Longitude,
 	}, nil
 }
 
@@ -136,6 +142,19 @@ func (s *Server) CLICityHandler(w http.ResponseWriter, r *http.Request) *appErro
 		return internalServerError(err)
 	}
 	fmt.Fprintln(w, response.City)
+	return nil
+}
+
+func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *appError {
+	response, err := s.newResponse(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	var str string
+	str += FloatToString(response.LocationLatitude)
+	str += ","
+	str += FloatToString(response.LocationLongitude)
+	fmt.Fprintln(w, str)
 	return nil
 }
 
@@ -253,6 +272,7 @@ func (s *Server) Handler() http.Handler {
 		r.Route("GET", "/country", s.CLICountryHandler)
 		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
 		r.Route("GET", "/city", s.CLICityHandler)
+		r.Route("GET", "/coordinates", s.CLICoordinatesHandler)
 	}
 
 	// Browser
@@ -268,4 +288,9 @@ func (s *Server) Handler() http.Handler {
 
 func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s.Handler())
+}
+
+func FloatToString(input_num float64) string {
+    // to convert a float number to a string
+    return strconv.FormatFloat(input_num, 'f', 6, 64)
 }
