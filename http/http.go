@@ -53,17 +53,7 @@ func New(db database.Client) *Server {
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
-	var remoteIP string
-	if r.URL != nil && remoteIP == "" {
-		host := filepath.Base(r.URL.Path)
-		ip := net.ParseIP(host)
-		if ip != nil {
-			remoteIP = ip.String()
-		}
-	}
-	if remoteIP == "" {
-		remoteIP = r.Header.Get(header)
-	}
+	remoteIP := r.Header.Get(header)
 	if remoteIP == "" {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
@@ -282,7 +272,6 @@ func (s *Server) Handler() http.Handler {
 	// JSON
 	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
 	r.Route("GET", "/json", s.JSONHandler)
-	r.RoutePrefix("GET", "/json/", s.JSONHandler)
 
 	// CLI
 	r.Route("GET", "/", s.CLIHandler).MatcherFunc(cliMatcher)
