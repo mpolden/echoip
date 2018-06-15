@@ -20,7 +20,10 @@ func (t *testDb) Country(net.IP) (geo.Country, error) {
 	return geo.Country{Name: "Elbonia", ISO: "EB"}, nil
 }
 
-func (t *testDb) City(net.IP) (string, error) { return "Bornyasherk", nil }
+func (t *testDb) City(net.IP) (database.City, error) {
+	return database.City{Name: "Bornyasherk"}, nil
+}
+
 func (t *testDb) IsEmpty() bool               { return false }
 
 func testServer() *Server {
