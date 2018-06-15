@@ -38,6 +38,8 @@ type Response struct {
 	Hostname                     string `json:"hostname,omitempty"`
 	LocationLatitude             float64 `json:"location_latitude,omitempty"`
 	LocationLongitude            float64 `json:"location_longitude,omitempty"`
+	AutonomousSystemNumber       string `json:"asn_number,omitempty"`
+	AutonomousSystemOrganization string `json:"asn_organization,omitempty"`
 }
 
 type PortResponse struct {
@@ -74,9 +76,14 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	ipDecimal := iputil.ToDecimal(ip)
 	country, _ := s.db.Country(ip)
 	city, _ := s.db.City(ip)
+	asn, _ := s.db.ASN(ip)
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
+	}
+	var autonomousSystemNumber string
+	if asn.AutonomousSystemNumber > 0 {
+		autonomousSystemNumber = "AS" + strconv.FormatUint(uint64(asn.AutonomousSystemNumber), 10);
 	}
 	return Response{
 		IP:                           ip,
@@ -88,6 +95,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		Hostname:                     hostname,
 		LocationLatitude:             city.Latitude,
 		LocationLongitude:            city.Longitude,
+		AutonomousSystemNumber:       autonomousSystemNumber,
+		AutonomousSystemOrganization: asn.AutonomousSystemOrganization,
 	}, nil
 }
 
