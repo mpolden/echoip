@@ -38,6 +38,8 @@ type Response struct {
 	Hostname   string `json:"hostname,omitempty"`
 	LocationLatitude float64 `json:"location_latitude,omitempty"`
 	LocationLongitude float64 `json:"location_longitude,omitempty"`
+	AutonomousSystemNumber string `json:"asn_number,omitempty"`
+	AutonomousSystemOrganization string `json:"asn_organization,omitempty"`
 }
 
 type PortResponse struct {
@@ -52,13 +54,21 @@ func New(db database.Client) *Server {
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 	remoteIP := r.Header.Get(header)
+	if remoteIP == "" && r.URL != nil {
+		host := filepath.Base(r.URL.Path)
+		ip := net.ParseIP(host)
+		if ip != nil {
+			remoteIP = ip.String()
+		}
+		fmt.Printf("IP: %v\n", ip)
+	}
 	if remoteIP == "" {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
-			return nil, err
 		}
 		remoteIP = host
 	}
+	fmt.Printf("Remote: %v\n", remoteIP)
 	ip := net.ParseIP(remoteIP)
 	if ip == nil {
 		return nil, fmt.Errorf("could not parse IP: %s", remoteIP)
@@ -74,9 +84,14 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	ipDecimal := iputil.ToDecimal(ip)
 	country, _ := s.db.Country(ip)
 	city, _ := s.db.City(ip)
+	asn, _ := s.db.ASN(ip)
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
+	}
+	var autonomousSystemNumber string
+	if(asn.AutonomousSystemNumber > 0) {
+		autonomousSystemNumber = "AS" + strconv.FormatUint(uint64(asn.AutonomousSystemNumber), 10);
 	}
 	return Response{
 		IP:         ip,
@@ -88,6 +103,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		Hostname:   hostname,
 		LocationLatitude: city.Latitude,
 		LocationLongitude: city.Longitude,
+		AutonomousSystemNumber: autonomousSystemNumber,
+		AutonomousSystemOrganization: asn.AutonomousSystemOrganization,
 	}, nil
 }
 
@@ -263,6 +280,8 @@ func (s *Server) Handler() http.Handler {
 	// JSON
 	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
 	r.Route("GET", "/json", s.JSONHandler)
+
+	r.RoutePrefix("GET", "/json/", s.JSONHandler)
 
 	// CLI
 	r.Route("GET", "/", s.CLIHandler).MatcherFunc(cliMatcher)
