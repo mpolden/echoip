@@ -53,8 +53,8 @@ func New(db database.Client) *Server {
 }
 
 func ipFromRequest(header string, r *http.Request) (net.IP, error) {
-	remoteIP := r.Header.Get(header)
-	if remoteIP == "" && r.URL != nil {
+	var remoteIP string
+	if r.URL != nil && remoteIP == "" {
 		host := filepath.Base(r.URL.Path)
 		ip := net.ParseIP(host)
 		if ip != nil {
@@ -62,8 +62,12 @@ func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 		}
 	}
 	if remoteIP == "" {
+		remoteIP = r.Header.Get(header)
+	}
+	if remoteIP == "" {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
+			return nil, err
 		}
 		remoteIP = host
 	}
