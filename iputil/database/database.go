@@ -15,26 +15,26 @@ type Client interface {
 }
 
 type Country struct {
-	Name string
-	ISO  string
+	Name              string
+	ISO               string
 	IsInEuropeanUnion bool
 }
 
 type City struct {
-	Name string
-	Latitude float64
+	Name      string
+	Latitude  float64
 	Longitude float64
 }
 
 type ASN struct {
-	AutonomousSystemNumber uint
+	AutonomousSystemNumber       uint
 	AutonomousSystemOrganization string
 }
 
 type geoip struct {
 	country *geoip2.Reader
 	city    *geoip2.Reader
-	asn    *geoip2.Reader
+	asn     *geoip2.Reader
 }
 
 func New(countryDB, cityDB, asnDB string) (Client, error) {

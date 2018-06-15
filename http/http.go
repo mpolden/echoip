@@ -29,16 +29,16 @@ type Server struct {
 }
 
 type Response struct {
-	IP         net.IP `json:"ip"`
-	IPDecimal  uint64 `json:"ip_decimal"`
-	Country    string `json:"country,omitempty"`
-	CountryISO string `json:"country_iso,omitempty"`
-	IsInEuropeanUnion bool `json:"is_in_european_union,omitempty"`
-	City       string `json:"city,omitempty"`
-	Hostname   string `json:"hostname,omitempty"`
-	LocationLatitude float64 `json:"location_latitude,omitempty"`
-	LocationLongitude float64 `json:"location_longitude,omitempty"`
-	AutonomousSystemNumber string `json:"asn_number,omitempty"`
+	IP                           net.IP `json:"ip"`
+	IPDecimal                    uint64 `json:"ip_decimal"`
+	Country                      string `json:"country,omitempty"`
+	CountryISO                   string `json:"country_iso,omitempty"`
+	IsInEuropeanUnion            bool `json:"is_in_european_union,omitempty"`
+	City                         string `json:"city,omitempty"`
+	Hostname                     string `json:"hostname,omitempty"`
+	LocationLatitude             float64 `json:"location_latitude,omitempty"`
+	LocationLongitude            float64 `json:"location_longitude,omitempty"`
+	AutonomousSystemNumber       string `json:"asn_number,omitempty"`
 	AutonomousSystemOrganization string `json:"asn_organization,omitempty"`
 }
 
@@ -60,7 +60,6 @@ func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 		if ip != nil {
 			remoteIP = ip.String()
 		}
-		fmt.Printf("IP: %v\n", ip)
 	}
 	if remoteIP == "" {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
@@ -68,7 +67,6 @@ func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 		}
 		remoteIP = host
 	}
-	fmt.Printf("Remote: %v\n", remoteIP)
 	ip := net.ParseIP(remoteIP)
 	if ip == nil {
 		return nil, fmt.Errorf("could not parse IP: %s", remoteIP)
@@ -90,20 +88,20 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		hostname, _ = s.LookupAddr(ip)
 	}
 	var autonomousSystemNumber string
-	if(asn.AutonomousSystemNumber > 0) {
+	if asn.AutonomousSystemNumber > 0 {
 		autonomousSystemNumber = "AS" + strconv.FormatUint(uint64(asn.AutonomousSystemNumber), 10);
 	}
 	return Response{
-		IP:         ip,
-		IPDecimal:  ipDecimal,
-		Country:    country.Name,
-		CountryISO: country.ISO,
-		IsInEuropeanUnion: country.IsInEuropeanUnion,
-		City:       city.Name,
-		Hostname:   hostname,
-		LocationLatitude: city.Latitude,
-		LocationLongitude: city.Longitude,
-		AutonomousSystemNumber: autonomousSystemNumber,
+		IP:                           ip,
+		IPDecimal:                    ipDecimal,
+		Country:                      country.Name,
+		CountryISO:                   country.ISO,
+		IsInEuropeanUnion:            country.IsInEuropeanUnion,
+		City:                         city.Name,
+		Hostname:                     hostname,
+		LocationLatitude:             city.Latitude,
+		LocationLongitude:            city.Longitude,
+		AutonomousSystemNumber:       autonomousSystemNumber,
 		AutonomousSystemOrganization: asn.AutonomousSystemOrganization,
 	}, nil
 }
@@ -280,7 +278,6 @@ func (s *Server) Handler() http.Handler {
 	// JSON
 	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
 	r.Route("GET", "/json", s.JSONHandler)
-
 	r.RoutePrefix("GET", "/json/", s.JSONHandler)
 
 	// CLI
