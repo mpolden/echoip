@@ -36,8 +36,8 @@ type Response struct {
 	IsInEuropeanUnion            bool `json:"is_in_european_union,omitempty"`
 	City                         string `json:"city,omitempty"`
 	Hostname                     string `json:"hostname,omitempty"`
-	LocationLatitude             float64 `json:"location_latitude,omitempty"`
-	LocationLongitude            float64 `json:"location_longitude,omitempty"`
+	Latitude                     float64 `json:"location_latitude,omitempty"`
+	Longitude                    float64 `json:"location_longitude,omitempty"`
 }
 
 type PortResponse struct {
@@ -86,8 +86,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		IsInEuropeanUnion:            country.IsInEuropeanUnion,
 		City:                         city.Name,
 		Hostname:                     hostname,
-		LocationLatitude:             city.Latitude,
-		LocationLongitude:            city.Longitude,
+		Latitude:                     city.Latitude,
+		Longitude:                    city.Longitude,
 	}, nil
 }
 
