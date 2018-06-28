@@ -150,11 +150,7 @@ func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *
 	if err != nil {
 		return internalServerError(err)
 	}
-	var str string
-	str += FloatToString(response.LocationLatitude)
-	str += ","
-	str += FloatToString(response.LocationLongitude)
-	fmt.Fprintln(w, str)
+	fmt.Fprintf(w, "%s, %s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
 	return nil
 }
 
@@ -290,6 +286,6 @@ func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s.Handler())
 }
 
-func FloatToString(input_num float64) string {
-	return strconv.FormatFloat(input_num, 'f', 6, 64)
+func formatCoordinate(c float64) string {
+	return strconv.FormatFloat(c, 'f', 6, 64)
 }
