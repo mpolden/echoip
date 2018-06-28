@@ -89,10 +89,10 @@ func (g *geoip) City(ip net.IP) (City, error) {
 	if c, exists := record.City.Names["en"]; exists {
 		city.Name = c
 	}
-	if math.IsNaN(record.Location.Latitude) == false {
+	if !math.IsNaN(record.Location.Latitude) {
 		city.Latitude = record.Location.Latitude
 	}
-	if math.IsNaN(record.Location.Longitude) == false {
+	if !math.IsNaN(record.Location.Longitude) {
 		city.Longitude = record.Location.Longitude
 	}
 	return city, nil
