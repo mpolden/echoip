@@ -23,7 +23,7 @@ ifdef TRAVIS
 endif
 
 check-fmt:
-	bash -c "diff -u <(echo -n) <(gofmt -d -s .)"
+	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
 
 lint: check-fmt vet megacheck
 
