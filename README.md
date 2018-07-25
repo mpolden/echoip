@@ -66,9 +66,6 @@ $ curl ifconfig.co/port/80
 Pass the appropriate flag (usually `-4` and `-6`) to your client to switch
 between IPv4 and IPv6 lookup.
 
-The subdomains https://v4.ifconfig.co and https://v6.ifconfig.co can be used to
-force IPv4 or IPv6 lookup.
-
 ## Features
 
 * Easy to remember domain name
