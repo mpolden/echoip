@@ -22,7 +22,7 @@ const (
 
 type Server struct {
 	Template   string
-	IPHeader   string
+	IPHeaders  []string
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
 	db         database.Client
@@ -47,8 +47,14 @@ func New(db database.Client) *Server {
 	return &Server{db: db}
 }
 
-func ipFromRequest(header string, r *http.Request) (net.IP, error) {
-	remoteIP := r.Header.Get(header)
+func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
+	remoteIP := ""
+	for _, header := range headers {
+		remoteIP = r.Header.Get(header)
+		if remoteIP != "" {
+			break
+		}
+	}
 	if remoteIP == "" {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
@@ -64,7 +70,7 @@ func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 }
 
 func (s *Server) newResponse(r *http.Request) (Response, error) {
-	ip, err := ipFromRequest(s.IPHeader, r)
+	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
 		return Response{}, err
 	}
@@ -91,7 +97,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	if err != nil || port < 1 || port > 65355 {
 		return PortResponse{Port: port}, fmt.Errorf("invalid port: %d", port)
 	}
-	ip, err := ipFromRequest(s.IPHeader, r)
+	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
 		return PortResponse{Port: port}, err
 	}
@@ -104,7 +110,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 }
 
 func (s *Server) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
-	ip, err := ipFromRequest(s.IPHeader, r)
+	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
 		return internalServerError(err)
 	}

@@ -149,16 +149,17 @@ func TestJSONHandlers(t *testing.T) {
 
 func TestIPFromRequest(t *testing.T) {
 	var tests = []struct {
-		remoteAddr    string
-		headerKey     string
-		headerValue   string
-		trustedHeader string
-		out           string
+		remoteAddr     string
+		headerKey      string
+		headerValue    string
+		trustedHeaders []string
+		out            string
 	}{
-		{"127.0.0.1:9999", "", "", "", "127.0.0.1"},                          // No header given
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "", "127.0.0.1"},          // Trusted header is empty
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "X-Foo-Bar", "127.0.0.1"}, // Trusted header does not match
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "X-Real-IP", "1.3.3.7"},   // Trusted header matches
+		{"127.0.0.1:9999", "", "", nil, "127.0.0.1"},                                                          // No header given
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", nil, "127.0.0.1"},                                          // Trusted header is empty
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Foo-Bar"}, "127.0.0.1"},                        // Trusted header does not match
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},       // Trusted header matches
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"}, // Second trusted header matches
 	}
 	for _, tt := range tests {
 		r := &http.Request{
@@ -166,7 +167,7 @@ func TestIPFromRequest(t *testing.T) {
 			Header:     http.Header{},
 		}
 		r.Header.Add(tt.headerKey, tt.headerValue)
-		ip, err := ipFromRequest(tt.trustedHeader, r)
+		ip, err := ipFromRequest(tt.trustedHeaders, r)
 		if err != nil {
 			t.Fatal(err)
 		}
