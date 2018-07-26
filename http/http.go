@@ -29,12 +29,15 @@ type Server struct {
 }
 
 type Response struct {
-	IP         net.IP `json:"ip"`
-	IPDecimal  uint64 `json:"ip_decimal"`
-	Country    string `json:"country,omitempty"`
-	CountryISO string `json:"country_iso,omitempty"`
-	City       string `json:"city,omitempty"`
-	Hostname   string `json:"hostname,omitempty"`
+	IP                           net.IP `json:"ip"`
+	IPDecimal                    uint64 `json:"ip_decimal"`
+	Country                      string `json:"country,omitempty"`
+	CountryISO                   string `json:"country_iso,omitempty"`
+	IsInEuropeanUnion            bool `json:"is_in_european_union,omitempty"`
+	City                         string `json:"city,omitempty"`
+	Hostname                     string `json:"hostname,omitempty"`
+	Latitude                     float64 `json:"location_latitude,omitempty"`
+	Longitude                    float64 `json:"location_longitude,omitempty"`
 }
 
 type PortResponse struct {
@@ -82,12 +85,15 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		hostname, _ = s.LookupAddr(ip)
 	}
 	return Response{
-		IP:         ip,
-		IPDecimal:  ipDecimal,
-		Country:    country.Name,
-		CountryISO: country.ISO,
-		City:       city,
-		Hostname:   hostname,
+		IP:                           ip,
+		IPDecimal:                    ipDecimal,
+		Country:                      country.Name,
+		CountryISO:                   country.ISO,
+		IsInEuropeanUnion:            country.IsInEuropeanUnion,
+		City:                         city.Name,
+		Hostname:                     hostname,
+		Latitude:                     city.Latitude,
+		Longitude:                    city.Longitude,
 	}, nil
 }
 
@@ -142,6 +148,15 @@ func (s *Server) CLICityHandler(w http.ResponseWriter, r *http.Request) *appErro
 		return internalServerError(err)
 	}
 	fmt.Fprintln(w, response.City)
+	return nil
+}
+
+func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *appError {
+	response, err := s.newResponse(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	fmt.Fprintf(w, "%s, %s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
 	return nil
 }
 
@@ -259,6 +274,7 @@ func (s *Server) Handler() http.Handler {
 		r.Route("GET", "/country", s.CLICountryHandler)
 		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
 		r.Route("GET", "/city", s.CLICityHandler)
+		r.Route("GET", "/coordinates", s.CLICoordinatesHandler)
 	}
 
 	// Browser
@@ -274,4 +290,8 @@ func (s *Server) Handler() http.Handler {
 
 func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s.Handler())
+}
+
+func formatCoordinate(c float64) string {
+	return strconv.FormatFloat(c, 'f', 6, 64)
 }
