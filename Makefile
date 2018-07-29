@@ -14,6 +14,9 @@ test:
 vet:
 	go vet ./...
 
+build:
+	go build -o ipd cmd/ipd/main.go
+
 megacheck:
 ifdef TRAVIS
 	megacheck 2> /dev/null; if [ $$? -eq 127 ]; then \
@@ -28,7 +31,7 @@ check-fmt:
 lint: check-fmt vet megacheck
 
 deps:
-	go get -d -v ./...
+	dep ensure
 
 install:
 	go install ./...
