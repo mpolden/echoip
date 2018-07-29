@@ -1,3 +1,4 @@
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 OS := $(shell uname)
 ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
@@ -26,7 +27,7 @@ ifdef TRAVIS
 endif
 
 check-fmt:
-	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
+	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s ${GOFILES_NOVENDOR})"
 
 lint: check-fmt vet megacheck
 
