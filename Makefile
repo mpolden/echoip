@@ -1,3 +1,4 @@
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 OS := $(shell uname)
 ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
@@ -14,6 +15,9 @@ test:
 vet:
 	go vet ./...
 
+build:
+	go build -o ipd cmd/ipd/main.go
+
 megacheck:
 ifdef TRAVIS
 	megacheck 2> /dev/null; if [ $$? -eq 127 ]; then \
@@ -23,12 +27,12 @@ ifdef TRAVIS
 endif
 
 check-fmt:
-	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
+	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s ${GOFILES_NOVENDOR})"
 
 lint: check-fmt vet megacheck
 
 deps:
-	go get -d -v ./...
+	dep ensure
 
 install:
 	go install ./...
