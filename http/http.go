@@ -159,6 +159,12 @@ func (s *Server) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
+func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) *appError {
+	w.Header().Set("Content-Type", jsonMediaType)
+	w.Write([]byte(`{"status":"OK"}`))
+	return nil
+}
+
 func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newPortResponse(r)
 	if err != nil {
@@ -246,6 +252,9 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Handler() http.Handler {
 	r := NewRouter()
+
+	// Health
+	r.Route("GET", "/health", s.HealthHandler)
 
 	// JSON
 	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
