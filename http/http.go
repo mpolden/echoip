@@ -49,12 +49,11 @@ func New(db geo.Reader) *Server {
 }
 
 func ipFromForwardedForHeader(v string) string {
-	// Handle both comma and comma+space separator
-	ips := strings.Fields(strings.Replace(v, ",", " ", -1))
-	if len(ips) == 0 {
-		return ""
+	sep := strings.Index(v, ",")
+	if sep == -1 {
+		return v
 	}
-	return ips[0]
+	return v[:sep]
 }
 
 func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
