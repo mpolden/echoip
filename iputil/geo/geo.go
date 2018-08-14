@@ -1,4 +1,4 @@
-package database
+package geo
 
 import (
 	"net"
@@ -6,7 +6,7 @@ import (
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
-type Client interface {
+type Reader interface {
 	Country(net.IP) (Country, error)
 	City(net.IP) (string, error)
 	IsEmpty() bool
@@ -22,7 +22,7 @@ type geoip struct {
 	city    *geoip2.Reader
 }
 
-func New(countryDB, cityDB string) (Client, error) {
+func Open(countryDB, cityDB string) (Reader, error) {
 	var country, city *geoip2.Reader
 	if countryDB != "" {
 		r, err := geoip2.Open(countryDB)

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/database"
+	"github.com/mpolden/ipd/iputil/geo"
 	"github.com/mpolden/ipd/useragent"
 
 	"net"
@@ -25,7 +25,7 @@ type Server struct {
 	IPHeaders  []string
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
-	db         database.Client
+	gr         geo.Reader
 }
 
 type Response struct {
@@ -43,8 +43,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db database.Client) *Server {
-	return &Server{db: db}
+func New(db geo.Reader) *Server {
+	return &Server{gr: db}
 }
 
 func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
@@ -75,8 +75,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		return Response{}, err
 	}
 	ipDecimal := iputil.ToDecimal(ip)
-	country, _ := s.db.Country(ip)
-	city, _ := s.db.City(ip)
+	country, _ := s.gr.Country(ip)
+	city, _ := s.gr.City(ip)
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
@@ -264,7 +264,7 @@ func (s *Server) Handler() http.Handler {
 	r.Route("GET", "/", s.CLIHandler).MatcherFunc(cliMatcher)
 	r.Route("GET", "/", s.CLIHandler).Header("Accept", textMediaType)
 	r.Route("GET", "/ip", s.CLIHandler)
-	if !s.db.IsEmpty() {
+	if !s.gr.IsEmpty() {
 		r.Route("GET", "/country", s.CLICountryHandler)
 		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
 		r.Route("GET", "/city", s.CLICityHandler)

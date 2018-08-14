@@ -9,7 +9,7 @@ import (
 
 	"github.com/mpolden/ipd/http"
 	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/database"
+	"github.com/mpolden/ipd/iputil/geo"
 )
 
 func main() {
@@ -28,12 +28,12 @@ func main() {
 	}
 
 	log := log.New(os.Stderr, "ipd: ", 0)
-	db, err := database.New(opts.CountryDBPath, opts.CityDBPath)
+	r, err := geo.Open(opts.CountryDBPath, opts.CityDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := http.New(db)
+	server := http.New(r)
 	server.Template = opts.Template
 	server.IPHeaders = opts.IPHeaders
 	if opts.ReverseLookup {
