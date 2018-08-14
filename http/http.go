@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"path/filepath"
+	"strings"
 
 	"github.com/mpolden/ipd/iputil"
 	"github.com/mpolden/ipd/iputil/geo"
@@ -47,10 +48,22 @@ func New(db geo.Reader) *Server {
 	return &Server{gr: db}
 }
 
+func ipFromForwardedForHeader(v string) string {
+	// Handle both comma and comma+space separator
+	ips := strings.Fields(strings.Replace(v, ",", " ", -1))
+	if len(ips) == 0 {
+		return ""
+	}
+	return ips[0]
+}
+
 func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
 	remoteIP := ""
 	for _, header := range headers {
 		remoteIP = r.Header.Get(header)
+		if http.CanonicalHeaderKey(header) == "X-Forwarded-For" {
+			remoteIP = ipFromForwardedForHeader(remoteIP)
+		}
 		if remoteIP != "" {
 			break
 		}

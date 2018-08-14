@@ -87,7 +87,7 @@ func TestDisabledHandlers(t *testing.T) {
 	server := testServer()
 	server.LookupPort = nil
 	server.LookupAddr = nil
-	server.db, _ = geo.New("", "")
+	server.gr, _ = geo.Open("", "")
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {
@@ -161,6 +161,8 @@ func TestIPFromRequest(t *testing.T) {
 		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Foo-Bar"}, "127.0.0.1"},                        // Trusted header does not match
 		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},       // Trusted header matches
 		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"}, // Second trusted header matches
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7,4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},      // X-Forwarded-For with multiple entries (commas separator)
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7, 4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},     // X-Forwarded-For with multiple entries (space+comma separator)
 	}
 	for _, tt := range tests {
 		r := &http.Request{
