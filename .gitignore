@@ -1,2 +1,4 @@
 /data/
 /custom.html
+/vendor/*
+!/vendor/vendor.json
