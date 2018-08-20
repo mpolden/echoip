@@ -1,0 +1,7 @@
+build:
+  languages:
+    - go
+  pre:
+    - make geoip-download
+run:
+  web: ipd -f data/country.mmdb -c data/city.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$PORT
