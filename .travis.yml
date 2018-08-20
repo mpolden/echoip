@@ -4,3 +4,9 @@ language: go
 
 go:
   - stable
+
+deploy:
+  provider: heroku
+  app: ifconfig-co
+  api_key:
+    secure: IQG/ls5Zu0yua5Ynn5EL9JCPjo1/WcmS0z7BSaXWdgW+JIWFm7oF5z54bUZHl/q1tTuWzAJk59zSTYJijtQqh2Ssl3fLu3uFDwyJSrOuUu1akPlETam8NpdbH4lPkFp75JSDdDXV08c0APmeLL6gqRuTrUuufu69Wigjq4gLo+o=
