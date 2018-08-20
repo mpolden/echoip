@@ -11,6 +11,7 @@ import (
 	"github.com/mpolden/ipd/iputil/geo"
 	"github.com/mpolden/ipd/useragent"
 
+	"math/big"
 	"net"
 	"net/http"
 	"strconv"
@@ -30,12 +31,12 @@ type Server struct {
 }
 
 type Response struct {
-	IP         net.IP `json:"ip"`
-	IPDecimal  uint64 `json:"ip_decimal"`
-	Country    string `json:"country,omitempty"`
-	CountryISO string `json:"country_iso,omitempty"`
-	City       string `json:"city,omitempty"`
-	Hostname   string `json:"hostname,omitempty"`
+	IP         net.IP   `json:"ip"`
+	IPDecimal  *big.Int `json:"ip_decimal"`
+	Country    string   `json:"country,omitempty"`
+	CountryISO string   `json:"country_iso,omitempty"`
+	City       string   `json:"city,omitempty"`
+	Hostname   string   `json:"hostname,omitempty"`
 }
 
 type PortResponse struct {
