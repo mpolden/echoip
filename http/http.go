@@ -31,15 +31,15 @@ type Server struct {
 }
 
 type Response struct {
-	IP                net.IP   `json:"ip"`
-	IPDecimal         *big.Int `json:"ip_decimal"`
-	Country           string   `json:"country,omitempty"`
-	CountryISO        string   `json:"country_iso,omitempty"`
-	City              string   `json:"city,omitempty"`
-	Hostname          string   `json:"hostname,omitempty"`
-	IsInEuropeanUnion bool     `json:"is_in_european_union,omitempty"`
-	Latitude          float64  `json:"location_latitude,omitempty"`
-	Longitude         float64  `json:"location_longitude,omitempty"`
+	IP         net.IP   `json:"ip"`
+	IPDecimal  *big.Int `json:"ip_decimal"`
+	Country    string   `json:"country,omitempty"`
+	CountryEU  bool     `json:"country_eu,omitempty"`
+	CountryISO string   `json:"country_iso,omitempty"`
+	City       string   `json:"city,omitempty"`
+	Hostname   string   `json:"hostname,omitempty"`
+	Latitude   float64  `json:"latitude,omitempty"`
+	Longitude  float64  `json:"longitude,omitempty"`
 }
 
 type PortResponse struct {
@@ -98,15 +98,15 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		hostname, _ = s.LookupAddr(ip)
 	}
 	return Response{
-		IP:                ip,
-		IPDecimal:         ipDecimal,
-		Country:           country.Name,
-		CountryISO:        country.ISO,
-		IsInEuropeanUnion: country.IsInEuropeanUnion,
-		City:              city.Name,
-		Hostname:          hostname,
-		Latitude:          city.Latitude,
-		Longitude:         city.Longitude,
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    country.Name,
+		CountryISO: country.ISO,
+		CountryEU:  country.IsEU,
+		City:       city.Name,
+		Hostname:   hostname,
+		Latitude:   city.Latitude,
+		Longitude:  city.Longitude,
 	}, nil
 }
 

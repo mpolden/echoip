@@ -17,11 +17,11 @@ func lookupPort(net.IP, uint64) error   { return nil }
 type testDb struct{}
 
 func (t *testDb) Country(net.IP) (geo.Country, error) {
-	return geo.Country{Name: "Elbonia", ISO: "EB"}, nil
+	return geo.Country{Name: "Elbonia", ISO: "EB", IsEU: true}, nil
 }
 
 func (t *testDb) City(net.IP) (geo.City, error) {
-	return geo.City{Name: "Bornyasherk"}, nil
+	return geo.City{Name: "Bornyasherk", Latitude: 63.416667, Longitude: 10.416667}, nil
 }
 
 func (t *testDb) IsEmpty() bool { return false }
@@ -128,7 +128,7 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_iso":"EB","city":"Bornyasherk","hostname":"localhost"}`, 200},
+		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_eu":true,"country_iso":"EB","city":"Bornyasherk","hostname":"localhost","latitude":63.416667,"longitude":10.416667}`, 200},
 		{s.URL + "/port/foo", `{"error":"Invalid port: 0"}`, 400},
 		{s.URL + "/port/0", `{"error":"Invalid port: 0"}`, 400},
 		{s.URL + "/port/65356", `{"error":"Invalid port: 65356"}`, 400},
