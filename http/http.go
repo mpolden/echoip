@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/geo"
-	"github.com/mpolden/ipd/useragent"
+	"github.com/mpolden/echoip/iputil"
+	"github.com/mpolden/echoip/iputil/geo"
+	"github.com/mpolden/echoip/useragent"
 
 	"math/big"
 	"net"

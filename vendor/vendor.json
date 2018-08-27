@@ -33,7 +33,7 @@
       "revisionTime": "2018-02-02T13:35:31Z"
     }
   ],
-  "rootPath": "github.com/mpolden/ipd",
+  "rootPath": "github.com/mpolden/echoip",
   "heroku": {
     "install": [
       "./..."

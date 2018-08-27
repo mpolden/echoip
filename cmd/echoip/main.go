@@ -7,9 +7,9 @@ import (
 
 	"os"
 
-	"github.com/mpolden/ipd/http"
-	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/geo"
+	"github.com/mpolden/echoip/http"
+	"github.com/mpolden/echoip/iputil"
+	"github.com/mpolden/echoip/iputil/geo"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log := log.New(os.Stderr, "ipd: ", 0)
+	log := log.New(os.Stderr, "echoip: ", 0)
 	r, err := geo.Open(opts.CountryDBPath, opts.CityDBPath)
 	if err != nil {
 		log.Fatal(err)

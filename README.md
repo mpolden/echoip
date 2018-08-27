@@ -1,6 +1,6 @@
-# ipd
+# echoip
 
-[![Build Status](https://travis-ci.org/mpolden/ipd.svg)](https://travis-ci.org/mpolden/ipd)
+[![Build Status](https://travis-ci.org/mpolden/echoip.svg)](https://travis-ci.org/mpolden/echoip)
 
 A simple service for looking up your IP address. This is the code that powers
 https://ifconfig.co.
@@ -89,7 +89,7 @@ between IPv4 and IPv6 lookup.
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
 This package can be installed with `go get`:
 
-`go get github.com/mpolden/ipd/...`
+`go get github.com/mpolden/echoip/...`
 
 For more information on building a Go project, see the [official Go
 documentation](https://golang.org/doc/code.html).
@@ -97,9 +97,9 @@ documentation](https://golang.org/doc/code.html).
 ### Usage
 
 ```
-$ ipd -h
+$ echoip -h
 Usage:
-  ipd [OPTIONS]
+  echoip [OPTIONS]
 
 Application Options:
   -f, --country-db=FILE        Path to GeoIP country database
