@@ -1,8 +1,8 @@
 package geo
 
 import (
-	"net"
 	"math"
+	"net"
 
 	geoip2 "github.com/oschwald/geoip2-golang"
 )

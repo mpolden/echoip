@@ -20,11 +20,11 @@ func (t *testDb) Country(net.IP) (geo.Country, error) {
 	return geo.Country{Name: "Elbonia", ISO: "EB"}, nil
 }
 
-func (t *testDb) City(net.IP) (database.City, error) {
-	return database.City{Name: "Bornyasherk"}, nil
+func (t *testDb) City(net.IP) (geo.City, error) {
+	return geo.City{Name: "Bornyasherk"}, nil
 }
 
-func (t *testDb) IsEmpty() bool               { return false }
+func (t *testDb) IsEmpty() bool { return false }
 
 func testServer() *Server {
 	return &Server{gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
