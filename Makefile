@@ -23,12 +23,12 @@ ifdef TRAVIS
 endif
 
 check-fmt:
-	bash -c 'diff --line-format="%L" <(echo -n) <(gofmt -d -s $$(find . -type f -name "*.go" -not -path "./vendor/*"))'
+	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
 
 lint: check-fmt vet megacheck
 
 deps:
-	go get -d -v ./...
+	go get
 
 install:
 	go install ./...

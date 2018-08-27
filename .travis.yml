@@ -5,6 +5,11 @@ language: go
 go:
   - stable
 
+# Go module behaviour is disabled by default for packages inside GOPATH.
+# Turn module support on explicitly:
+env:
+  - GO111MODULE=on
+
 deploy:
   provider: heroku
   app: ifconfig-co
