@@ -169,7 +169,7 @@ func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *
 	if err != nil {
 		return internalServerError(err)
 	}
-	fmt.Fprintf(w, "%s, %s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
+	fmt.Fprintf(w, "%s,%s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
 	return nil
 }
 

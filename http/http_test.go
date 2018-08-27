@@ -67,6 +67,7 @@ func TestCLIHandlers(t *testing.T) {
 		{s.URL + "/ip", "127.0.0.1\n", 200, "", ""},
 		{s.URL + "/country", "Elbonia\n", 200, "", ""},
 		{s.URL + "/country-iso", "EB\n", 200, "", ""},
+		{s.URL + "/coordinates", "63.416667,10.416667\n", 200, "", ""},
 		{s.URL + "/city", "Bornyasherk\n", 200, "", ""},
 		{s.URL + "/foo", "404 page not found", 404, "", ""},
 	}
