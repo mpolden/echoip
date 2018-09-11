@@ -14,12 +14,6 @@ test:
 vet:
 	go vet ./...
 
-megacheck:
-	megacheck 2> /dev/null; if [ $$? -eq 127 ]; then \
-		go get -v honnef.co/go/tools/cmd/megacheck; \
-	fi
-	megacheck ./...
-
 check-fmt:
 	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
 
