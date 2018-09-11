@@ -5,13 +5,13 @@ endif
 
 all: deps lint test install
 
-fmt:
-	go fmt ./...
+deps:
+	go get ./...
 
-test:
+test: deps
 	go test ./...
 
-vet:
+vet: deps
 	go vet ./...
 
 check-fmt:
@@ -19,10 +19,7 @@ check-fmt:
 
 lint: check-fmt vet
 
-deps:
-	go get
-
-install:
+install: deps
 	go install ./...
 
 databases := GeoLite2-City GeoLite2-Country
