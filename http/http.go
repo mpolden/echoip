@@ -40,6 +40,10 @@ type Response struct {
 	Hostname   string   `json:"hostname,omitempty"`
 	Latitude   float64  `json:"latitude,omitempty"`
 	Longitude  float64  `json:"longitude,omitempty"`
+	BoxLatTop   float64  
+	BoxLatBottom  float64  
+	BoxLontTop   float64  
+	BoxLonBottom  float64  
 }
 
 type PortResponse struct {
