@@ -48,7 +48,7 @@ func main() {
 		log.Printf("Trusting header(s) %+v to contain correct remote IP", opts.IPHeaders)
 	}
 
-	log.Printf("Listening on http://%s", opts.Listen)
+	log.Printf("Listening on http://%s", os.Getenv("PORT") || opts.Listen)
 	if err := server.ListenAndServe(opts.Listen); err != nil {
 		log.Fatal(err)
 	}
