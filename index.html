@@ -99,7 +99,7 @@ $ http {{ .Host }}/port/8080
       </div>
 {{ if .City }}      
       <div class="pure-u-1 pure-u-md-1-1">
-          <h1>Where is my IP address located?</h1>
+          <h2>Map</h2>
           <iframe width="100%" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox={{ .BoxLonLeft }}%2C{{ .BoxLatBottom }}%2C{{ .BoxLonRight }}%2C{{ .BoxLatTop }}&amp;layer=mapnik&amp;marker={{ .Latitude }}%2C{{ .Longitude }}"></iframe>
       </div>
 {{ end }}      
