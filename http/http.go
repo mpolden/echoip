@@ -98,15 +98,19 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		hostname, _ = s.LookupAddr(ip)
 	}
 	return Response{
-		IP:         ip,
-		IPDecimal:  ipDecimal,
-		Country:    country.Name,
-		CountryISO: country.ISO,
-		CountryEU:  country.IsEU,
-		City:       city.Name,
-		Hostname:   hostname,
-		Latitude:   city.Latitude,
-		Longitude:  city.Longitude,
+		IP:           ip,
+		IPDecimal:    ipDecimal,
+		Country:      country.Name,
+		CountryISO:   country.ISO,
+		CountryEU:    country.IsEU,
+		City:         city.Name,
+		Hostname:     hostname,
+		Latitude:     city.Latitude,
+		Longitude:    city.Longitude,
+        BoxLatTop:    city.Latitude + 0.10,
+        BoxLatBottom: city.Latitude - 0.10,
+        BoxLonLeft:   city.Longitude - 0.10,
+        BoxLonRight:  city.Longitude + 0.10,
 	}, nil
 }
 
