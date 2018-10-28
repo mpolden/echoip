@@ -31,19 +31,15 @@ type Server struct {
 }
 
 type Response struct {
-	IP           net.IP   `json:"ip"`
-	IPDecimal    *big.Int `json:"ip_decimal"`
-	Country      string   `json:"country,omitempty"`
-	CountryEU    *bool    `json:"country_eu,omitempty"`
-	CountryISO   string   `json:"country_iso,omitempty"`
-	City         string   `json:"city,omitempty"`
-	Hostname     string   `json:"hostname,omitempty"`
-	Latitude     float64  `json:"latitude,omitempty"`
-	Longitude    float64  `json:"longitude,omitempty"`
-	BoxLatTop    float64  `json:",omit"`
-	BoxLatBottom float64  `json:",omit"`
-	BoxLonLeft   float64  `json:",omit"`
-	BoxLonRight  float64  `json:",omit"`
+	IP         net.IP   `json:"ip"`
+	IPDecimal  *big.Int `json:"ip_decimal"`
+	Country    string   `json:"country,omitempty"`
+	CountryEU  *bool    `json:"country_eu,omitempty"`
+	CountryISO string   `json:"country_iso,omitempty"`
+	City       string   `json:"city,omitempty"`
+	Hostname   string   `json:"hostname,omitempty"`
+	Latitude   float64  `json:"latitude,omitempty"`
+	Longitude  float64  `json:"longitude,omitempty"`
 }
 
 type PortResponse struct {
@@ -102,19 +98,15 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		hostname, _ = s.LookupAddr(ip)
 	}
 	return Response{
-		IP:           ip,
-		IPDecimal:    ipDecimal,
-		Country:      country.Name,
-		CountryISO:   country.ISO,
-		CountryEU:    country.IsEU,
-		City:         city.Name,
-		Hostname:     hostname,
-		Latitude:     city.Latitude,
-		Longitude:    city.Longitude,
-        BoxLatTop:    city.Latitude + 0.10,
-        BoxLatBottom: city.Latitude - 0.10,
-        BoxLonLeft:   city.Longitude - 0.10,
-        BoxLonRight:  city.Longitude + 0.10,
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    country.Name,
+		CountryISO: country.ISO,
+		CountryEU:  country.IsEU,
+		City:       city.Name,
+		Hostname:   hostname,
+		Latitude:   city.Latitude,
+		Longitude:  city.Longitude,
 	}, nil
 }
 
@@ -230,12 +222,20 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	}
 	var data = struct {
 		Response
-		Host string
-		JSON string
-		Port bool
+		Host         string
+		BoxLatTop    float64
+		BoxLatBottom float64
+		BoxLonLeft   float64
+		BoxLonRight  float64
+		JSON         string
+		Port         bool
 	}{
 		response,
 		r.Host,
+		city.Latitude + 0.10,
+		city.Latitude - 0.10,
+		city.Longitude - 0.10,
+		city.Longitude + 0.10,
 		string(json),
 		s.LookupPort != nil,
 	}
