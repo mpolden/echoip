@@ -232,10 +232,10 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	}{
 		response,
 		r.Host,
-		json.city.Latitude + 0.05,
-		json.city.Latitude - 0.05,
-		json.city.Longitude - 0.05,
-		json.city.Longitude + 0.05,
+		response.Latitude + 0.05,
+		response.Latitude - 0.05,
+		response.Longitude - 0.05,
+		response.Longitude + 0.05,
 		string(json),
 		s.LookupPort != nil,
 	}
