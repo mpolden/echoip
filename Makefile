@@ -1,20 +1,33 @@
-all: deps test vet install
+OS := $(shell uname)
+ifeq ($(OS),Linux)
+	TAR_OPTS := --wildcards
+endif
 
-fmt:
-	go fmt ./...
-
-test:
-	go test ./...
-
-vet:
-	go vet ./...
+all: deps lint test install
 
 deps:
-	go get -d -v ./...
+	go get ./...
 
-install:
-	go install
+test: deps
+	go test ./...
 
-get-geoip-dbs:
-	curl -s http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz | gunzip > GeoLite2-Country.mmdb
-	curl -s http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz | gunzip > GeoLite2-City.mmdb
+vet: deps
+	go vet ./...
+
+check-fmt:
+	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
+
+lint: check-fmt vet
+
+install: deps
+	go install ./...
+
+databases := GeoLite2-City GeoLite2-Country
+
+$(databases):
+	mkdir -p data
+	curl -fsSL -m 30 https://geolite.maxmind.com/download/geoip/database/$@.tar.gz | tar $(TAR_OPTS) --strip-components=1 -C $(PWD)/data -xzf - '*.mmdb'
+	test ! -f data/GeoLite2-City.mmdb || mv data/GeoLite2-City.mmdb data/city.mmdb
+	test ! -f data/GeoLite2-Country.mmdb || mv data/GeoLite2-Country.mmdb data/country.mmdb
+
+geoip-download: $(databases)
