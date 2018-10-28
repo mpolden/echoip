@@ -222,12 +222,20 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	}
 	var data = struct {
 		Response
-		Host string
-		JSON string
-		Port bool
+		Host         string
+		BoxLatTop    float64
+		BoxLatBottom float64
+		BoxLonLeft   float64
+		BoxLonRight  float64
+		JSON         string
+		Port         bool
 	}{
 		response,
 		r.Host,
+		response.Latitude + 0.05,
+		response.Latitude - 0.05,
+		response.Longitude - 0.05,
+		response.Longitude + 0.05,
 		string(json),
 		s.LookupPort != nil,
 	}
