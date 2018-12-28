@@ -94,6 +94,13 @@ This package can be installed with `go get`:
 For more information on building a Go project, see the [official Go
 documentation](https://golang.org/doc/code.html).
 
+## Docker image
+
+A Docker image is available on [Docker
+Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
+
+`docker pull mpolden/echoip`
+
 ### Usage
 
 ```
