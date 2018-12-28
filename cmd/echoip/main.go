@@ -48,7 +48,11 @@ func main() {
 		log.Printf("Trusting header(s) %+v to contain correct remote IP", opts.IPHeaders)
 	}
 
-	log.Printf("Listening on http://%s", opts.Listen)
+	listen := opts.Listen
+	if listen == ":8080" {
+		listen = "0.0.0.0:8080"
+	}
+	log.Printf("Listening on http://%s", listen)
 	if err := server.ListenAndServe(opts.Listen); err != nil {
 		log.Fatal(err)
 	}
