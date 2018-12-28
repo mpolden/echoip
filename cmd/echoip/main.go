@@ -34,8 +34,12 @@ func main() {
 	}
 
 	server := http.New(r)
-	server.Template = opts.Template
 	server.IPHeaders = opts.IPHeaders
+	if _, err := os.Stat(opts.Template); err == nil {
+		server.Template = opts.Template
+	} else {
+		log.Printf("Not configuring default handler: Template not found: %s", opts.Template)
+	}
 	if opts.ReverseLookup {
 		log.Println("Enabling reverse lookup")
 		server.LookupAddr = iputil.LookupAddr

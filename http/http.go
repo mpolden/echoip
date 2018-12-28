@@ -308,7 +308,9 @@ func (s *Server) Handler() http.Handler {
 	}
 
 	// Browser
-	r.Route("GET", "/", s.DefaultHandler)
+	if s.Template != "" {
+		r.Route("GET", "/", s.DefaultHandler)
+	}
 
 	// Port testing
 	if s.LookupPort != nil {
