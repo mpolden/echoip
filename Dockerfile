@@ -1,15 +1,16 @@
-# Compile
-FROM golang:1.11-alpine AS build
-ADD . /go/src/github.com/mpolden/echoip
+# Build
+FROM golang:1.11-stretch AS build
 WORKDIR /go/src/github.com/mpolden/echoip
-RUN apk --update add git gcc musl-dev
-ENV GO111MODULE=on
-RUN go get -d -v .
+COPY . .
+ENV GO111MODULE=on CGO_ENABLED=0
 RUN go install ./...
 
 # Run
-FROM alpine
-RUN mkdir -p /opt/
-COPY --from=build /go/bin/echoip /opt/
-WORKDIR /opt/
-ENTRYPOINT ["/opt/echoip"]
+FROM scratch
+EXPOSE 8080
+COPY --from=build \
+     /go/bin/echoip \
+     /go/src/github.com/mpolden/echoip/index.html \
+     /opt/echoip/
+WORKDIR /opt/echoip
+ENTRYPOINT ["/opt/echoip/echoip"]
