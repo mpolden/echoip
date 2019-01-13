@@ -113,8 +113,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	lastElement := filepath.Base(r.URL.Path)
 	port, err := strconv.ParseUint(lastElement, 10, 16)
-	if err != nil || port < 1 || port > 65355 {
-		return PortResponse{Port: port}, fmt.Errorf("invalid port: %d", port)
+	if err != nil || port < 1 || port > 65535 {
+		return PortResponse{Port: port}, fmt.Errorf("invalid port: %s", lastElement)
 	}
 	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
