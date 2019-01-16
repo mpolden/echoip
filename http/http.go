@@ -196,7 +196,7 @@ func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) *appError
 func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newPortResponse(r)
 	if err != nil {
-		return badRequest(err).WithMessage(fmt.Sprintf("Invalid port: %d", response.Port)).AsJSON()
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	b, err := json.Marshal(response)
 	if err != nil {
