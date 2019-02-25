@@ -101,6 +101,12 @@ Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
 
 `docker pull mpolden/echoip`
 
+## Deploying to Heroku
+
+Click the button below to automatically build and deploy the application to Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ### Usage
 
 ```

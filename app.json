@@ -1,0 +1,8 @@
+{
+  "name": "echoip",
+  "description": "IP address lookup service",
+  "website": "https://ifconfig.co",
+  "repository": "https://github.com/mpolden/echoip",
+  "stack": "container",
+  "success_url": "/"
+}
