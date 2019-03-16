@@ -1,3 +1,4 @@
+DOCKER_IMAGE := mpolden/echoip
 OS := $(shell uname)
 ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
@@ -31,3 +32,12 @@ $(databases):
 	test ! -f data/GeoLite2-Country.mmdb || mv data/GeoLite2-Country.mmdb data/country.mmdb
 
 geoip-download: $(databases)
+
+docker-build:
+	docker build -t $(DOCKER_IMAGE) .
+
+docker-login:
+	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
+
+docker-push: docker-build docker-login
+	docker push $(DOCKER_IMAGE)
