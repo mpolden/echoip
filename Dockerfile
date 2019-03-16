@@ -1,5 +1,5 @@
 # Build
-FROM golang:1.11-stretch AS build
+FROM golang:1.12-stretch AS build
 WORKDIR /go/src/github.com/mpolden/echoip
 COPY . .
 ENV GO111MODULE=on CGO_ENABLED=0
