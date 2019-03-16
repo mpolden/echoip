@@ -39,5 +39,5 @@ docker-build:
 docker-login:
 	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
 
-docker-push: docker-build docker-login
+docker-push: docker-login
 	docker push $(DOCKER_IMAGE)
