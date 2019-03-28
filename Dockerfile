@@ -6,7 +6,7 @@ ENV GO111MODULE=on
 RUN make
 
 # Run
-FROM scratch
+FROM golang:1.12-stretch
 EXPOSE 8080
 COPY --from=build \
      /go/bin/echoip \
