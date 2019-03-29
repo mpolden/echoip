@@ -2,7 +2,8 @@
 FROM golang:1.12-stretch AS build
 WORKDIR /go/src/github.com/mpolden/echoip
 COPY . .
-ENV GO111MODULE=on
+# Must build without cgo because libc is unavailable in runtime image
+ENV GO111MODULE=on CGO_ENABLED=0
 RUN make
 
 # Run
