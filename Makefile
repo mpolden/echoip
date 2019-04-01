@@ -39,5 +39,10 @@ docker-build:
 docker-login:
 	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
 
-docker-push: docker-login
+docker-test:
+	$(eval CONTAINER=$(shell docker run --rm --detach --publish-all $(DOCKER_IMAGE)))
+	$(eval DOCKER_PORT=$(shell docker port $(CONTAINER) | cut -d ":" -f 2))
+	curl -qfsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; docker stop $(CONTAINER)
+
+docker-push: docker-test docker-login
 	docker push $(DOCKER_IMAGE)
