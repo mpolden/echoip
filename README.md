@@ -37,6 +37,9 @@ EB
 
 $ curl ifconfig.co/city
 Bornyasherk
+
+$ curl ifconfig.co/asn
+AS59795
 ```
 
 As JSON:
@@ -48,7 +51,9 @@ $ curl -H 'Accept: application/json' ifconfig.co  # or curl ifconfig.co/json
   "country": "Elbonia",
   "country_iso": "EB",
   "ip": "127.0.0.1",
-  "ip_decimal": 2130706433
+  "ip_decimal": 2130706433,
+  "asn": "AS59795",
+  "asn_org": "Hosting4Real"
 }
 ```
 
@@ -74,7 +79,7 @@ between IPv4 and IPv6 lookup.
 * Supports HTTPS
 * Supports common command-line clients (e.g. `curl`, `httpie`, `wget` and `fetch`)
 * JSON output
-* Country and city lookup using the MaxMind GeoIP database
+* ASN, country and city lookup using the MaxMind GeoIP database
 * Port testing
 * Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -111,6 +116,7 @@ Usage:
 Application Options:
   -f, --country-db=FILE        Path to GeoIP country database
   -c, --city-db=FILE           Path to GeoIP city database
+  -a, --asn-db=FILE            Path to GeoIP ASN database
   -l, --listen=ADDR            Listening address (default: :8080)
   -r, --reverse-lookup         Perform reverse hostname lookups
   -p, --port-lookup            Enable port lookup
