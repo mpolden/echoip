@@ -1,6 +1,6 @@
-# ipd
+# echoip
 
-[![Build Status](https://travis-ci.org/mpolden/ipd.svg)](https://travis-ci.org/mpolden/ipd)
+[![Build Status](https://travis-ci.org/mpolden/echoip.svg)](https://travis-ci.org/mpolden/echoip)
 
 A simple service for looking up your IP address. This is the code that powers
 https://ifconfig.co.
@@ -66,9 +66,6 @@ $ curl ifconfig.co/port/80
 Pass the appropriate flag (usually `-4` and `-6`) to your client to switch
 between IPv4 and IPv6 lookup.
 
-The subdomains https://v4.ifconfig.co and https://v6.ifconfig.co can be used to
-force IPv4 or IPv6 lookup.
-
 ## Features
 
 * Easy to remember domain name
@@ -92,17 +89,24 @@ force IPv4 or IPv6 lookup.
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
 This package can be installed with `go get`:
 
-`go get github.com/mpolden/ipd/...`
+`go get github.com/mpolden/echoip/...`
 
 For more information on building a Go project, see the [official Go
 documentation](https://golang.org/doc/code.html).
 
+## Docker image
+
+A Docker image is available on [Docker
+Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
+
+`docker pull mpolden/echoip`
+
 ### Usage
 
 ```
-$ ipd -h
+$ echoip -h
 Usage:
-  ipd [OPTIONS]
+  echoip [OPTIONS]
 
 Application Options:
   -f, --country-db=FILE        Path to GeoIP country database

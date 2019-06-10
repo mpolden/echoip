@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"html/template"
 	"path/filepath"
+	"strings"
 
-	"github.com/mpolden/ipd/iputil"
-	"github.com/mpolden/ipd/iputil/database"
-	"github.com/mpolden/ipd/useragent"
+	"github.com/mpolden/echoip/iputil"
+	"github.com/mpolden/echoip/iputil/geo"
+	"github.com/mpolden/echoip/useragent"
 
+	"math/big"
 	"net"
 	"net/http"
 	"strconv"
@@ -22,22 +24,22 @@ const (
 
 type Server struct {
 	Template   string
-	IPHeader   string
+	IPHeaders  []string
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
-	db         database.Client
+	gr         geo.Reader
 }
 
 type Response struct {
-	IP                           net.IP `json:"ip"`
-	IPDecimal                    uint64 `json:"ip_decimal"`
-	Country                      string `json:"country,omitempty"`
-	CountryISO                   string `json:"country_iso,omitempty"`
-	IsInEuropeanUnion            bool `json:"is_in_european_union,omitempty"`
-	City                         string `json:"city,omitempty"`
-	Hostname                     string `json:"hostname,omitempty"`
-	LocationLatitude             float64 `json:"location_latitude,omitempty"`
-	LocationLongitude            float64 `json:"location_longitude,omitempty"`
+	IP         net.IP   `json:"ip"`
+	IPDecimal  *big.Int `json:"ip_decimal"`
+	Country    string   `json:"country,omitempty"`
+	CountryEU  *bool    `json:"country_eu,omitempty"`
+	CountryISO string   `json:"country_iso,omitempty"`
+	City       string   `json:"city,omitempty"`
+	Hostname   string   `json:"hostname,omitempty"`
+	Latitude   float64  `json:"latitude,omitempty"`
+	Longitude  float64  `json:"longitude,omitempty"`
 	AutonomousSystemNumber       string `json:"asn_number,omitempty"`
 	AutonomousSystemOrganization string `json:"asn_organization,omitempty"`
 }
@@ -48,12 +50,29 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db database.Client) *Server {
-	return &Server{db: db}
+func New(db geo.Reader) *Server {
+	return &Server{gr: db}
 }
 
-func ipFromRequest(header string, r *http.Request) (net.IP, error) {
-	remoteIP := r.Header.Get(header)
+func ipFromForwardedForHeader(v string) string {
+	sep := strings.Index(v, ",")
+	if sep == -1 {
+		return v
+	}
+	return v[:sep]
+}
+
+func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
+	remoteIP := ""
+	for _, header := range headers {
+		remoteIP = r.Header.Get(header)
+		if http.CanonicalHeaderKey(header) == "X-Forwarded-For" {
+			remoteIP = ipFromForwardedForHeader(remoteIP)
+		}
+		if remoteIP != "" {
+			break
+		}
+	}
 	if remoteIP == "" {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
@@ -69,14 +88,14 @@ func ipFromRequest(header string, r *http.Request) (net.IP, error) {
 }
 
 func (s *Server) newResponse(r *http.Request) (Response, error) {
-	ip, err := ipFromRequest(s.IPHeader, r)
+	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
 		return Response{}, err
 	}
 	ipDecimal := iputil.ToDecimal(ip)
-	country, _ := s.db.Country(ip)
-	city, _ := s.db.City(ip)
-	asn, _ := s.db.ASN(ip)
+	country, _ := s.gr.Country(ip)
+	city, _ := s.gr.City(ip)
+	asn, _ := s.gr.ASN(ip)
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
@@ -86,15 +105,15 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		autonomousSystemNumber = "AS" + strconv.FormatUint(uint64(asn.AutonomousSystemNumber), 10);
 	}
 	return Response{
-		IP:                           ip,
-		IPDecimal:                    ipDecimal,
-		Country:                      country.Name,
-		CountryISO:                   country.ISO,
-		IsInEuropeanUnion:            country.IsInEuropeanUnion,
-		City:                         city.Name,
-		Hostname:                     hostname,
-		LocationLatitude:             city.Latitude,
-		LocationLongitude:            city.Longitude,
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    country.Name,
+		CountryISO: country.ISO,
+		CountryEU:  country.IsEU,
+		City:       city.Name,
+		Hostname:   hostname,
+		Latitude:   city.Latitude,
+		Longitude:  city.Longitude,
 		AutonomousSystemNumber:       autonomousSystemNumber,
 		AutonomousSystemOrganization: asn.AutonomousSystemOrganization,
 	}, nil
@@ -103,10 +122,10 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	lastElement := filepath.Base(r.URL.Path)
 	port, err := strconv.ParseUint(lastElement, 10, 16)
-	if err != nil || port < 1 || port > 65355 {
-		return PortResponse{Port: port}, fmt.Errorf("invalid port: %d", port)
+	if err != nil || port < 1 || port > 65535 {
+		return PortResponse{Port: port}, fmt.Errorf("invalid port: %s", lastElement)
 	}
-	ip, err := ipFromRequest(s.IPHeader, r)
+	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
 		return PortResponse{Port: port}, err
 	}
@@ -119,7 +138,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 }
 
 func (s *Server) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
-	ip, err := ipFromRequest(s.IPHeader, r)
+	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -159,11 +178,7 @@ func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *
 	if err != nil {
 		return internalServerError(err)
 	}
-	var str string
-	str += FloatToString(response.LocationLatitude)
-	str += ","
-	str += FloatToString(response.LocationLongitude)
-	fmt.Fprintln(w, str)
+	fmt.Fprintf(w, "%s,%s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
 	return nil
 }
 
@@ -181,10 +196,16 @@ func (s *Server) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
+func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) *appError {
+	w.Header().Set("Content-Type", jsonMediaType)
+	w.Write([]byte(`{"status":"OK"}`))
+	return nil
+}
+
 func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newPortResponse(r)
 	if err != nil {
-		return badRequest(err).WithMessage(fmt.Sprintf("Invalid port: %d", response.Port)).AsJSON()
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	b, err := json.Marshal(response)
 	if err != nil {
@@ -210,12 +231,20 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	}
 	var data = struct {
 		Response
-		Host string
-		JSON string
-		Port bool
+		Host         string
+		BoxLatTop    float64
+		BoxLatBottom float64
+		BoxLonLeft   float64
+		BoxLonRight  float64
+		JSON         string
+		Port         bool
 	}{
 		response,
 		r.Host,
+		response.Latitude + 0.05,
+		response.Latitude - 0.05,
+		response.Longitude - 0.05,
+		response.Longitude + 0.05,
 		string(json),
 		s.LookupPort != nil,
 	}
@@ -269,6 +298,9 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Handler() http.Handler {
 	r := NewRouter()
 
+	// Health
+	r.Route("GET", "/health", s.HealthHandler)
+
 	// JSON
 	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
 	r.Route("GET", "/json", s.JSONHandler)
@@ -277,7 +309,7 @@ func (s *Server) Handler() http.Handler {
 	r.Route("GET", "/", s.CLIHandler).MatcherFunc(cliMatcher)
 	r.Route("GET", "/", s.CLIHandler).Header("Accept", textMediaType)
 	r.Route("GET", "/ip", s.CLIHandler)
-	if !s.db.IsEmpty() {
+	if !s.gr.IsEmpty() {
 		r.Route("GET", "/country", s.CLICountryHandler)
 		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
 		r.Route("GET", "/city", s.CLICityHandler)
@@ -285,7 +317,9 @@ func (s *Server) Handler() http.Handler {
 	}
 
 	// Browser
-	r.Route("GET", "/", s.DefaultHandler)
+	if s.Template != "" {
+		r.Route("GET", "/", s.DefaultHandler)
+	}
 
 	// Port testing
 	if s.LookupPort != nil {
@@ -299,6 +333,6 @@ func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s.Handler())
 }
 
-func FloatToString(input_num float64) string {
-	return strconv.FormatFloat(input_num, 'f', 6, 64)
+func formatCoordinate(c float64) string {
+	return strconv.FormatFloat(c, 'f', 6, 64)
 }

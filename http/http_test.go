@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mpolden/ipd/iputil/database"
+	"github.com/mpolden/echoip/iputil/geo"
 )
 
 func lookupAddr(net.IP) (string, error) { return "localhost", nil }
@@ -16,8 +16,8 @@ func lookupPort(net.IP, uint64) error   { return nil }
 
 type testDb struct{}
 
-func (t *testDb) Country(net.IP) (database.Country, error) {
-	return database.Country{Name: "Elbonia", ISO: "EB"}, nil
+func (t *testDb) Country(net.IP) (geo.Country, error) {
+	return geo.Country{Name: "Elbonia", ISO: "EB", IsEU: new(bool)}, nil
 }
 
 func (t *testDb) City(net.IP) (database.City, error) {
@@ -31,7 +31,7 @@ func (t *testDb) ASN(net.IP) (database.ASN, error) {
 func (t *testDb) IsEmpty() bool               { return false }
 
 func testServer() *Server {
-	return &Server{db: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
+	return &Server{gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -71,6 +71,7 @@ func TestCLIHandlers(t *testing.T) {
 		{s.URL + "/ip", "127.0.0.1\n", 200, "", ""},
 		{s.URL + "/country", "Elbonia\n", 200, "", ""},
 		{s.URL + "/country-iso", "EB\n", 200, "", ""},
+		{s.URL + "/coordinates", "63.416667,10.416667\n", 200, "", ""},
 		{s.URL + "/city", "Bornyasherk\n", 200, "", ""},
 		{s.URL + "/foo", "404 page not found", 404, "", ""},
 	}
@@ -94,7 +95,7 @@ func TestDisabledHandlers(t *testing.T) {
 	server := testServer()
 	server.LookupPort = nil
 	server.LookupAddr = nil
-	server.db, _ = database.New("", "", "")
+	server.gr, _ = geo.Open("", "", "")
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {
@@ -132,12 +133,13 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_iso":"EB","city":"Bornyasherk","hostname":"localhost","asn_number":"AS59795","asn_organization":"Hosting4Real"}`, 200},
-		{s.URL + "/port/foo", `{"error":"Invalid port: 0"}`, 400},
-		{s.URL + "/port/0", `{"error":"Invalid port: 0"}`, 400},
-		{s.URL + "/port/65356", `{"error":"Invalid port: 65356"}`, 400},
+		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_eu":false,"country_iso":"EB","city":"Bornyasherk","hostname":"localhost","latitude":63.416667,"longitude":10.416667,"asn_number":"AS59795","asn_organization":"Hosting4Real"}`, 200},
+		{s.URL + "/port/foo", `{"error":"invalid port: foo"}`, 400},
+		{s.URL + "/port/0", `{"error":"invalid port: 0"}`, 400},
+		{s.URL + "/port/65537", `{"error":"invalid port: 65537"}`, 400},
 		{s.URL + "/port/31337", `{"ip":"127.0.0.1","port":31337,"reachable":true}`, 200},
 		{s.URL + "/foo", `{"error":"404 page not found"}`, 404},
+		{s.URL + "/health", `{"status":"OK"}`, 200},
 	}
 
 	for _, tt := range tests {
@@ -156,16 +158,20 @@ func TestJSONHandlers(t *testing.T) {
 
 func TestIPFromRequest(t *testing.T) {
 	var tests = []struct {
-		remoteAddr    string
-		headerKey     string
-		headerValue   string
-		trustedHeader string
-		out           string
+		remoteAddr     string
+		headerKey      string
+		headerValue    string
+		trustedHeaders []string
+		out            string
 	}{
-		{"127.0.0.1:9999", "", "", "", "127.0.0.1"},                          // No header given
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "", "127.0.0.1"},          // Trusted header is empty
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "X-Foo-Bar", "127.0.0.1"}, // Trusted header does not match
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", "X-Real-IP", "1.3.3.7"},   // Trusted header matches
+		{"127.0.0.1:9999", "", "", nil, "127.0.0.1"},                                                          // No header given
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", nil, "127.0.0.1"},                                          // Trusted header is empty
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Foo-Bar"}, "127.0.0.1"},                        // Trusted header does not match
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},       // Trusted header matches
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"}, // Second trusted header matches
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7,4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},      // X-Forwarded-For with multiple entries (commas separator)
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7, 4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},     // X-Forwarded-For with multiple entries (space+comma separator)
+		{"127.0.0.1:9999", "X-Forwarded-For", "", []string{"X-Forwarded-For"}, "127.0.0.1"},                   // Empty header
 	}
 	for _, tt := range tests {
 		r := &http.Request{
@@ -173,7 +179,7 @@ func TestIPFromRequest(t *testing.T) {
 			Header:     http.Header{},
 		}
 		r.Header.Add(tt.headerKey, tt.headerValue)
-		ip, err := ipFromRequest(tt.trustedHeader, r)
+		ip, err := ipFromRequest(tt.trustedHeaders, r)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -1,13 +1,13 @@
-package database
+package geo
 
 import (
-	"net"
 	"math"
+	"net"
 
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
-type Client interface {
+type Reader interface {
 	Country(net.IP) (Country, error)
 	City(net.IP) (City, error)
 	ASN(net.IP) (ASN, error)
@@ -15,9 +15,9 @@ type Client interface {
 }
 
 type Country struct {
-	Name              string
-	ISO               string
-	IsInEuropeanUnion bool
+	Name string
+	ISO  string
+	IsEU *bool
 }
 
 type City struct {
@@ -37,7 +37,7 @@ type geoip struct {
 	asn     *geoip2.Reader
 }
 
-func New(countryDB, cityDB, asnDB string) (Client, error) {
+func Open(countryDB, cityDB string, asnDB string) (Reader, error) {
 	var country, city, asn *geoip2.Reader
 	if countryDB != "" {
 		r, err := geoip2.Open(countryDB)
@@ -84,10 +84,8 @@ func (g *geoip) Country(ip net.IP) (Country, error) {
 	if record.RegisteredCountry.IsoCode != "" && country.ISO == "" {
 		country.ISO = record.RegisteredCountry.IsoCode
 	}
-	country.IsInEuropeanUnion = record.Country.IsInEuropeanUnion
-	if record.RegisteredCountry.IsoCode != "" && country.ISO == "" {
-		country.IsInEuropeanUnion = record.RegisteredCountry.IsInEuropeanUnion
-	}
+	isEU := record.Country.IsInEuropeanUnion || record.RegisteredCountry.IsInEuropeanUnion
+	country.IsEU = &isEU
 	return country, nil
 }
 
@@ -103,10 +101,10 @@ func (g *geoip) City(ip net.IP) (City, error) {
 	if c, exists := record.City.Names["en"]; exists {
 		city.Name = c
 	}
-	if math.IsNaN(record.Location.Latitude) == false {
+	if !math.IsNaN(record.Location.Latitude) {
 		city.Latitude = record.Location.Latitude
 	}
-	if math.IsNaN(record.Location.Longitude) == false {
+	if !math.IsNaN(record.Location.Longitude) {
 		city.Longitude = record.Location.Longitude
 	}
 	return city, nil
