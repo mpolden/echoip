@@ -81,7 +81,7 @@ $ http {{ .Host }}/city
 {{ if .ASN }}
         <h2>ASN lookup</h2>
         <pre>
-$ http ip.alphakilo.eu/asn
+$ http {{ .Host }}/asn
 {{ .ASN }}
 {{ if .ASNOrg }}</pre>
         <p>Looks like you're with {{ .ASNOrg }}</p>
