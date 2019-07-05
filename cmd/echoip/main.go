@@ -16,6 +16,7 @@ func main() {
 	var opts struct {
 		CountryDBPath string   `short:"f" long:"country-db" description:"Path to GeoIP country database" value-name:"FILE" default:""`
 		CityDBPath    string   `short:"c" long:"city-db" description:"Path to GeoIP city database" value-name:"FILE" default:""`
+		ASNDBPath     string   `short:"a" long:"asn-db" description:"Path to GeoIP ASN database" value-name:"FILE" default:""`
 		Listen        string   `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
 		ReverseLookup bool     `short:"r" long:"reverse-lookup" description:"Perform reverse hostname lookups"`
 		PortLookup    bool     `short:"p" long:"port-lookup" description:"Enable port lookup"`
@@ -28,7 +29,7 @@ func main() {
 	}
 
 	log := log.New(os.Stderr, "echoip: ", 0)
-	r, err := geo.Open(opts.CountryDBPath, opts.CityDBPath)
+	r, err := geo.Open(opts.CountryDBPath, opts.CityDBPath, opts.ASNDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}

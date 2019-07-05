@@ -40,6 +40,8 @@ type Response struct {
 	Hostname   string   `json:"hostname,omitempty"`
 	Latitude   float64  `json:"latitude,omitempty"`
 	Longitude  float64  `json:"longitude,omitempty"`
+	ASN        string   `json:"asn,omitempty"`
+	ASNOrg     string   `json:"asn_org,omitempty"`
 }
 
 type PortResponse struct {
@@ -93,9 +95,14 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	ipDecimal := iputil.ToDecimal(ip)
 	country, _ := s.gr.Country(ip)
 	city, _ := s.gr.City(ip)
+	asn, _ := s.gr.ASN(ip)
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
+	}
+	var autonomousSystemNumber string
+	if asn.AutonomousSystemNumber > 0 {
+		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
 	}
 	return Response{
 		IP:         ip,
@@ -107,6 +114,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		Hostname:   hostname,
 		Latitude:   city.Latitude,
 		Longitude:  city.Longitude,
+		ASN:        autonomousSystemNumber,
+		ASNOrg:     asn.AutonomousSystemOrganization,
 	}, nil
 }
 
@@ -170,6 +179,15 @@ func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *
 		return internalServerError(err)
 	}
 	fmt.Fprintf(w, "%s,%s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
+	return nil
+}
+
+func (s *Server) CLIASNHandler(w http.ResponseWriter, r *http.Request) *appError {
+	response, err := s.newResponse(r)
+	if err != nil {
+		return internalServerError(err)
+	}
+	fmt.Fprintf(w, "%s\n", response.ASN)
 	return nil
 }
 
@@ -305,6 +323,7 @@ func (s *Server) Handler() http.Handler {
 		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
 		r.Route("GET", "/city", s.CLICityHandler)
 		r.Route("GET", "/coordinates", s.CLICoordinatesHandler)
+		r.Route("GET", "/asn", s.CLIASNHandler)
 	}
 
 	// Browser

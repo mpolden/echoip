@@ -4,4 +4,4 @@ build:
   pre:
     - make geoip-download
 run:
-  web: echoip -f data/country.mmdb -c data/city.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$PORT
+  web: echoip -f data/country.mmdb -c data/city.mmdb -a data/asn.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$PORT
