@@ -24,6 +24,10 @@ func (t *testDb) City(net.IP) (geo.City, error) {
 	return geo.City{Name: "Bornyasherk", Latitude: 63.416667, Longitude: 10.416667}, nil
 }
 
+func (t *testDb) ASN(net.IP) (geo.ASN, error) {
+	return geo.ASN{AutonomousSystemNumber: 59795, AutonomousSystemOrganization: "Hosting4Real"}, nil
+}
+
 func (t *testDb) IsEmpty() bool { return false }
 
 func testServer() *Server {
@@ -70,6 +74,7 @@ func TestCLIHandlers(t *testing.T) {
 		{s.URL + "/coordinates", "63.416667,10.416667\n", 200, "", ""},
 		{s.URL + "/city", "Bornyasherk\n", 200, "", ""},
 		{s.URL + "/foo", "404 page not found", 404, "", ""},
+		{s.URL + "/asn", "AS59795\n", 200, "", ""},
 	}
 
 	for _, tt := range tests {
@@ -91,7 +96,7 @@ func TestDisabledHandlers(t *testing.T) {
 	server := testServer()
 	server.LookupPort = nil
 	server.LookupAddr = nil
-	server.gr, _ = geo.Open("", "")
+	server.gr, _ = geo.Open("", "", "")
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {
@@ -129,7 +134,7 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_eu":false,"country_iso":"EB","city":"Bornyasherk","hostname":"localhost","latitude":63.416667,"longitude":10.416667}`, 200},
+		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_eu":false,"country_iso":"EB","city":"Bornyasherk","hostname":"localhost","latitude":63.416667,"longitude":10.416667,"asn":"AS59795","asn_org":"Hosting4Real"}`, 200},
 		{s.URL + "/port/foo", `{"error":"invalid port: foo"}`, 400},
 		{s.URL + "/port/0", `{"error":"invalid port: 0"}`, 400},
 		{s.URL + "/port/65537", `{"error":"invalid port: 65537"}`, 400},

@@ -23,13 +23,14 @@ lint: check-fmt vet
 install: deps
 	go install ./...
 
-databases := GeoLite2-City GeoLite2-Country
+databases := GeoLite2-City GeoLite2-Country GeoLite2-ASN
 
 $(databases):
 	mkdir -p data
 	curl -fsSL -m 30 https://geolite.maxmind.com/download/geoip/database/$@.tar.gz | tar $(TAR_OPTS) --strip-components=1 -C $(CURDIR)/data -xzf - '*.mmdb'
 	test ! -f data/GeoLite2-City.mmdb || mv data/GeoLite2-City.mmdb data/city.mmdb
 	test ! -f data/GeoLite2-Country.mmdb || mv data/GeoLite2-Country.mmdb data/country.mmdb
+	test ! -f data/GeoLite2-ASN.mmdb || mv data/GeoLite2-ASN.mmdb data/asn.mmdb
 
 geoip-download: $(databases)
 
@@ -42,7 +43,7 @@ docker-login:
 docker-test:
 	$(eval CONTAINER=$(shell docker run --rm --detach --publish-all $(DOCKER_IMAGE)))
 	$(eval DOCKER_PORT=$(shell docker port $(CONTAINER) | cut -d ":" -f 2))
-	curl -qfsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; docker stop $(CONTAINER)
+	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; docker stop $(CONTAINER)
 
 docker-push: docker-test docker-login
 	docker push $(DOCKER_IMAGE)
