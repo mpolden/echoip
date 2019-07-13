@@ -31,17 +31,18 @@ type Server struct {
 }
 
 type Response struct {
-	IP         net.IP   `json:"ip"`
-	IPDecimal  *big.Int `json:"ip_decimal"`
-	Country    string   `json:"country,omitempty"`
-	CountryEU  *bool    `json:"country_eu,omitempty"`
-	CountryISO string   `json:"country_iso,omitempty"`
-	City       string   `json:"city,omitempty"`
-	Hostname   string   `json:"hostname,omitempty"`
-	Latitude   float64  `json:"latitude,omitempty"`
-	Longitude  float64  `json:"longitude,omitempty"`
-	ASN        string   `json:"asn,omitempty"`
-	ASNOrg     string   `json:"asn_org,omitempty"`
+	IP         net.IP               `json:"ip"`
+	IPDecimal  *big.Int             `json:"ip_decimal"`
+	Country    string               `json:"country,omitempty"`
+	CountryEU  *bool                `json:"country_eu,omitempty"`
+	CountryISO string               `json:"country_iso,omitempty"`
+	City       string               `json:"city,omitempty"`
+	Hostname   string               `json:"hostname,omitempty"`
+	Latitude   float64              `json:"latitude,omitempty"`
+	Longitude  float64              `json:"longitude,omitempty"`
+	ASN        string               `json:"asn,omitempty"`
+	ASNOrg     string               `json:"asn_org,omitempty"`
+	UserAgent  *useragent.UserAgent `json:"user_agent,omitempty"`
 }
 
 type PortResponse struct {
@@ -104,6 +105,12 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if asn.AutonomousSystemNumber > 0 {
 		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
 	}
+	var userAgent *useragent.UserAgent
+	userAgentRaw := r.UserAgent()
+	if userAgentRaw != "" {
+		parsed := useragent.Parse(userAgentRaw)
+		userAgent = &parsed
+	}
 	return Response{
 		IP:         ip,
 		IPDecimal:  ipDecimal,
@@ -116,6 +123,7 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		Longitude:  city.Longitude,
 		ASN:        autonomousSystemNumber,
 		ASNOrg:     asn.AutonomousSystemOrganization,
+		UserAgent:  userAgent,
 	}, nil
 }
 
