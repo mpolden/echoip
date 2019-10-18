@@ -5,9 +5,10 @@ import (
 )
 
 type UserAgent struct {
-	Product string
-	Version string
-	Comment string
+	Product  string `json:"product,omitempty"`
+	Version  string `json:"version,omitempty"`
+	Comment  string `json:"comment,omitempty"`
+	RawValue string `json:"raw_value,omitempty"`
 }
 
 func Parse(s string) UserAgent {
@@ -31,8 +32,9 @@ func Parse(s string) UserAgent {
 		}
 	}
 	return UserAgent{
-		Product: parts[0],
-		Version: version,
-		Comment: comment,
+		Product:  parts[0],
+		Version:  version,
+		Comment:  comment,
+		RawValue: s,
 	}
 }
