@@ -1,6 +1,8 @@
 // +heroku install ./...
-// +heroku goVersion go1.12
+// +heroku goVersion go1.13
 module github.com/mpolden/echoip
+
+go 1.13
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
