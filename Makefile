@@ -4,15 +4,12 @@ ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
 endif
 
-all: deps lint test install
+all: lint test install
 
-deps:
-	go get ./...
-
-test: deps
+test:
 	go test ./...
 
-vet: deps
+vet:
 	go vet ./...
 
 check-fmt:
@@ -20,7 +17,7 @@ check-fmt:
 
 lint: check-fmt vet
 
-install: deps
+install:
 	go install ./...
 
 databases := GeoLite2-City GeoLite2-Country GeoLite2-ASN
