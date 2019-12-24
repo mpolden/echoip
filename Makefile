@@ -47,3 +47,9 @@ docker-test:
 
 docker-push: docker-test docker-login
 	docker push $(DOCKER_IMAGE)
+
+heroku-run: geoip-download
+ifndef PORT
+	$(error PORT must be set)
+endif
+	echoip -f data/country.mmdb -c data/city.mmdb -a data/asn.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$(PORT)
