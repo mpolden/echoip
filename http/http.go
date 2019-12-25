@@ -27,6 +27,7 @@ type Server struct {
 	IPHeaders  []string
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
+	cache      *Cache
 	gr         geo.Reader
 }
 
@@ -51,8 +52,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db geo.Reader) *Server {
-	return &Server{gr: db}
+func New(db geo.Reader, cache *Cache) *Server {
+	return &Server{cache: cache, gr: db}
 }
 
 func ipFromForwardedForHeader(v string) string {
@@ -93,6 +94,10 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if err != nil {
 		return Response{}, err
 	}
+	response, ok := s.cache.Get(ip)
+	if ok {
+		return *response, nil
+	}
 	ipDecimal := iputil.ToDecimal(ip)
 	country, _ := s.gr.Country(ip)
 	city, _ := s.gr.City(ip)
@@ -111,7 +116,7 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		parsed := useragent.Parse(userAgentRaw)
 		userAgent = &parsed
 	}
-	return Response{
+	response = &Response{
 		IP:         ip,
 		IPDecimal:  ipDecimal,
 		Country:    country.Name,
@@ -124,7 +129,9 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		ASN:        autonomousSystemNumber,
 		ASNOrg:     asn.AutonomousSystemOrganization,
 		UserAgent:  userAgent,
-	}, nil
+	}
+	s.cache.Set(ip, response)
+	return *response, nil
 }
 
 func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {

@@ -52,4 +52,4 @@ heroku-run: geoip-download
 ifndef PORT
 	$(error PORT must be set)
 endif
-	echoip -f data/country.mmdb -c data/city.mmdb -a data/asn.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$(PORT)
+	echoip -C 1000000 -f data/country.mmdb -c data/city.mmdb -a data/asn.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$(PORT)

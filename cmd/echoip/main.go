@@ -22,6 +22,7 @@ func main() {
 		PortLookup    bool     `short:"p" long:"port-lookup" description:"Enable port lookup"`
 		Template      string   `short:"t" long:"template" description:"Path to template" default:"index.html" value-name:"FILE"`
 		IPHeaders     []string `short:"H" long:"trusted-header" description:"Header to trust for remote IP, if present (e.g. X-Real-IP)" value-name:"NAME"`
+		CacheCapacity int      `short:"C" long:"cache-size" description:"Size of response cache. Set to 0 to disable" value-name:"SIZE"`
 	}
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
@@ -33,8 +34,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	server := http.New(r)
+	cache := http.NewCache(opts.CacheCapacity)
+	server := http.New(r, cache)
 	server.IPHeaders = opts.IPHeaders
 	if _, err := os.Stat(opts.Template); err == nil {
 		server.Template = opts.Template

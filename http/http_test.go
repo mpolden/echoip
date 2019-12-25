@@ -31,7 +31,7 @@ func (t *testDb) ASN(net.IP) (geo.ASN, error) {
 func (t *testDb) IsEmpty() bool { return false }
 
 func testServer() *Server {
-	return &Server{gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
+	return &Server{cache: NewCache(100), gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
