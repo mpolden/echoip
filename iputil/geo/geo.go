@@ -21,9 +21,9 @@ type Country struct {
 }
 
 type City struct {
-	Name      string
-	Latitude  float64
-	Longitude float64
+	Name       string
+	Latitude   float64
+	Longitude  float64
 	PostalCode string
 	Timezone   string
 	MetroCode  uint
