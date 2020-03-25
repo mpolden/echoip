@@ -34,6 +34,8 @@ type Server struct {
 type Response struct {
 	IP         net.IP               `json:"ip"`
 	IPDecimal  *big.Int             `json:"ip_decimal"`
+	RegionName string               `json:"region_name,omitempty"`
+	RegionCode string               `json:"region_code,omitempty"`
 	Country    string               `json:"country,omitempty"`
 	CountryEU  *bool                `json:"country_eu,omitempty"`
 	CountryISO string               `json:"country_iso,omitempty"`
@@ -44,6 +46,9 @@ type Response struct {
 	ASN        string               `json:"asn,omitempty"`
 	ASNOrg     string               `json:"asn_org,omitempty"`
 	UserAgent  *useragent.UserAgent `json:"user_agent,omitempty"`
+	PostalCode string               `json:"zip_code,omitempty"`
+	Timezone   string               `json:"time_zone,omitempty"`
+	MetroCode  uint                 `json:"metro_code,omitempty"`
 }
 
 type PortResponse struct {
@@ -129,6 +134,11 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		ASN:        autonomousSystemNumber,
 		ASNOrg:     asn.AutonomousSystemOrganization,
 		UserAgent:  userAgent,
+		PostalCode: city.PostalCode,
+		Timezone:   city.Timezone,
+		MetroCode:  city.MetroCode,
+		RegionName: city.RegionName,
+		RegionCode: city.RegionCode,
 	}
 	s.cache.Set(ip, response)
 	return *response, nil
