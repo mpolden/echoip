@@ -1,5 +1,6 @@
 DOCKER_IMAGE := mpolden/echoip
 OS := $(shell uname)
+SHELL := /bin/bash
 ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
 endif
@@ -34,19 +35,21 @@ endif
 
 geoip-download: $(databases)
 
+SUDO ?= $(shell if ! groups 2&>/dev/null | grep -q docker; then echo sudo --preserve-env=DOCKER_BUILDKIT,DOCKER_CLI_EXPERIMENTAL,COMPOSE_DOCKER_CLI_BUILD,HOME,PWD; fi)
+
 docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+	$(SUDO) docker build -t $(DOCKER_IMAGE) .
 
 docker-login:
-	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
+	@echo "$(DOCKER_PASSWORD)" | $(SUDO) docker login -u "$(DOCKER_USERNAME)" --password-stdin
 
 docker-test:
-	$(eval CONTAINER=$(shell docker run --rm --detach --publish-all $(DOCKER_IMAGE)))
-	$(eval DOCKER_PORT=$(shell docker port $(CONTAINER) | cut -d ":" -f 2))
-	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; docker stop $(CONTAINER)
+	$(eval CONTAINER=$(shell $(SUDO) docker run --rm --detach --publish-all $(DOCKER_IMAGE)))
+	$(eval DOCKER_PORT=$(shell $(SUDO) docker port $(CONTAINER) | cut -d ":" -f 2))
+	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; $(SUDO) docker stop $(CONTAINER)
 
 docker-push: docker-test docker-login
-	docker push $(DOCKER_IMAGE)
+	$(SUDO) docker push $(DOCKER_IMAGE)
 
 heroku-run: geoip-download
 ifndef PORT
