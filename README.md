@@ -106,6 +106,15 @@ Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
 
 `docker pull mpolden/echoip`
 
+### GeoIP support
+
+To build the Docker Image with GeoIP support follow the following steps:
+
+1. Clone the repo
+2. Get a license key. See https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/
+3. Run with replacing xxxxxxxxxxxxxxxx with the license key and USERNAME with your name: ``make docker-build GEOIP_LICENSE_KEY=xxxxxxxxxxxxxxxx DOCKER_IMAGE=USERNAME/echoip``
+4. Run the image with: ``docker run -p 8080:8080 USERNAME/echoip -f country.mmdb -c city.mmdb -a asn.mmdb
+
 ### Usage
 
 ```

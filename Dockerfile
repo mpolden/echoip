@@ -4,13 +4,19 @@ WORKDIR /go/src/github.com/mpolden/echoip
 COPY . .
 # Must build without cgo because libc is unavailable in runtime image
 ENV GO111MODULE=on CGO_ENABLED=0
-RUN make
+ARG GEOIP_LICENSE_KEY
+RUN if [ ${GEOIP_LICENSE_KEY:-} ]; then \
+    make all geoip-download ;\
+  else \
+    make all ;\
+  fi
 
 # Run
 FROM scratch
 EXPOSE 8080
 COPY --from=build \
      /go/bin/echoip \
+     /go/src/github.com/mpolden/echoip/data/ \
      /go/src/github.com/mpolden/echoip/index.html \
      /opt/echoip/
 WORKDIR /opt/echoip

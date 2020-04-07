@@ -36,7 +36,7 @@ endif
 geoip-download: $(databases)
 
 docker-build:
-	$(DOCKER) build -t $(DOCKER_IMAGE) .
+	$(DOCKER) build -t $(DOCKER_IMAGE) . --build-arg GEOIP_LICENSE_KEY
 
 docker-login:
 	@echo "$(DOCKER_PASSWORD)" | $(DOCKER) login -u "$(DOCKER_USERNAME)" --password-stdin
