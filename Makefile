@@ -1,3 +1,4 @@
+DOCKER ?= docker
 DOCKER_IMAGE ?= mpolden/echoip
 OS := $(shell uname)
 ifeq ($(OS),Linux)
@@ -35,18 +36,18 @@ endif
 geoip-download: $(databases)
 
 docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+	$(DOCKER) build -t $(DOCKER_IMAGE) .
 
 docker-login:
-	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
+	@echo "$(DOCKER_PASSWORD)" | $(DOCKER) login -u "$(DOCKER_USERNAME)" --password-stdin
 
 docker-test:
-	$(eval CONTAINER=$(shell docker run --rm --detach --publish-all $(DOCKER_IMAGE)))
-	$(eval DOCKER_PORT=$(shell docker port $(CONTAINER) | cut -d ":" -f 2))
-	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; docker stop $(CONTAINER)
+	$(eval CONTAINER=$(shell $(DOCKER) run --rm --detach --publish-all $(DOCKER_IMAGE)))
+	$(eval DOCKER_PORT=$(shell $(DOCKER) port $(CONTAINER) | cut -d ":" -f 2))
+	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; $(DOCKER) stop $(CONTAINER)
 
 docker-push: docker-test docker-login
-	docker push $(DOCKER_IMAGE)
+	$(DOCKER) push $(DOCKER_IMAGE)
 
 heroku-run: geoip-download
 ifndef PORT
