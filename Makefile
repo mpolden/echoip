@@ -35,6 +35,14 @@ endif
 
 geoip-download: $(databases)
 
+# Create an environment to build multiarch containers (https://github.com/docker/buildx/)
+docker-multiarch-builder:
+	DOCKER_BUILDKIT=1 $(DOCKER) build -o . git://github.com/docker/buildx
+	mkdir -p ~/.docker/cli-plugins
+	mv buildx ~/.docker/cli-plugins/docker-buildx
+	$(DOCKER) buildx create --name multiarch-builder --node multiarch-builder --driver docker-container --use
+	$(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
 docker-build:
 	$(DOCKER) build -t $(DOCKER_IMAGE) .
 
@@ -46,8 +54,8 @@ docker-test:
 	$(eval DOCKER_PORT=$(shell $(DOCKER) port $(CONTAINER) | cut -d ":" -f 2))
 	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; $(DOCKER) stop $(CONTAINER)
 
-docker-push: docker-test docker-login
-	$(DOCKER) push $(DOCKER_IMAGE)
+docker-push: docker-test docker-multiarch-builder docker-login
+	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
 heroku-run: geoip-download
 ifndef PORT
