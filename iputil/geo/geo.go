@@ -120,6 +120,7 @@ func (g *geoip) City(ip net.IP) (City, error) {
 	if !math.IsNaN(record.Location.Longitude) {
 		city.Longitude = record.Location.Longitude
 	}
+	// Metro code is US Only https://maxmind.github.io/GeoIP2-dotnet/doc/v2.7.1/html/P_MaxMind_GeoIP2_Model_Location_MetroCode.htm
 	if record.Location.MetroCode > 0 && record.Country.IsoCode == "US" {
 		city.MetroCode = record.Location.MetroCode
 	}
