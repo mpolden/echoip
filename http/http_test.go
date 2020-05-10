@@ -21,7 +21,7 @@ func (t *testDb) Country(net.IP) (geo.Country, error) {
 }
 
 func (t *testDb) City(net.IP) (geo.City, error) {
-	return geo.City{Name: "Bornyasherk", Latitude: 63.416667, Longitude: 10.416667}, nil
+	return geo.City{Name: "Bornyasherk", RegionName: "North Elbonia", RegionCode: "1234", MetroCode: 1234, PostalCode: "1234", Latitude: 63.416667, Longitude: 10.416667, Timezone: "Europe/Bornyasherk"}, nil
 }
 
 func (t *testDb) ASN(net.IP) (geo.ASN, error) {
@@ -134,7 +134,7 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_eu":false,"country_iso":"EB","city":"Bornyasherk","hostname":"localhost","latitude":63.416667,"longitude":10.416667,"asn":"AS59795","asn_org":"Hosting4Real","user_agent":{"product":"curl","version":"7.2.6.0","raw_value":"curl/7.2.6.0"}}`, 200},
+		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_iso":"EB","country_eu":false,"region_name":"North Elbonia","region_code":"1234","metro_code":1234,"zip_code":"1234","city":"Bornyasherk","latitude":63.416667,"longitude":10.416667,"time_zone":"Europe/Bornyasherk","asn":"AS59795","asn_org":"Hosting4Real","hostname":"localhost","user_agent":{"product":"curl","version":"7.2.6.0","raw_value":"curl/7.2.6.0"}}`, 200},
 		{s.URL + "/port/foo", `{"error":"invalid port: foo"}`, 400},
 		{s.URL + "/port/0", `{"error":"invalid port: 0"}`, 400},
 		{s.URL + "/port/65537", `{"error":"invalid port: 65537"}`, 400},

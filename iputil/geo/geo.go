@@ -21,9 +21,14 @@ type Country struct {
 }
 
 type City struct {
-	Name      string
-	Latitude  float64
-	Longitude float64
+	Name       string
+	Latitude   float64
+	Longitude  float64
+	PostalCode string
+	Timezone   string
+	MetroCode  uint
+	RegionName string
+	RegionCode string
 }
 
 type ASN struct {
@@ -101,12 +106,31 @@ func (g *geoip) City(ip net.IP) (City, error) {
 	if c, exists := record.City.Names["en"]; exists {
 		city.Name = c
 	}
+	if len(record.Subdivisions) > 0 {
+		if c, exists := record.Subdivisions[0].Names["en"]; exists {
+			city.RegionName = c
+		}
+		if record.Subdivisions[0].IsoCode != "" {
+			city.RegionCode = record.Subdivisions[0].IsoCode
+		}
+	}
 	if !math.IsNaN(record.Location.Latitude) {
 		city.Latitude = record.Location.Latitude
 	}
 	if !math.IsNaN(record.Location.Longitude) {
 		city.Longitude = record.Location.Longitude
 	}
+	// Metro code is US Only https://maxmind.github.io/GeoIP2-dotnet/doc/v2.7.1/html/P_MaxMind_GeoIP2_Model_Location_MetroCode.htm
+	if record.Location.MetroCode > 0 && record.Country.IsoCode == "US" {
+		city.MetroCode = record.Location.MetroCode
+	}
+	if record.Postal.Code != "" {
+		city.PostalCode = record.Postal.Code
+	}
+	if record.Location.TimeZone != "" {
+		city.Timezone = record.Location.TimeZone
+	}
+
 	return city, nil
 }
 
