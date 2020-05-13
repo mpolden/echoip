@@ -81,6 +81,7 @@ between IPv4 and IPv6 lookup.
 * JSON output
 * ASN, country and city lookup using the MaxMind GeoIP database
 * Port testing
+* All endpoints (except `/port`) can return information about a custom IP address specified via `?ip=` query parameter
 * Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 
 ## Why?

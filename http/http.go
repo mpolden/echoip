@@ -69,15 +69,27 @@ func ipFromForwardedForHeader(v string) string {
 	return v[:sep]
 }
 
-func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
+// ipFromRequest detects the IP address for this transaction.
+//
+// * `headers` - the specific HTTP headers to trust
+// * `r` - the incoming HTTP request
+// * `customIP` - whether to allow the IP to be pulled from query parameters
+func ipFromRequest(headers []string, r *http.Request, customIP bool) (net.IP, error) {
 	remoteIP := ""
-	for _, header := range headers {
-		remoteIP = r.Header.Get(header)
-		if http.CanonicalHeaderKey(header) == "X-Forwarded-For" {
-			remoteIP = ipFromForwardedForHeader(remoteIP)
+	if customIP && r.URL != nil {
+		if v, ok := r.URL.Query()["ip"]; ok {
+			remoteIP = v[0]
 		}
-		if remoteIP != "" {
-			break
+	}
+	if remoteIP == "" {
+		for _, header := range headers {
+			remoteIP = r.Header.Get(header)
+			if http.CanonicalHeaderKey(header) == "X-Forwarded-For" {
+				remoteIP = ipFromForwardedForHeader(remoteIP)
+			}
+			if remoteIP != "" {
+				break
+			}
 		}
 	}
 	if remoteIP == "" {
@@ -105,7 +117,7 @@ func userAgentFromRequest(r *http.Request) *useragent.UserAgent {
 }
 
 func (s *Server) newResponse(r *http.Request) (Response, error) {
-	ip, err := ipFromRequest(s.IPHeaders, r)
+	ip, err := ipFromRequest(s.IPHeaders, r, true)
 	if err != nil {
 		return Response{}, err
 	}
@@ -127,7 +139,6 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if asn.AutonomousSystemNumber > 0 {
 		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
 	}
-	userAgent := userAgentFromRequest(r)
 	response = &Response{
 		IP:         ip,
 		IPDecimal:  ipDecimal,
@@ -145,9 +156,9 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		ASN:        autonomousSystemNumber,
 		ASNOrg:     asn.AutonomousSystemOrganization,
 		Hostname:   hostname,
-		UserAgent:  userAgent,
 	}
 	s.cache.Set(ip, response)
+	response.UserAgent = userAgentFromRequest(r)
 	return *response, nil
 }
 
@@ -157,7 +168,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 	if err != nil || port < 1 || port > 65535 {
 		return PortResponse{Port: port}, fmt.Errorf("invalid port: %s", lastElement)
 	}
-	ip, err := ipFromRequest(s.IPHeaders, r)
+	ip, err := ipFromRequest(s.IPHeaders, r, false)
 	if err != nil {
 		return PortResponse{Port: port}, err
 	}
@@ -170,7 +181,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 }
 
 func (s *Server) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
-	ip, err := ipFromRequest(s.IPHeaders, r)
+	ip, err := ipFromRequest(s.IPHeaders, r, true)
 	if err != nil {
 		return internalServerError(err)
 	}
