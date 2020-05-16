@@ -122,6 +122,7 @@ Application Options:
   -p, --port-lookup            Enable port lookup
   -t, --template=FILE          Path to template (default: index.html)
   -H, --trusted-header=NAME    Header to trust for remote IP, if present (e.g. X-Real-IP)
+  -C, --cache-size=SIZE        Size of response cache. Set to 0 to disable
 
 Help Options:
   -h, --help                   Show this help message
