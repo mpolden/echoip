@@ -111,6 +111,7 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	}
 	response, ok := s.cache.Get(ip)
 	if ok {
+		// Not Caching the userAgent as it can vary for a given IP
 		response.UserAgent = userAgentFromRequest(r)
 		return *response, nil
 	}
