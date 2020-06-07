@@ -94,6 +94,16 @@ func ipFromRequest(headers []string, r *http.Request) (net.IP, error) {
 	return ip, nil
 }
 
+func userAgentFromRequest(r *http.Request) *useragent.UserAgent {
+	var userAgent *useragent.UserAgent
+	userAgentRaw := r.UserAgent()
+	if userAgentRaw != "" {
+		parsed := useragent.Parse(userAgentRaw)
+		userAgent = &parsed
+	}
+	return userAgent
+}
+
 func (s *Server) newResponse(r *http.Request) (Response, error) {
 	ip, err := ipFromRequest(s.IPHeaders, r)
 	if err != nil {
@@ -101,6 +111,8 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	}
 	response, ok := s.cache.Get(ip)
 	if ok {
+		// Not Caching the userAgent as it can vary for a given IP
+		response.UserAgent = userAgentFromRequest(r)
 		return *response, nil
 	}
 	ipDecimal := iputil.ToDecimal(ip)
@@ -115,12 +127,7 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if asn.AutonomousSystemNumber > 0 {
 		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
 	}
-	var userAgent *useragent.UserAgent
-	userAgentRaw := r.UserAgent()
-	if userAgentRaw != "" {
-		parsed := useragent.Parse(userAgentRaw)
-		userAgent = &parsed
-	}
+	userAgent := userAgentFromRequest(r)
 	response = &Response{
 		IP:         ip,
 		IPDecimal:  ipDecimal,
