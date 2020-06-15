@@ -3,6 +3,11 @@ language: minimal
 services:
   - docker
 
+addons:
+  apt:
+    packages:
+      - docker-ce
+
 script:
   - make docker-build
 
