@@ -84,6 +84,7 @@
         <p>Multiple command line HTTP clients are supported,
           including <a href="https://curl.haxx.se/">curl</a>, <a href="https://github.com/jkbrzt/httpie">httpie</a>, <a href="https://www.gnu.org/software/wget/">GNU
             Wget</a>, <a href="https://www.freebsd.org/cgi/man.cgi?fetch(1)">fetch</a>, and <a href="https://github.com/astaxie/bat">bat</a>.</p>
+        <p>All endpoints (except <code>/port</code>) can return information about a custom IP address specified via <code>?ip=</code> query parameter.</p>
       </div>
     </div>
     <div class="pure-g">
@@ -135,7 +136,6 @@ $ http {{ .Host }}/asn
 $ http {{ .Host }}/json
 {{ .JSON }}</pre>
         <p>Setting the <code>Accept: application/json</code> header also works as expected.</p>
-	<p>All endpoints (except <code>/port</code>) can return information about a custom IP address specified via <code>?ip=</code> query parameter.</p>
         <h2>Plain output</h2>
         <p>Always returns the IP address including a trailing newline, regardless of user agent.</p>
         <pre>
