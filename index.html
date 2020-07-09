@@ -135,6 +135,7 @@ $ http {{ .Host }}/asn
 $ http {{ .Host }}/json
 {{ .JSON }}</pre>
         <p>Setting the <code>Accept: application/json</code> header also works as expected.</p>
+	<p>All endpoints (except <code>/port</code>) can return information about a custom IP address specified via <code>?ip=</code> query parameter.</p>
         <h2>Plain output</h2>
         <p>Always returns the IP address including a trailing newline, regardless of user agent.</p>
         <pre>
