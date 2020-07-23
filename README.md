@@ -77,7 +77,7 @@ between IPv4 and IPv6 lookup.
 * Fast
 * Supports IPv6
 * Supports HTTPS
-* Supports common command-line clients (e.g. `curl`, `httpie`, `wget` and `fetch`)
+* Supports common command-line clients (e.g. `curl`, `httpie`, `ht`, `wget` and `fetch`)
 * JSON output
 * ASN, country and city lookup using the MaxMind GeoIP database
 * Port testing
