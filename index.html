@@ -82,7 +82,7 @@
         <h1>What is my IP address?</h1>
         <p><code class="ip">{{ .IP }}</code></p>
         <p>Multiple command line HTTP clients are supported,
-          including <a href="https://curl.haxx.se/">curl</a>, <a href="https://github.com/jkbrzt/httpie">httpie</a>, <a href="https://www.gnu.org/software/wget/">GNU
+          including <a href="https://curl.haxx.se/">curl</a>, <a href="https://github.com/jkbrzt/httpie">httpie</a>, <a href="https://github.com/nojima/httpie-go">httpie-go</a>, <a href="https://www.gnu.org/software/wget/">GNU
             Wget</a>, <a href="https://www.freebsd.org/cgi/man.cgi?fetch(1)">fetch</a>, and <a href="https://github.com/astaxie/bat">bat</a>.</p>
         <p>All endpoints (except <code>/port</code>) can return information about a custom IP address specified via <code>?ip=</code> query parameter.</p>
       </div>
@@ -95,6 +95,9 @@ $ curl {{ .Host }}
 {{ .IP }}
 
 $ http -b {{ .Host }}
+{{ .IP }}
+
+$ ht -b {{ .Host }}
 {{ .IP }}
 
 $ wget -qO- {{ .Host }}

@@ -214,6 +214,7 @@ func TestCLIMatcher(t *testing.T) {
 		{"Wget", true},
 		{"fetch libfetch/2.0", true},
 		{"HTTPie/0.9.3", true},
+		{"httpie-go/0.6.0", true},
 		{"Go 1.1 package http", true},
 		{"Go-http-client/1.1", true},
 		{"Go-http-client/2.0", true},
