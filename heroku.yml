@@ -1,5 +1,0 @@
-build:
-  languages:
-    - go
-run:
-  web: make heroku-run

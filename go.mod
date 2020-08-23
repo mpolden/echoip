@@ -1,5 +1,3 @@
-// +heroku install ./...
-// +heroku goVersion go1.13
 module github.com/mpolden/echoip
 
 go 1.13

@@ -60,12 +60,6 @@ docker-test:
 docker-push: docker-test docker-multiarch-builder docker-login
 	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
-heroku-run: geoip-download
-ifndef PORT
-	$(error PORT must be set)
-endif
-	echoip -C 1000000 -f data/country.mmdb -c data/city.mmdb -a data/asn.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$(PORT)
-
 xinstall:
 	env GOOS=$(XGOOS) GOARCH=$(XGOARCH) go install ./...
 
