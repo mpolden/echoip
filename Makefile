@@ -4,6 +4,9 @@ OS := $(shell uname)
 ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
 endif
+XGOARCH := amd64
+XGOOS := linux
+XBIN := $(XGOOS)_$(XGOARCH)/echoip
 
 all: lint test install
 
@@ -62,3 +65,13 @@ ifndef PORT
 	$(error PORT must be set)
 endif
 	echoip -C 1000000 -f data/country.mmdb -c data/city.mmdb -a data/asn.mmdb -p -r -H CF-Connecting-IP -H X-Forwarded-For -l :$(PORT)
+
+xinstall:
+	env GOOS=$(XGOOS) GOARCH=$(XGOARCH) go install ./...
+
+publish:
+ifndef DEST_PATH
+	$(error DEST_PATH must be set when publishing)
+endif
+	rsync -a $(GOPATH)/bin/$(XBIN) $(DEST_PATH)/$(XBIN)
+	@sha256sum $(GOPATH)/bin/$(XBIN)
