@@ -111,20 +111,21 @@ Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
 
 ```
 $ echoip -h
-Usage:
-  echoip [OPTIONS]
-
-Application Options:
-  -f, --country-db=FILE        Path to GeoIP country database
-  -c, --city-db=FILE           Path to GeoIP city database
-  -a, --asn-db=FILE            Path to GeoIP ASN database
-  -l, --listen=ADDR            Listening address (default: :8080)
-  -r, --reverse-lookup         Perform reverse hostname lookups
-  -p, --port-lookup            Enable port lookup
-  -t, --template=FILE          Path to template (default: index.html)
-  -H, --trusted-header=NAME    Header to trust for remote IP, if present (e.g. X-Real-IP)
-  -C, --cache-size=SIZE        Size of response cache. Set to 0 to disable
-
-Help Options:
-  -h, --help                   Show this help message
+Usage of echoip:
+  -C int
+    	Size of response cache. Set to 0 to disable
+  -H value
+    	Header to trust for remote IP, if present (e.g. X-Real-IP)
+  -a string
+    	Path to GeoIP ASN database
+  -c string
+    	Path to GeoIP city database
+  -f string
+    	Path to GeoIP country database
+  -l string
+    	Listening address (default ":8080")
+  -p	Enable port lookup
+  -r	Perform reverse hostname lookups
+  -t string
+    	Path to template (default "index.html")
 ```

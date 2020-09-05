@@ -4,7 +4,23 @@ import (
 	"fmt"
 	"net"
 	"testing"
+	"unsafe"
 )
+
+func TestCache(t *testing.T) {
+
+	c := NewCache(10)
+
+	for i := 0; i < 100; i++ {
+		ip := net.ParseIP(fmt.Sprintf("192.0.2.%d", i))
+		r := &Response{IP: ip}
+		fmt.Println(unsafe.Sizeof(r))
+		c.Set(ip, r)
+	}
+
+	fmt.Println(len(c.entries))
+	fmt.Println(len(c.keys))
+}
 
 func TestCacheCapacity(t *testing.T) {
 	var tests = []struct {

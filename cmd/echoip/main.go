@@ -1,9 +1,8 @@
 package main
 
 import (
+	"flag"
 	"log"
-
-	flags "github.com/jessevdk/go-flags"
 
 	"os"
 
@@ -12,54 +11,66 @@ import (
 	"github.com/mpolden/echoip/iputil/geo"
 )
 
+type multiValueFlag []string
+
+func (f *multiValueFlag) String() string {
+	vs := ""
+	for i, v := range *f {
+		vs += v
+		if i < len(*f)-1 {
+			vs += ", "
+		}
+	}
+	return vs
+}
+
+func (f *multiValueFlag) Set(v string) error {
+	*f = append(*f, v)
+	return nil
+}
+
 func main() {
-	var opts struct {
-		CountryDBPath string   `short:"f" long:"country-db" description:"Path to GeoIP country database" value-name:"FILE" default:""`
-		CityDBPath    string   `short:"c" long:"city-db" description:"Path to GeoIP city database" value-name:"FILE" default:""`
-		ASNDBPath     string   `short:"a" long:"asn-db" description:"Path to GeoIP ASN database" value-name:"FILE" default:""`
-		Listen        string   `short:"l" long:"listen" description:"Listening address" value-name:"ADDR" default:":8080"`
-		ReverseLookup bool     `short:"r" long:"reverse-lookup" description:"Perform reverse hostname lookups"`
-		PortLookup    bool     `short:"p" long:"port-lookup" description:"Enable port lookup"`
-		Template      string   `short:"t" long:"template" description:"Path to template" default:"index.html" value-name:"FILE"`
-		IPHeaders     []string `short:"H" long:"trusted-header" description:"Header to trust for remote IP, if present (e.g. X-Real-IP)" value-name:"NAME"`
-		CacheCapacity int      `short:"C" long:"cache-size" description:"Size of response cache. Set to 0 to disable" value-name:"SIZE"`
-	}
-	_, err := flags.ParseArgs(&opts, os.Args)
-	if err != nil {
-		os.Exit(1)
-	}
+	countryFile := flag.String("f", "", "Path to GeoIP country database")
+	cityFile := flag.String("c", "", "Path to GeoIP city database")
+	asnFile := flag.String("a", "", "Path to GeoIP ASN database")
+	listen := flag.String("l", ":8080", "Listening address")
+	reverseLookup := flag.Bool("r", false, "Perform reverse hostname lookups")
+	portLookup := flag.Bool("p", false, "Enable port lookup")
+	template := flag.String("t", "index.html", "Path to template")
+	cacheSize := flag.Int("C", 0, "Size of response cache. Set to 0 to disable")
+	var headers multiValueFlag
+	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
+	flag.Parse()
 
 	log := log.New(os.Stderr, "echoip: ", 0)
-	r, err := geo.Open(opts.CountryDBPath, opts.CityDBPath, opts.ASNDBPath)
+	r, err := geo.Open(*countryFile, *cityFile, *asnFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cache := http.NewCache(opts.CacheCapacity)
+	cache := http.NewCache(*cacheSize)
 	server := http.New(r, cache)
-	server.IPHeaders = opts.IPHeaders
-	if _, err := os.Stat(opts.Template); err == nil {
-		server.Template = opts.Template
+	server.IPHeaders = headers
+	if _, err := os.Stat(*template); err == nil {
+		server.Template = *template
 	} else {
-		log.Printf("Not configuring default handler: Template not found: %s", opts.Template)
+		log.Printf("Not configuring default handler: Template not found: %s", *template)
 	}
-	if opts.ReverseLookup {
+	if *reverseLookup {
 		log.Println("Enabling reverse lookup")
 		server.LookupAddr = iputil.LookupAddr
 	}
-	if opts.PortLookup {
+	if *portLookup {
 		log.Println("Enabling port lookup")
 		server.LookupPort = iputil.LookupPort
 	}
-	if len(opts.IPHeaders) > 0 {
-		log.Printf("Trusting header(s) %+v to contain correct remote IP", opts.IPHeaders)
+	if len(headers) > 0 {
+		log.Printf("Trusting remote IP from header(s): %s", headers.String())
 	}
-
-	listen := opts.Listen
-	if listen == ":8080" {
-		listen = "0.0.0.0:8080"
+	if *cacheSize > 0 {
+		log.Printf("Cache capacity set to %d", *cacheSize)
 	}
-	log.Printf("Listening on http://%s", listen)
-	if err := server.ListenAndServe(opts.Listen); err != nil {
+	log.Printf("Listening on http://%s", *listen)
+	if err := server.ListenAndServe(*listen); err != nil {
 		log.Fatal(err)
 	}
 }
