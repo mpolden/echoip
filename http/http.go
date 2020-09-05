@@ -7,10 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"net/http/pprof"
+
 	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
 	"github.com/mpolden/echoip/useragent"
-	"net/http/pprof"
 
 	"math/big"
 	"net"
@@ -125,9 +126,9 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	}
 	response, ok := s.cache.Get(ip)
 	if ok {
-		// Not Caching the userAgent as it can vary for a given IP
+		// Do not cache user agent
 		response.UserAgent = userAgentFromRequest(r)
-		return *response, nil
+		return response, nil
 	}
 	ipDecimal := iputil.ToDecimal(ip)
 	country, _ := s.gr.Country(ip)
@@ -141,7 +142,7 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	if asn.AutonomousSystemNumber > 0 {
 		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
 	}
-	response = &Response{
+	response = Response{
 		IP:         ip,
 		IPDecimal:  ipDecimal,
 		Country:    country.Name,
@@ -161,7 +162,7 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 	}
 	s.cache.Set(ip, response)
 	response.UserAgent = userAgentFromRequest(r)
-	return *response, nil
+	return response, nil
 }
 
 func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {

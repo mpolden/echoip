@@ -9,7 +9,7 @@ import (
 type Cache struct {
 	capacity int
 	mu       sync.RWMutex
-	entries  map[uint64]*Response
+	entries  map[uint64]Response
 	keys     []uint64
 }
 
@@ -19,7 +19,7 @@ func NewCache(capacity int) *Cache {
 	}
 	return &Cache{
 		capacity: capacity,
-		entries:  make(map[uint64]*Response),
+		entries:  make(map[uint64]Response),
 		keys:     make([]uint64, 0, capacity),
 	}
 }
@@ -30,7 +30,7 @@ func key(ip net.IP) uint64 {
 	return h.Sum64()
 }
 
-func (c *Cache) Set(ip net.IP, resp *Response) {
+func (c *Cache) Set(ip net.IP, resp Response) {
 	if c.capacity == 0 {
 		return
 	}
@@ -45,7 +45,7 @@ func (c *Cache) Set(ip net.IP, resp *Response) {
 	c.keys = append(c.keys, k)
 }
 
-func (c *Cache) Get(ip net.IP) (*Response, bool) {
+func (c *Cache) Get(ip net.IP) (Response, bool) {
 	k := key(ip)
 	c.mu.RLock()
 	defer c.mu.RUnlock()
