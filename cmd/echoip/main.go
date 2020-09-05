@@ -38,6 +38,7 @@ func main() {
 	portLookup := flag.Bool("p", false, "Enable port lookup")
 	template := flag.String("t", "index.html", "Path to template")
 	cacheSize := flag.Int("C", 0, "Size of response cache. Set to 0 to disable")
+	profile := flag.Bool("P", false, "Enables profiling handlers")
 	var headers multiValueFlag
 	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
 	flag.Parse()
@@ -48,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 	cache := http.NewCache(*cacheSize)
-	server := http.New(r, cache)
+	server := http.New(r, cache, *profile)
 	server.IPHeaders = headers
 	if _, err := os.Stat(*template); err == nil {
 		server.Template = *template
@@ -68,6 +69,9 @@ func main() {
 	}
 	if *cacheSize > 0 {
 		log.Printf("Cache capacity set to %d", *cacheSize)
+	}
+	if *profile {
+		log.Printf("Enabling profiling handlers")
 	}
 	log.Printf("Listening on http://%s", *listen)
 	if err := server.ListenAndServe(*listen); err != nil {

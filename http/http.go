@@ -10,6 +10,7 @@ import (
 	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
 	"github.com/mpolden/echoip/useragent"
+	"net/http/pprof"
 
 	"math/big"
 	"net"
@@ -29,6 +30,7 @@ type Server struct {
 	LookupPort func(net.IP, uint64) error
 	cache      *Cache
 	gr         geo.Reader
+	profile    bool
 }
 
 type Response struct {
@@ -57,8 +59,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db geo.Reader, cache *Cache) *Server {
-	return &Server{cache: cache, gr: db}
+func New(db geo.Reader, cache *Cache, profile bool) *Server {
+	return &Server{cache: cache, gr: db, profile: profile}
 }
 
 func ipFromForwardedForHeader(v string) string {
@@ -325,6 +327,13 @@ func cliMatcher(r *http.Request) bool {
 
 type appHandler func(http.ResponseWriter, *http.Request) *appError
 
+func wrapHandlerFunc(f http.HandlerFunc) appHandler {
+	return func(w http.ResponseWriter, r *http.Request) *appError {
+		f.ServeHTTP(w, r)
+		return nil
+	}
+}
+
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError
 		// When Content-Type for error is JSON, we need to marshal the response into JSON
@@ -377,6 +386,15 @@ func (s *Server) Handler() http.Handler {
 	// Port testing
 	if s.LookupPort != nil {
 		r.RoutePrefix("GET", "/port/", s.PortHandler)
+	}
+
+	// Profiling
+	if s.profile {
+		r.Route("GET", "/debug/pprof/cmdline", wrapHandlerFunc(pprof.Cmdline))
+		r.Route("GET", "/debug/pprof/profile", wrapHandlerFunc(pprof.Profile))
+		r.Route("GET", "/debug/pprof/symbol", wrapHandlerFunc(pprof.Symbol))
+		r.Route("GET", "/debug/pprof/trace", wrapHandlerFunc(pprof.Trace))
+		r.RoutePrefix("GET", "/debug/pprof/", wrapHandlerFunc(pprof.Index))
 	}
 
 	return r.Handler()
