@@ -1,6 +1,7 @@
 package http
 
 import (
+	"container/list"
 	"hash/fnv"
 	"net"
 	"sync"
@@ -10,17 +11,18 @@ type Cache struct {
 	capacity int
 	mu       sync.RWMutex
 	entries  map[uint64]Response
-	keys     []uint64
+	keys     *list.List
 }
 
 func NewCache(capacity int) *Cache {
 	if capacity < 0 {
 		capacity = 0
 	}
+	keys := list.New()
 	return &Cache{
 		capacity: capacity,
 		entries:  make(map[uint64]Response),
-		keys:     make([]uint64, 0, capacity),
+		keys:     keys,
 	}
 }
 
@@ -37,12 +39,14 @@ func (c *Cache) Set(ip net.IP, resp Response) {
 	k := key(ip)
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if len(c.entries) == c.capacity && c.capacity > 0 {
-		delete(c.entries, c.keys[0])
-		c.keys = c.keys[1:]
+	if len(c.entries) == c.capacity {
+		// At capacity. Remove the oldest entry
+		oldest := c.keys.Front()
+		delete(c.entries, oldest.Value.(uint64))
+		c.keys.Remove(oldest)
 	}
 	c.entries[k] = resp
-	c.keys = append(c.keys, k)
+	c.keys.PushBack(k)
 }
 
 func (c *Cache) Get(ip net.IP) (Response, bool) {
