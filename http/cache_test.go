@@ -39,3 +39,18 @@ func TestCacheCapacity(t *testing.T) {
 		}
 	}
 }
+
+func TestCacheDuplicate(t *testing.T) {
+	c := NewCache(10)
+	ip := net.ParseIP("192.0.2.1")
+	response := Response{IP: ip}
+	c.Set(ip, response)
+	c.Set(ip, response)
+	want := 1
+	if got := len(c.entries); got != want {
+		t.Errorf("want %d entries, got %d", want, got)
+	}
+	if got := c.values.Len(); got != want {
+		t.Errorf("want %d values, got %d", want, got)
+	}
+}

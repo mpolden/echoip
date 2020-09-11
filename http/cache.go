@@ -10,19 +10,18 @@ import (
 type Cache struct {
 	capacity int
 	mu       sync.RWMutex
-	entries  map[uint64]Response
-	keys     *list.List
+	entries  map[uint64]*list.Element
+	values   *list.List
 }
 
 func NewCache(capacity int) *Cache {
 	if capacity < 0 {
 		capacity = 0
 	}
-	keys := list.New()
 	return &Cache{
 		capacity: capacity,
-		entries:  make(map[uint64]Response),
-		keys:     keys,
+		entries:  make(map[uint64]*list.Element),
+		values:   list.New(),
 	}
 }
 
@@ -41,12 +40,17 @@ func (c *Cache) Set(ip net.IP, resp Response) {
 	defer c.mu.Unlock()
 	if len(c.entries) == c.capacity {
 		// At capacity. Remove the oldest entry
-		oldest := c.keys.Front()
-		delete(c.entries, oldest.Value.(uint64))
-		c.keys.Remove(oldest)
+		oldest := c.values.Front()
+		oldestValue := oldest.Value.(Response)
+		oldestKey := key(oldestValue.IP)
+		delete(c.entries, oldestKey)
+		c.values.Remove(oldest)
 	}
-	c.entries[k] = resp
-	c.keys.PushBack(k)
+	current, ok := c.entries[k]
+	if ok {
+		c.values.Remove(current)
+	}
+	c.entries[k] = c.values.PushBack(resp)
 }
 
 func (c *Cache) Get(ip net.IP) (Response, bool) {
@@ -54,5 +58,8 @@ func (c *Cache) Get(ip net.IP) (Response, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	r, ok := c.entries[k]
-	return r, ok
+	if !ok {
+		return Response{}, false
+	}
+	return r.Value.(Response), true
 }
