@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -271,6 +272,30 @@ func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
+func (s *Server) cacheResizeHandler(w http.ResponseWriter, r *http.Request) *appError {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
+	}
+	capacity, err := strconv.Atoi(string(body))
+	if err != nil {
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
+	}
+	if err := s.cache.Resize(capacity); err != nil {
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
+	}
+	data := struct {
+		Message string `json:"message"`
+	}{fmt.Sprintf("Changed cache capacity to %d.", capacity)}
+	b, err := json.Marshal(data)
+	if err != nil {
+		return internalServerError(err).AsJSON()
+	}
+	w.Header().Set("Content-Type", jsonMediaType)
+	w.Write(b)
+	return nil
+}
+
 func (s *Server) cacheHandler(w http.ResponseWriter, r *http.Request) *appError {
 	cacheStats := s.cache.Stats()
 	var data = struct {
@@ -409,6 +434,7 @@ func (s *Server) Handler() http.Handler {
 
 	// Profiling
 	if s.profile {
+		r.Route("POST", "/debug/cache/resize", s.cacheResizeHandler)
 		r.Route("GET", "/debug/cache/", s.cacheHandler)
 		r.Route("GET", "/debug/pprof/cmdline", wrapHandlerFunc(pprof.Cmdline))
 		r.Route("GET", "/debug/pprof/profile", wrapHandlerFunc(pprof.Profile))

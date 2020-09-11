@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/mpolden/echoip/iputil/geo"
@@ -54,6 +55,23 @@ func httpGet(url string, acceptMediaType string, userAgent string) (string, int,
 		return "", 0, err
 	}
 	return string(data), res.StatusCode, nil
+}
+
+func httpPost(url, body string) (*http.Response, string, error) {
+	r, err := http.NewRequest(http.MethodPost, url, strings.NewReader(body))
+	if err != nil {
+		return nil, "", err
+	}
+	res, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return nil, "", err
+	}
+	defer res.Body.Close()
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	return res, string(data), nil
 }
 
 func TestCLIHandlers(t *testing.T) {
@@ -170,6 +188,21 @@ func TestCacheHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := `{"size":0,"capacity":100}`
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestCacheResizeHandler(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+	srv := testServer()
+	srv.profile = true
+	s := httptest.NewServer(srv.Handler())
+	_, got, err := httpPost(s.URL+"/debug/cache/resize", "10")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"message":"Changed cache capacity to 10."}`
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}

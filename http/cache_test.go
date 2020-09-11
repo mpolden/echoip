@@ -54,3 +54,23 @@ func TestCacheDuplicate(t *testing.T) {
 		t.Errorf("want %d values, got %d", want, got)
 	}
 }
+
+func TestCacheResize(t *testing.T) {
+	c := NewCache(10)
+	for i := 1; i <= 10; i++ {
+		ip := net.ParseIP(fmt.Sprintf("192.0.2.%d", i))
+		r := Response{IP: ip}
+		c.Set(ip, r)
+	}
+	if got, want := len(c.entries), 10; got != want {
+		t.Errorf("want %d entries, got %d", want, got)
+	}
+	if err := c.Resize(5); err != nil {
+		t.Fatal(err)
+	}
+	r := Response{IP: net.ParseIP("192.0.2.42")}
+	c.Set(r.IP, r)
+	if got, want := len(c.entries), 5; got != want {
+		t.Errorf("want %d entries, got %d", want, got)
+	}
+}

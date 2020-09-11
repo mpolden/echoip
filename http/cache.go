@@ -44,13 +44,17 @@ func (c *Cache) Set(ip net.IP, resp Response) {
 	k := key(ip)
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if len(c.entries) == c.capacity {
-		// At capacity. Remove the oldest entry
-		oldest := c.values.Front()
-		oldestValue := oldest.Value.(Response)
-		oldestKey := key(oldestValue.IP)
-		delete(c.entries, oldestKey)
-		c.values.Remove(oldest)
+	minEvictions := len(c.entries) - c.capacity + 1
+	if minEvictions > 0 { // At or above capacity. Shrink the cache
+		evicted := 0
+		for el := c.values.Front(); el != nil && evicted < minEvictions; {
+			value := el.Value.(Response)
+			delete(c.entries, key(value.IP))
+			next := el.Next()
+			c.values.Remove(el)
+			el = next
+			evicted++
+		}
 	}
 	current, ok := c.entries[k]
 	if ok {
@@ -68,6 +72,16 @@ func (c *Cache) Get(ip net.IP) (Response, bool) {
 		return Response{}, false
 	}
 	return r.Value.(Response), true
+}
+
+func (c *Cache) Resize(capacity int) error {
+	if capacity < 0 {
+		return fmt.Errorf("invalid capacity: %d\n", capacity)
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.capacity = capacity
+	return nil
 }
 
 func (c *Cache) Stats() CacheStats {
