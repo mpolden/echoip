@@ -187,7 +187,7 @@ func TestCacheHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"size":0,"capacity":100}`
+	want := `{"size":0,"capacity":100,"evictions":0}`
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}

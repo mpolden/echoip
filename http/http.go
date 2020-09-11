@@ -299,11 +299,13 @@ func (s *Server) cacheResizeHandler(w http.ResponseWriter, r *http.Request) *app
 func (s *Server) cacheHandler(w http.ResponseWriter, r *http.Request) *appError {
 	cacheStats := s.cache.Stats()
 	var data = struct {
-		Size     int `json:"size"`
-		Capacity int `json:"capacity"`
+		Size      int    `json:"size"`
+		Capacity  int    `json:"capacity"`
+		Evictions uint64 `json:"evictions"`
 	}{
 		cacheStats.Size,
 		cacheStats.Capacity,
+		cacheStats.Evictions,
 	}
 	b, err := json.Marshal(data)
 	if err != nil {

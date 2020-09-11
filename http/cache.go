@@ -9,15 +9,17 @@ import (
 )
 
 type Cache struct {
-	capacity int
-	mu       sync.RWMutex
-	entries  map[uint64]*list.Element
-	values   *list.List
+	capacity  int
+	mu        sync.RWMutex
+	entries   map[uint64]*list.Element
+	values    *list.List
+	evictions uint64
 }
 
 type CacheStats struct {
-	Capacity int
-	Size     int
+	Capacity  int
+	Size      int
+	Evictions uint64
 }
 
 func NewCache(capacity int) *Cache {
@@ -55,6 +57,7 @@ func (c *Cache) Set(ip net.IP, resp Response) {
 			el = next
 			evicted++
 		}
+		c.evictions += uint64(evicted)
 	}
 	current, ok := c.entries[k]
 	if ok {
@@ -81,6 +84,7 @@ func (c *Cache) Resize(capacity int) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.capacity = capacity
+	c.evictions = 0
 	return nil
 }
 
@@ -88,7 +92,8 @@ func (c *Cache) Stats() CacheStats {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return CacheStats{
-		Size:     len(c.entries),
-		Capacity: c.capacity,
+		Size:      len(c.entries),
+		Capacity:  c.capacity,
+		Evictions: c.evictions,
 	}
 }
