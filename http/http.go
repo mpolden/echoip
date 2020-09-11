@@ -271,6 +271,24 @@ func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	return nil
 }
 
+func (s *Server) cacheHandler(w http.ResponseWriter, r *http.Request) *appError {
+	cacheStats := s.cache.Stats()
+	var data = struct {
+		Size     int `json:"size"`
+		Capacity int `json:"capacity"`
+	}{
+		cacheStats.Size,
+		cacheStats.Capacity,
+	}
+	b, err := json.Marshal(data)
+	if err != nil {
+		return internalServerError(err).AsJSON()
+	}
+	w.Header().Set("Content-Type", jsonMediaType)
+	w.Write(b)
+	return nil
+}
+
 func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
@@ -391,6 +409,7 @@ func (s *Server) Handler() http.Handler {
 
 	// Profiling
 	if s.profile {
+		r.Route("GET", "/debug/cache/", s.cacheHandler)
 		r.Route("GET", "/debug/pprof/cmdline", wrapHandlerFunc(pprof.Cmdline))
 		r.Route("GET", "/debug/pprof/profile", wrapHandlerFunc(pprof.Profile))
 		r.Route("GET", "/debug/pprof/symbol", wrapHandlerFunc(pprof.Symbol))

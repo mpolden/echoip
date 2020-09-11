@@ -2,6 +2,7 @@ package http
 
 import (
 	"container/list"
+	"fmt"
 	"hash/fnv"
 	"net"
 	"sync"
@@ -12,6 +13,11 @@ type Cache struct {
 	mu       sync.RWMutex
 	entries  map[uint64]*list.Element
 	values   *list.List
+}
+
+type CacheStats struct {
+	Capacity int
+	Size     int
 }
 
 func NewCache(capacity int) *Cache {
@@ -62,4 +68,13 @@ func (c *Cache) Get(ip net.IP) (Response, bool) {
 		return Response{}, false
 	}
 	return r.Value.(Response), true
+}
+
+func (c *Cache) Stats() CacheStats {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return CacheStats{
+		Size:     len(c.entries),
+		Capacity: c.capacity,
+	}
 }

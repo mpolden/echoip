@@ -160,6 +160,21 @@ func TestJSONHandlers(t *testing.T) {
 	}
 }
 
+func TestCacheHandler(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+	srv := testServer()
+	srv.profile = true
+	s := httptest.NewServer(srv.Handler())
+	got, _, err := httpGet(s.URL+"/debug/cache/", jsonMediaType, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"size":0,"capacity":100}`
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestIPFromRequest(t *testing.T) {
 	var tests = []struct {
 		remoteAddr     string
