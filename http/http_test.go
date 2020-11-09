@@ -127,7 +127,7 @@ func TestDisabledHandlers(t *testing.T) {
 		{s.URL + "/country", "404 page not found", 404},
 		{s.URL + "/country-iso", "404 page not found", 404},
 		{s.URL + "/city", "404 page not found", 404},
-		{s.URL + "/json", `{"ip":"127.0.0.1","ip_decimal":2130706433}`, 200},
+		{s.URL + "/json", "{\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433\n}", 200},
 	}
 
 	for _, tt := range tests {
@@ -153,14 +153,14 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, `{"ip":"127.0.0.1","ip_decimal":2130706433,"country":"Elbonia","country_iso":"EB","country_eu":false,"region_name":"North Elbonia","region_code":"1234","metro_code":1234,"zip_code":"1234","city":"Bornyasherk","latitude":63.416667,"longitude":10.416667,"time_zone":"Europe/Bornyasherk","asn":"AS59795","asn_org":"Hosting4Real","hostname":"localhost","user_agent":{"product":"curl","version":"7.2.6.0","raw_value":"curl/7.2.6.0"}}`, 200},
-		{s.URL + "/port/foo", `{"error":"invalid port: foo"}`, 400},
-		{s.URL + "/port/0", `{"error":"invalid port: 0"}`, 400},
-		{s.URL + "/port/65537", `{"error":"invalid port: 65537"}`, 400},
-		{s.URL + "/port/31337", `{"ip":"127.0.0.1","port":31337,"reachable":true}`, 200},
-		{s.URL + "/port/80", `{"ip":"127.0.0.1","port":80,"reachable":true}`, 200},            // checking that our test server is reachable on port 80
-		{s.URL + "/port/80?ip=1.3.3.7", `{"ip":"127.0.0.1","port":80,"reachable":true}`, 200}, // ensuring that the "ip" parameter is not usable to check remote host ports
-		{s.URL + "/foo", `{"error":"404 page not found"}`, 404},
+		{s.URL, "{\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433,\n  \"country\": \"Elbonia\",\n  \"country_iso\": \"EB\",\n  \"country_eu\": false,\n  \"region_name\": \"North Elbonia\",\n  \"region_code\": \"1234\",\n  \"metro_code\": 1234,\n  \"zip_code\": \"1234\",\n  \"city\": \"Bornyasherk\",\n  \"latitude\": 63.416667,\n  \"longitude\": 10.416667,\n  \"time_zone\": \"Europe/Bornyasherk\",\n  \"asn\": \"AS59795\",\n  \"asn_org\": \"Hosting4Real\",\n  \"hostname\": \"localhost\",\n  \"user_agent\": {\n    \"product\": \"curl\",\n    \"version\": \"7.2.6.0\",\n    \"raw_value\": \"curl/7.2.6.0\"\n  }\n}", 200},
+		{s.URL + "/port/foo", "{\n  \"error\": \"invalid port: foo\"\n}", 400},
+		{s.URL + "/port/0", "{\n  \"error\": \"invalid port: 0\"\n}", 400},
+		{s.URL + "/port/65537", "{\n  \"error\": \"invalid port: 65537\"\n}", 400},
+		{s.URL + "/port/31337", "{\n  \"ip\": \"127.0.0.1\",\n  \"port\": 31337,\n  \"reachable\": true\n}", 200},
+		{s.URL + "/port/80", "{\n  \"ip\": \"127.0.0.1\",\n  \"port\": 80,\n  \"reachable\": true\n}", 200},            // checking that our test server is reachable on port 80
+		{s.URL + "/port/80?ip=1.3.3.7", "{\n  \"ip\": \"127.0.0.1\",\n  \"port\": 80,\n  \"reachable\": true\n}", 200}, // ensuring that the "ip" parameter is not usable to check remote host ports
+		{s.URL + "/foo", "{\n  \"error\": \"404 page not found\"\n}", 404},
 		{s.URL + "/health", `{"status":"OK"}`, 200},
 	}
 
@@ -187,7 +187,7 @@ func TestCacheHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"size":0,"capacity":100,"evictions":0}`
+	want := "{\n  \"size\": 0,\n  \"capacity\": 100,\n  \"evictions\": 0\n}"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -202,7 +202,7 @@ func TestCacheResizeHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"message":"Changed cache capacity to 10."}`
+	want := "{\n  \"message\": \"Changed cache capacity to 10.\"\n}"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}

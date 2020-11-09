@@ -243,7 +243,7 @@ func (s *Server) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
-	b, err := json.Marshal(response)
+	b, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
@@ -263,7 +263,7 @@ func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
-	b, err := json.Marshal(response)
+	b, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
@@ -287,7 +287,7 @@ func (s *Server) cacheResizeHandler(w http.ResponseWriter, r *http.Request) *app
 	data := struct {
 		Message string `json:"message"`
 	}{fmt.Sprintf("Changed cache capacity to %d.", capacity)}
-	b, err := json.Marshal(data)
+	b, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
@@ -307,7 +307,7 @@ func (s *Server) cacheHandler(w http.ResponseWriter, r *http.Request) *appError 
 		cacheStats.Capacity,
 		cacheStats.Evictions,
 	}
-	b, err := json.Marshal(data)
+	b, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
@@ -387,7 +387,7 @@ func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			var data = struct {
 				Error string `json:"error"`
 			}{e.Message}
-			b, err := json.Marshal(data)
+			b, err := json.MarshalIndent(data, "", "  ")
 			if err != nil {
 				panic(err)
 			}
