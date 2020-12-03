@@ -42,6 +42,10 @@ func main() {
 	var headers multiValueFlag
 	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
 	flag.Parse()
+	if len(flag.Args()) != 0 {
+		flag.Usage()
+		return
+	}
 
 	log := log.New(os.Stderr, "echoip: ", 0)
 	r, err := geo.Open(*countryFile, *cityFile, *asnFile)
