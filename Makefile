@@ -69,3 +69,6 @@ ifndef DEST_PATH
 endif
 	rsync -a $(GOPATH)/bin/$(XBIN) $(DEST_PATH)/$(XBIN)
 	@sha256sum $(GOPATH)/bin/$(XBIN)
+
+run:
+	go run cmd/echoip/main.go -a data/asn.mmdb -c data/city.mmdb -f data/country.mmdb -H x-forwarded-for -r

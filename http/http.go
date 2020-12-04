@@ -321,7 +321,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return internalServerError(err)
 	}
-	t, err := template.ParseFiles(s.Template)
+	t, err := template.ParseGlob(s.Template + "/*")
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -329,6 +329,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return internalServerError(err)
 	}
+
 	var data = struct {
 		Response
 		Host         string

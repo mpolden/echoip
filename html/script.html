@@ -1,0 +1,105 @@
+<script lang="text/javascript">
+  let host = "{{ .Host }}";
+  let jsonObj = "{{ .JSON }}";
+  let data = JSON.parse(jsonObj);
+  let tool = "curl";
+  let commandBox, widgetBox, compositePath, commandStr;
+  let path
+  let ipQuery, portQuery
+  let ipCheckBox, portCheckBox
+  let ip = ''
+
+  window.onload = (event) => {
+     commandBox = document.getElementById('command');
+     widgetBox = document.getElementById('output');
+     ipCheckBox = document.getElementById('ipCheckBox')
+     portCheckBox = document.getElementById('portCheckBox')
+     reset()
+     setcommdStr()
+     changeInput("ip")
+  }
+
+  function reset() {
+    path = '';
+    ipQuery = '';
+    portQuery = '';
+  }
+
+  function setcommdStr() {
+    compositePath = `${path}${ipQuery}${portQuery}`;
+    commandStr = `${tool} ${host}/${compositePath}`;
+    commandBox.innerText = commandStr;
+  }
+
+  function changeInput(input) {
+    path = input
+    portCheckBox.checked = false;
+    portQuery = ""
+    if (path === "json") {
+      output.innerText = jsonObj
+    } else if (path === "country-iso") {
+      output.innerText = data["country_iso"]
+    }
+    else {
+      output.innerText = data[path]
+      if (path === "ip") { path = "" }
+    }
+    setcommdStr()
+  }
+
+  function enableIP(cb) {
+    portCheckBox.checked = false;
+    // reset();
+    if (cb.checked) {
+      ipQuery = `?ip=${ip}`;
+      portQuery = ""
+    } else {
+      ipQuery = '';
+    }
+    setcommdStr()
+  }
+
+  function enablePort(cb) {
+    ipCheckBox.checked = false;
+    reset();
+    if (cb.checked) {
+      portQuery = "port/8080";
+      ipQuery = "";
+    } else {
+      portQuery = '';
+    }
+    setcommdStr()
+  }
+
+  function getQuery() {
+    fetch(compositePath, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      console.log(response.headers)
+      if (response.headers.get('Content-Type') === "application/json") {
+        console.log("its json")
+        return response.json()
+      } else {
+        return response.text()
+      }
+    })
+    .then(data => {
+      // console.log(data)
+      output.innerText = JSON.stringify(data);
+    })
+  }
+
+  function navigate() {
+    window.location = compositePath
+  }
+
+  function updateIP(input) {
+    ip = input.value
+    ipQuery = `?ip=${ip}`;
+    setcommdStr()
+    console.log(ip)
+  }
+</script>

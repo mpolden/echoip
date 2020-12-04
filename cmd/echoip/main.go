@@ -36,7 +36,7 @@ func main() {
 	listen := flag.String("l", ":8080", "Listening address")
 	reverseLookup := flag.Bool("r", false, "Perform reverse hostname lookups")
 	portLookup := flag.Bool("p", false, "Enable port lookup")
-	template := flag.String("t", "index.html", "Path to template")
+	template := flag.String("t", "html", "Path to template dir")
 	cacheSize := flag.Int("C", 0, "Size of response cache. Set to 0 to disable")
 	profile := flag.Bool("P", false, "Enables profiling handlers")
 	var headers multiValueFlag
