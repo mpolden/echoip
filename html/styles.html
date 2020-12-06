@@ -41,7 +41,7 @@
     margin-right: auto;
     padding-left: 1em;
     padding-right: 1em;
-    max-width: 1280px;
+    max-width: 1024px;
   }
 
   .center {
@@ -66,6 +66,7 @@
     border: 1px solid grey;
     font-family: "Courier New", Courier, monospace;
     margin-top: 0.5rem;
+    box-sizing: border-box;
   }
 
   .widgetbox.input :first-child::before {
@@ -79,17 +80,16 @@
     overflow-x: scroll;
   }
 
-  /* Add a gutter to Pure's Columns */
-  .pure-g.gutters {
-    margin: 0 -1em;
-  }
-  .pure-g.gutters > [class*="pure-u"] {
-    box-sizing: border-box;
-    padding: 0em 1em;
+  .l-box {
+    margin: 0 1rem;
   }
 
   .align-right {
     text-align: right;
+  }
+
+  .narrow-input {
+    width: 10em;
   }
 
   /* TOGGLE */ /* https://codepen.io/avstorm/pen/jOEpBLW */
