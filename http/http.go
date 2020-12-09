@@ -383,14 +383,15 @@ func wrapHandlerFunc(f http.HandlerFunc) appHandler {
 
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError
-		// When Content-Type for error is JSON, we need to marshal the response into JSON
 		if e.Code/100 == 5 {
 			log.Println(e.Error)
 		}
+		// When Content-Type for error is JSON, we need to marshal the response into JSON
 		if e.IsJSON() {
 			var data = struct {
+				Code  int    `json:"status"`
 				Error string `json:"error"`
-			}{e.Message}
+			}{e.Code, e.Message}
 			b, err := json.MarshalIndent(data, "", "  ")
 			if err != nil {
 				panic(err)
