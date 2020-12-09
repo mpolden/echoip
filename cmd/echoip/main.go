@@ -29,6 +29,11 @@ func (f *multiValueFlag) Set(v string) error {
 	return nil
 }
 
+func init() {
+	log.SetPrefix("echoip: ")
+	log.SetFlags(log.Lshortfile)
+}
+
 func main() {
 	countryFile := flag.String("f", "", "Path to GeoIP country database")
 	cityFile := flag.String("c", "", "Path to GeoIP city database")
@@ -47,7 +52,6 @@ func main() {
 		return
 	}
 
-	log := log.New(os.Stderr, "echoip: ", 0)
 	r, err := geo.Open(*countryFile, *cityFile, *asnFile)
 	if err != nil {
 		log.Fatal(err)

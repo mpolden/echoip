@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -383,6 +384,9 @@ func wrapHandlerFunc(f http.HandlerFunc) appHandler {
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if e := fn(w, r); e != nil { // e is *appError
 		// When Content-Type for error is JSON, we need to marshal the response into JSON
+		if e.Code/100 == 5 {
+			log.Println(e.Error)
+		}
 		if e.IsJSON() {
 			var data = struct {
 				Error string `json:"error"`
