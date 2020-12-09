@@ -188,7 +188,7 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 func (s *Server) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
 	ip, err := ipFromRequest(s.IPHeaders, r, true)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	fmt.Fprintln(w, ip.String())
 	return nil
@@ -197,7 +197,7 @@ func (s *Server) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
 func (s *Server) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	fmt.Fprintln(w, response.Country)
 	return nil
@@ -206,7 +206,7 @@ func (s *Server) CLICountryHandler(w http.ResponseWriter, r *http.Request) *appE
 func (s *Server) CLICountryISOHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	fmt.Fprintln(w, response.CountryISO)
 	return nil
@@ -215,7 +215,7 @@ func (s *Server) CLICountryISOHandler(w http.ResponseWriter, r *http.Request) *a
 func (s *Server) CLICityHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	fmt.Fprintln(w, response.City)
 	return nil
@@ -224,7 +224,7 @@ func (s *Server) CLICityHandler(w http.ResponseWriter, r *http.Request) *appErro
 func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	fmt.Fprintf(w, "%s,%s\n", formatCoordinate(response.Latitude), formatCoordinate(response.Longitude))
 	return nil
@@ -233,7 +233,7 @@ func (s *Server) CLICoordinatesHandler(w http.ResponseWriter, r *http.Request) *
 func (s *Server) CLIASNHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	fmt.Fprintf(w, "%s\n", response.ASN)
 	return nil
@@ -242,7 +242,7 @@ func (s *Server) CLIASNHandler(w http.ResponseWriter, r *http.Request) *appError
 func (s *Server) JSONHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err).AsJSON()
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	b, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
@@ -320,7 +320,7 @@ func (s *Server) cacheHandler(w http.ResponseWriter, r *http.Request) *appError 
 func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newResponse(r)
 	if err != nil {
-		return internalServerError(err)
+		return badRequest(err).WithMessage(err.Error())
 	}
 	t, err := template.ParseFiles(s.Template)
 	if err != nil {
