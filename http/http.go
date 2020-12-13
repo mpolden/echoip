@@ -54,7 +54,6 @@ type Response struct {
 	ASNOrg     string               `json:"asn_org,omitempty"`
 	Hostname   string               `json:"hostname,omitempty"`
 	UserAgent  *useragent.UserAgent `json:"user_agent,omitempty"`
-	Sponsor    bool                 `json:"sponsor"`
 }
 
 type PortResponse struct {
@@ -162,7 +161,6 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		ASN:        autonomousSystemNumber,
 		ASNOrg:     asn.AutonomousSystemOrganization,
 		Hostname:   hostname,
-		Sponsor:    s.Sponsor,
 	}
 	s.cache.Set(ip, response)
 	response.UserAgent = userAgentFromRequest(r)
@@ -342,6 +340,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		BoxLonRight  float64
 		JSON         string
 		Port         bool
+		Sponsor      bool
 	}{
 		response,
 		r.Host,
@@ -351,6 +350,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		response.Longitude + 0.05,
 		string(json),
 		s.LookupPort != nil,
+		s.Sponsor,
 	}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
