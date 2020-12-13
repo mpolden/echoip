@@ -6,7 +6,7 @@
   let commandBox, widgetBox, compositePath, commandStr;
   let path
   let ipQuery, portQuery
-  let ipCheckBox, portCheckBox
+  let ipCheckBox, portCheckBox, portInput
   let ip = ''
 
   window.onload = (event) => {
@@ -14,6 +14,7 @@
      widgetBox = document.getElementById('output');
      ipCheckBox = document.getElementById('ipCheckBox')
      portCheckBox = document.getElementById('portCheckBox')
+     portInput = document.getElementById('portInput')
      reset()
      setcommdStr()
      changeInput("ip")
@@ -26,80 +27,63 @@
   }
 
   function setcommdStr() {
-    compositePath = `${path}${ipQuery}${portQuery}`;
+    compositePath = `${path}${portQuery}${ipQuery}`;
     commandStr = `${tool} ${host}/${compositePath}`;
     commandBox.innerText = commandStr;
   }
 
-  function changeInput(input) {
+  function changeInput(input, button) {
     path = input
-    portCheckBox.checked = false;
     portQuery = ""
-    if (path === "json") {
-      output.innerText = jsonObj
-    } else if (path === "country-iso") {
-      output.innerText = data["country_iso"]
+    portInput.classList.add("hidden");
+    switch(path) {
+      case "json":
+        output.innerText = jsonObj
+        break
+      case "country-iso":
+        output.innerText = data["country_iso"]
+        break
+      case "port":
+        portInput.classList.remove("hidden");
+        path = "port";
+        output.innerText = "{}";
+        let currentPort = document.querySelector("#portInput").value;
+        updatePort(currentPort);
+        break
+      case "ip":
+        output.innerText = data["ip"]
+        path = ""
+        break
+      default:
+        output.innerText = data[path]
     }
-    else {
-      output.innerText = data[path]
-      if (path === "ip") { path = "" }
+    setcommdStr();
+
+    // set button selected
+    if (button) {
+      allButtons = document.querySelectorAll(('button.selected'));
+      allButtons.forEach((btn) => {btn.classList.remove("selected")})
+
+      button.classList.add("selected");
     }
-    setcommdStr()
   }
 
-  function enableIP(cb) {
-    portCheckBox.checked = false;
-    // reset();
-    if (cb.checked) {
-      ipQuery = `?ip=${ip}`;
-      portQuery = ""
-    } else {
-      ipQuery = '';
-    }
-    setcommdStr()
-  }
-
-  function enablePort(cb) {
-    ipCheckBox.checked = false;
-    reset();
-    if (cb.checked) {
-      portQuery = "port/8080";
-      ipQuery = "";
-    } else {
-      portQuery = '';
-    }
-    setcommdStr()
-  }
-
-  function getQuery() {
-    fetch(compositePath, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    })
-    .then(response => {
-      console.log(response.headers)
-      if (response.headers.get('Content-Type') === "application/json") {
-        console.log("its json")
-        return response.json()
-      } else {
-        return response.text()
-      }
-    })
-    .then(data => {
-      // console.log(data)
-      output.innerText = JSON.stringify(data);
-    })
-  }
-
-  function navigate() {
+  function navigate(event) {
+    console.log("navigate", compositePath)
     window.location = compositePath
+    event.preventDefault()
   }
 
-  function updateIP(input) {
-    ip = input.value
+  function updatePort(value) {
+    port = value
+    portQuery = `/${port}`
+    setcommdStr()
+  }
+
+  function updateIP(value) {
+    ip = value
     ipQuery = `?ip=${ip}`;
     setcommdStr()
-    console.log(ip)
+    changeInput("ip", null)
   }
 </script>
