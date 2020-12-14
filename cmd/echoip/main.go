@@ -41,9 +41,10 @@ func main() {
 	listen := flag.String("l", ":8080", "Listening address")
 	reverseLookup := flag.Bool("r", false, "Perform reverse hostname lookups")
 	portLookup := flag.Bool("p", false, "Enable port lookup")
-	template := flag.String("t", "index.html", "Path to template")
+	template := flag.String("t", "html", "Path to template dir")
 	cacheSize := flag.Int("C", 0, "Size of response cache. Set to 0 to disable")
 	profile := flag.Bool("P", false, "Enables profiling handlers")
+	sponsor := flag.Bool("s", false, "Show sponsor logo")
 	var headers multiValueFlag
 	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
 	flag.Parse()
@@ -71,6 +72,10 @@ func main() {
 	if *portLookup {
 		log.Println("Enabling port lookup")
 		server.LookupPort = iputil.LookupPort
+	}
+	if *sponsor {
+		log.Println("Enabling sponsor logo")
+		server.Sponsor = *sponsor
 	}
 	if len(headers) > 0 {
 		log.Printf("Trusting remote IP from header(s): %s", headers.String())

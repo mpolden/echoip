@@ -127,5 +127,5 @@ Usage of echoip:
   -p	Enable port lookup
   -r	Perform reverse hostname lookups
   -t string
-    	Path to template (default "index.html")
+    	Path to template directory (default "html")
 ```

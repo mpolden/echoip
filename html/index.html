@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>What is my IP address? &mdash; {{ .Host }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="{{ .Host }} • What is my IP address? &mdash; The best tool to find your own IP address, and information about it."
+    />
+    <link rel="canonical" href="https://ifconfig.co/" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css"
+      integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css"
+      integrity="sha384-b92sF+wDNTHrfEtRaYo+EpcA8FUyHOSXrdxKc9XB9kaaX1rSQAgMevW6cYeE5Bdv"
+      crossorigin="anonymous"
+    />
+
+    {{ template "script.html" . }} {{ template "styles.html" . }}
+  </head>
+  <body>
+    <div class="content">
+      <div class="pure-g gutters center">
+        <div class="pure-u-1 pure-u-md-2-3">
+          <div class="l-box">
+            <h1>{{ .Host }} — What is my IP address?</h1>
+            <p><code class="ip">{{ .IP }}</code></p>
+            <p>
+              The best tool to find your own IP address, and information about
+              it.
+            </p>
+          </div>
+        </div>
+        <div class="pure-u-1 pure-u-md-1-3">
+          {{ if .Sponsor }}
+          <div class="l-box leafcloud-placement">
+            <div class="pure-g">
+              <div class="pure-u pure-u-md-1">
+                <div class="leafcloud-logo">
+                  <a href="https://www.leaf.cloud?utm_source=ifconfig">
+                    {{ template "leafcloud-logo.svg" "." }}
+                  </a>
+                </div>
+              </div>
+              <div class="pure-u pure-u-md-1">
+                <p>
+                  This site is graciously hosted by<br />
+                  <a href="https://www.leaf.cloud?utm_source=ifconfig">
+                    Leafcloud – The Truly Sustainable Cloud
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+
+      <div class="pure-g gutters center">
+        <!-- COLUMN 1 -->
+        <div class="pure-u-1 pure-u-md-1-2 col">
+          <div class="l-box">
+            <h2>What do we know about this IP Address?</h2>
+            <table class="info-table">
+              <tr>
+                <th scope="row">IP Address</th>
+                <td>{{ .IP }}</td>
+              </tr>
+              <tr>
+                <th scope="row">IP Decimal</th>
+                <td>{{ .IPDecimal }}</td>
+              </tr>
+              {{ if .Country }}
+              <tr>
+                <th scope="row">Country</th>
+                <td>{{ .Country }}</td>
+              </tr>
+              {{ end }} {{ if .CountryISO }}
+              <tr>
+                <th scope="row">CountryISO</th>
+                <td>{{ .CountryISO }}</td>
+              </tr>
+              {{ end }} {{ if .CountryEU }}
+              <tr>
+                <th scope="row">CountryEU</th>
+                <td>{{ .CountryEU }}</td>
+              </tr>
+              {{ end }} {{ if .RegionName }}
+              <tr>
+                <th scope="row">RegionName</th>
+                <td>{{ .RegionName }}</td>
+              </tr>
+              {{ end }} {{ if .RegionCode }}
+              <tr>
+                <th scope="row">RegionCode</th>
+                <td>{{ .RegionCode }}</td>
+              </tr>
+              {{ end }} {{ if .MetroCode }}
+              <tr>
+                <th scope="row">MetroCode</th>
+                <td>{{ .MetroCode }}</td>
+              </tr>
+              {{ end }} {{ if .PostalCode }}
+              <tr>
+                <th scope="row">PostalCode</th>
+                <td>{{ .PostalCode }}</td>
+              </tr>
+              {{ end }} {{ if .City }}
+              <tr>
+                <th scope="row">City</th>
+                <td>{{ .City }}</td>
+              </tr>
+              {{ end }} {{ if .Latitude }}
+              <tr>
+                <th scope="row">Latitude</th>
+                <td>{{ .Latitude }}</td>
+              </tr>
+              {{ end }} {{ if .Longitude }}
+              <tr>
+                <th scope="row">Longitude</th>
+                <td>{{ .Longitude }}</td>
+              </tr>
+              {{ end }} {{ if .Timezone }}
+              <tr>
+                <th scope="row">Timezone</th>
+                <td>{{ .Timezone }}</td>
+              </tr>
+              {{ end }} {{ if .ASN }}
+              <tr>
+                <th scope="row">ASN</th>
+                <td>{{ .ASN }}</td>
+              </tr>
+              {{ end }} {{ if .ASNOrg }}
+              <tr>
+                <th scope="row">ASNOrg</th>
+                <td>{{ .ASNOrg }}</td>
+              </tr>
+              {{ end }} {{ if .Hostname }}
+              <tr>
+                <th scope="row">Hostname</th>
+                <td>{{ .Hostname }}</td>
+              </tr>
+              {{ end }} {{ if .UserAgent }} {{ if .UserAgent.Comment }}
+              <tr>
+                <th scope="row">User Agent</th>
+                <td>{{ .UserAgent.Product }}/{{ .UserAgent.Version }}</td>
+              </tr>
+              {{ end }} {{ if .UserAgent.Comment }}
+              <tr>
+                <th scope="row">Comment</th>
+                <td>{{ .UserAgent.Comment }}</td>
+              </tr>
+              {{ end }} {{ if .UserAgent.RawValue }}
+              <tr>
+                <th scope="row">Raw Value</th>
+                <td>{{ .UserAgent.RawValue }}</td>
+              </tr>
+              {{ end }} {{ end }}
+            </table>
+            {{ if .Country }}
+            <p>
+              This information is provided from the GeoLite2 database created by
+              MaxMind, available from
+              <a href="https://www.maxmind.com">www.maxmind.com</a>
+            </p>
+            {{ end }} {{ if .Latitude }}
+            <div class="pure-u-1 pure-u-md-1-1">
+              <h2>Map</h2>
+              <iframe
+                width="100%"
+                height="350"
+                frameborder="0"
+                scrolling="no"
+                marginheight="0"
+                marginwidth="0"
+                src="https://www.openstreetmap.org/export/embed.html?bbox={{ .BoxLonLeft }}%2C{{ .BoxLatBottom }}%2C{{ .BoxLonRight }}%2C{{ .BoxLatTop }}&amp;layer=mapnik&amp;marker={{ .Latitude }}%2C{{ .Longitude }}"
+              ></iframe>
+            </div>
+            {{ end }}
+          </div>
+        </div>
+        <!-- COLUMN 2 -->
+        <div class="pure-u-1 pure-u-md-1-2">
+          <div class="l-box">
+            <h2>How do I get this programmatically?</h2>
+            <p>
+              With the widget below you can build your query, and see what the
+              result will look like.
+            </p>
+            <div class="pure-form">
+              <!-- COMMAND WIDGET -->
+              <div class="buttons">
+                <button
+                  name="ip"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  ip
+                </button>
+                <button
+                  name="country"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  country
+                </button>
+                <button
+                  name="country-iso"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  country-iso
+                </button>
+                <button
+                  name="city"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  city
+                </button>
+                <button
+                  name="asn"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  asn
+                </button>
+                <button
+                  name="json"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  json
+                </button>
+                <button
+                  name="port"
+                  class="button widget-select"
+                  onclick="changeInput(this.name, this)"
+                >
+                  port
+                </button>
+                <input
+                  id="portInput"
+                  type="number"
+                  min="1"
+                  max="40000"
+                  value="8080"
+                  class="narrow-input pure-input"
+                  placeholder="8080"
+                  onchange="updatePort(this.value)"
+                />
+              </div>
+              <div class="widgetbox input">
+                <code id="command"></code>
+              </div>
+              <div id="output" class="widgetbox output"></div>
+
+              <form class="pure-form">
+                <fieldset>
+                  <label for="ipCheckBox">
+                    Check another IP
+                    <input
+                      id="ipInput"
+                      class="medium-input pure-input"
+                      type="text"
+                      placeholder="1.1.1.1"
+                      onkeyup="updateIP(this.value)"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    class="pure-button"
+                    onclick="navigate()"
+                  >
+                    Open
+                  </button>
+                </fieldset>
+              </form>
+            </div>
+
+            <!-- FAQ -->
+            <div class="FAQ">
+              <h2>FAQ</h2>
+              <h3>How do I force IPv4 or IPv6 lookup?</h3>
+              <p>
+                As of 2018-07-25 it's no longer possible to force protocol using
+                the
+                <i>v4</i> and <i>v6</i> subdomains. IPv4 or IPv6 still can be
+                forced by passing the appropiate flag to your client, e.g
+                <code>curl -4</code> or <code>curl -6</code>.
+              </p>
+              <h3>Can I force getting JSON?</h3>
+              <p>
+                Setting the <code>Accept: application/json</code> header works
+                as expected.
+              </p>
+
+              <h3>Is automated use of this service permitted?</h3>
+              <p>
+                Yes, as long as the rate limit is respected. The rate limit is
+                in place to ensure a fair service for all.
+              </p>
+              <p>
+                <em>Please limit automated requests to 1 request per minute</em
+                >. No guarantee is made for requests that exceed this limit.
+                They may be rate-limited, with a 429 status code, or dropped
+                entirely.
+              </p>
+
+              <h3>Can I run my own service?</h3>
+              <p>
+                Yes, the source code and documentation is available on
+                <a href="https://github.com/mpolden/echoip">GitHub</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+<style>
+  html,
+  .pure-g [class*="pure-u"] {
+    background-color: white;
+    font-family: "Open Sans", sans-serif;
+  }
+  pre {
+    font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+    white-space: pre-wrap; /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word;
+  }
+  a {
+    /* background: #e3e3e3; */
+    text-decoration: underline;
+    color: #000;
+  }
+  a:hover,
+  active {
+    background: #d7d7d7;
+  }
+  .ip {
+    border: 1px solid #cbcbcb;
+    background: #f2f2f2;
+    font-size: 36px;
+    padding: 6px;
+  }
+  svg.github-corner {
+    fill: #151513;
+    color: #fff;
+  }
+  .footer {
+    margin-top: 34px;
+    border-top: 1px solid #cbcbcb;
+  }
+
+  .content {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1em;
+    padding-right: 1em;
+    max-width: 1024px;
+  }
+
+  .center {
+    justify-content: center;
+  }
+
+  .info-table td,
+  .info-table th {
+    padding: 5px;
+    border: 2px solid #ababab;
+  }
+
+  .info-table th[scope="row"] {
+    background-color: #d5d5d5;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .widgetbox {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid grey;
+    font-family: "Courier New", Courier, monospace;
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  .widgetbox.input :first-child::before {
+    content: "$ ";
+    white-space: pre;
+  }
+
+  .widgetbox.output {
+    min-height: 4em;
+    white-space: pre;
+    overflow-x: scroll;
+  }
+
+  .l-box {
+    margin: 0 1rem;
+  }
+
+  .align-right {
+    text-align: right;
+  }
+
+  .narrow-input {
+    width: 5.5em;
+    height: 1.3em;
+    margin-top: 0.2em;
+  }
+
+  .medium-input {
+    width: 10em;
+  }
+
+  button.selected {
+    background-color: rgb(208 208 208);
+  }
+
+  /* POST CORRECTION */
+  .leafcloud-logo .letters {
+    fill: black;
+  }
+
+  /* DARK MODE OVERRIDES */
+  @media (prefers-color-scheme: dark) {
+    html,
+    .pure-g [class*="pure-u"],
+    a {
+      background-color: #161719;
+      color: #d8d9da;
+      /* text-decoration: underline; */
+    }
+    .ip {
+      border: 1px solid #313233;
+      background: #212223;
+    }
+    .footer {
+      color: #8e8e8e !important;
+      border-top: 1px solid #313233;
+    }
+    a:hover,
+    active {
+      background: #3d3e3f;
+    }
+
+    svg.github-corner {
+      fill: #f8f9fa;
+      color: #161719;
+    }
+
+    .info-table th[scope="row"] {
+      background-color: #2e2e2e;
+      color: rgb(220, 220, 220);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    button {
+      background-color: #2e2e2e;
+    }
+    button.selected {
+      background-color: rgb(125 125 125);
+    }
+
+    .pure-input {
+      background-color: #e6e6e6;
+      color: #666;
+    }
+
+    .pure-input::placeholder {
+      color: #bbb;
+    }
+
+    .leafcloud-logo .letters {
+      fill: white;
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .leafcloud-placement {
+      text-align: right;
+    }
+    .leafcloud-logo {
+      height: 80px;
+      margin: 2em 0 -0.5em 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .leafcloud-logo {
+      margin-right: 1em;
+    }
+  }
+
+  .debug {
+    outline: 1px dotted pink;
+  }
+</style>

@@ -34,6 +34,7 @@ type Server struct {
 	cache      *Cache
 	gr         geo.Reader
 	profile    bool
+	Sponsor    bool
 }
 
 type Response struct {
@@ -322,7 +323,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return badRequest(err).WithMessage(err.Error())
 	}
-	t, err := template.ParseFiles(s.Template)
+	t, err := template.ParseGlob(s.Template + "/*")
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -330,6 +331,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return internalServerError(err)
 	}
+
 	var data = struct {
 		Response
 		Host         string
@@ -339,6 +341,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		BoxLonRight  float64
 		JSON         string
 		Port         bool
+		Sponsor      bool
 	}{
 		response,
 		r.Host,
@@ -348,6 +351,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		response.Longitude + 0.05,
 		string(json),
 		s.LookupPort != nil,
+		s.Sponsor,
 	}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
