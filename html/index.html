@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="ifconfig. What is my IP address? &mdash; The best tool to find your own IP address, and information about it."
+      content="{{ .Host }} • What is my IP address? &mdash; The best tool to find your own IP address, and information about it."
     />
     <link rel="canonical" href="https://ifconfig.co/" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -56,9 +56,9 @@
               <div class="pure-u pure-u-md-1">
                 <p>
                   This site is graciously hosted by<br />
-                  <a href="https://www.leaf.cloud?utm_source=ifconfig"
-                    >Leafcloud – The Truly Sustainable Cloud</a
-                  >
+                  <a href="https://www.leaf.cloud?utm_source=ifconfig">
+                    Leafcloud – The Truly Sustainable Cloud
+                  </a>
                 </p>
               </div>
             </div>
@@ -174,7 +174,7 @@
               MaxMind, available from
               <a href="https://www.maxmind.com">www.maxmind.com</a>
             </p>
-            {{ end }} {{ if .City }}
+            {{ end }} {{ if .Latitude }}
             <div class="pure-u-1 pure-u-md-1-1">
               <h2>Map</h2>
               <iframe
@@ -234,14 +234,14 @@
                   class="button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
-                  ASN
+                  asn
                 </button>
                 <button
                   name="json"
                   class="button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
-                  JSON
+                  json
                 </button>
                 <button
                   name="port"
