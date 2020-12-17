@@ -71,14 +71,14 @@
         <!-- COLUMN 1 -->
         <div class="pure-u-1 pure-u-md-1-2 col">
           <div class="l-box">
-            <h2>What do we know about this IP Address?</h2>
+            <h2>What do we know about this IP address?</h2>
             <table class="info-table">
               <tr>
-                <th scope="row">IP Address</th>
+                <th scope="row">IP address</th>
                 <td>{{ .IP }}</td>
               </tr>
               <tr>
-                <th scope="row">IP Decimal</th>
+                <th scope="row">IP address (decimal)</th>
                 <td>{{ .IPDecimal }}</td>
               </tr>
               {{ if .Country }}
@@ -88,32 +88,32 @@
               </tr>
               {{ end }} {{ if .CountryISO }}
               <tr>
-                <th scope="row">CountryISO</th>
+                <th scope="row">Country (ISO code)</th>
                 <td>{{ .CountryISO }}</td>
               </tr>
               {{ end }} {{ if .CountryEU }}
               <tr>
-                <th scope="row">CountryEU</th>
+                <th scope="row">In EU?</th>
                 <td>{{ .CountryEU }}</td>
               </tr>
               {{ end }} {{ if .RegionName }}
               <tr>
-                <th scope="row">RegionName</th>
+                <th scope="row">Region</th>
                 <td>{{ .RegionName }}</td>
               </tr>
               {{ end }} {{ if .RegionCode }}
               <tr>
-                <th scope="row">RegionCode</th>
+                <th scope="row">Region code</th>
                 <td>{{ .RegionCode }}</td>
               </tr>
               {{ end }} {{ if .MetroCode }}
               <tr>
-                <th scope="row">MetroCode</th>
+                <th scope="row">Metro code</th>
                 <td>{{ .MetroCode }}</td>
               </tr>
               {{ end }} {{ if .PostalCode }}
               <tr>
-                <th scope="row">PostalCode</th>
+                <th scope="row">Postal code</th>
                 <td>{{ .PostalCode }}</td>
               </tr>
               {{ end }} {{ if .City }}
@@ -143,7 +143,7 @@
               </tr>
               {{ end }} {{ if .ASNOrg }}
               <tr>
-                <th scope="row">ASNOrg</th>
+                <th scope="row">ASN (organization)</th>
                 <td>{{ .ASNOrg }}</td>
               </tr>
               {{ end }} {{ if .Hostname }}
@@ -153,17 +153,17 @@
               </tr>
               {{ end }} {{ if .UserAgent }} {{ if .UserAgent.Comment }}
               <tr>
-                <th scope="row">User Agent</th>
+                <th scope="row">User agent</th>
                 <td>{{ .UserAgent.Product }}/{{ .UserAgent.Version }}</td>
               </tr>
               {{ end }} {{ if .UserAgent.Comment }}
               <tr>
-                <th scope="row">Comment</th>
+                <th scope="row">User agent: Comment</th>
                 <td>{{ .UserAgent.Comment }}</td>
               </tr>
               {{ end }} {{ if .UserAgent.RawValue }}
               <tr>
-                <th scope="row">Raw Value</th>
+                <th scope="row">User agent: Raw</th>
                 <td>{{ .UserAgent.RawValue }}</td>
               </tr>
               {{ end }} {{ end }}
@@ -269,12 +269,11 @@
               <form class="pure-form">
                 <fieldset>
                   <label for="ipCheckBox">
-                    Check another IP
                     <input
                       id="ipInput"
                       class="medium-input pure-input"
                       type="text"
-                      placeholder="1.1.1.1"
+                      placeholder="IP to query"
                       onkeyup="updateIP(this.value)"
                     />
                   </label>
