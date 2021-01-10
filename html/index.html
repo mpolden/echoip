@@ -200,52 +200,52 @@
             </p>
             <div class="pure-form">
               <!-- COMMAND WIDGET -->
-              <div class="buttons">
+              <div class="input-buttons">
                 <button
                   name="ip"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   ip
                 </button>
                 <button
                   name="country"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   country
                 </button>
                 <button
                   name="country-iso"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   country-iso
                 </button>
                 <button
                   name="city"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   city
                 </button>
                 <button
                   name="asn"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   asn
                 </button>
                 <button
                   name="json"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   json
                 </button>
                 <button
                   name="port"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   port
@@ -266,12 +266,13 @@
               </div>
               <div id="output" class="widgetbox output"></div>
 
-              <form class="pure-form">
+              <form class="pure-form input-buttons">
                 <fieldset>
-                  <label for="ipCheckBox">
+                  <label for="ipInput">
+                    Check another IP (optional)
                     <input
                       id="ipInput"
-                      class="medium-input pure-input"
+                      class=""
                       type="text"
                       placeholder="IP to query"
                       onkeyup="updateIP(this.value)"
