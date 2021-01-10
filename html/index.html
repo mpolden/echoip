@@ -74,11 +74,11 @@
             <h2>What do we know about this IP address?</h2>
             <table class="info-table">
               <tr>
-                <th scope="row">IP address</th>
+                <th scope="row">IP&nbsp;address</th>
                 <td>{{ .IP }}</td>
               </tr>
               <tr>
-                <th scope="row">IP address (decimal)</th>
+                <th scope="row">IP&nbsp;address (decimal)</th>
                 <td>{{ .IPDecimal }}</td>
               </tr>
               {{ if .Country }}
@@ -103,7 +103,7 @@
               </tr>
               {{ end }} {{ if .RegionCode }}
               <tr>
-                <th scope="row">Region code</th>
+                <th scope="row">Region&nbsp;code</th>
                 <td>{{ .RegionCode }}</td>
               </tr>
               {{ end }} {{ if .MetroCode }}
@@ -113,7 +113,7 @@
               </tr>
               {{ end }} {{ if .PostalCode }}
               <tr>
-                <th scope="row">Postal code</th>
+                <th scope="row">Postal&nbsp;code</th>
                 <td>{{ .PostalCode }}</td>
               </tr>
               {{ end }} {{ if .City }}
@@ -153,17 +153,17 @@
               </tr>
               {{ end }} {{ if .UserAgent }} {{ if .UserAgent.Comment }}
               <tr>
-                <th scope="row">User agent</th>
+                <th scope="row">User&nbsp;agent</th>
                 <td>{{ .UserAgent.Product }}/{{ .UserAgent.Version }}</td>
               </tr>
               {{ end }} {{ if .UserAgent.Comment }}
               <tr>
-                <th scope="row">User agent: Comment</th>
+                <th scope="row">User&nbsp;agent: Comment</th>
                 <td>{{ .UserAgent.Comment }}</td>
               </tr>
               {{ end }} {{ if .UserAgent.RawValue }}
               <tr>
-                <th scope="row">User agent: Raw</th>
+                <th scope="row">User&nbsp;agent: Raw</th>
                 <td>{{ .UserAgent.RawValue }}</td>
               </tr>
               {{ end }} {{ end }}
@@ -200,52 +200,52 @@
             </p>
             <div class="pure-form">
               <!-- COMMAND WIDGET -->
-              <div class="buttons">
+              <div class="input-buttons">
                 <button
                   name="ip"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   ip
                 </button>
                 <button
                   name="country"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   country
                 </button>
                 <button
                   name="country-iso"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   country-iso
                 </button>
                 <button
                   name="city"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   city
                 </button>
                 <button
                   name="asn"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   asn
                 </button>
                 <button
                   name="json"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   json
                 </button>
                 <button
                   name="port"
-                  class="button widget-select"
+                  class="pure-button widget-select"
                   onclick="changeInput(this.name, this)"
                 >
                   port
@@ -266,12 +266,13 @@
               </div>
               <div id="output" class="widgetbox output"></div>
 
-              <form class="pure-form">
+              <form class="pure-form input-buttons">
                 <fieldset>
-                  <label for="ipCheckBox">
+                  <label for="ipInput">
+                    Check another IP (optional)
                     <input
                       id="ipInput"
-                      class="medium-input pure-input"
+                      class=""
                       type="text"
                       placeholder="IP to query"
                       onkeyup="updateIP(this.value)"
