@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
     - uses: actions/checkout@v2
     - name: install go
@@ -19,7 +22,7 @@ jobs:
       run: make
     - name: enable experimental docker features
       run: |
-        echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json ~/.docker/config.json
+        echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
         sudo service docker restart
     - name: build docker image
       run: make docker-build
