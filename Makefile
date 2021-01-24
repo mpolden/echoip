@@ -60,7 +60,7 @@ docker-test:
 docker-push: docker-test docker-login
 	$(DOCKER) push $(DOCKER_IMAGE)
 
-docker-pushx: docker-multiarch-builder docker-login
+docker-pushx: docker-multiarch-builder docker-test docker-login
 	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
 xinstall:

@@ -24,9 +24,5 @@ jobs:
       run: |
         echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
         sudo service docker restart
-    - name: build docker image
-      run: make docker-build
-    - name: publish docker image
-      run: make docker-push
     - name: publish multi-arch docker image
       run: make docker-pushx
