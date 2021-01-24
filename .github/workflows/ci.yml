@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+    - name: build and test
+      run: make
+    - name: enable experimental docker features
+      run: |
+        echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json ~/.docker/config.json
+        sudo service docker restart
+    - name: build docker image
+      run: make docker-build
+    - name: publish docker image
+      run: make docker-push
+    - name: publish multi-arch docker image
+      run: make docker-pushx

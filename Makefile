@@ -57,7 +57,10 @@ docker-test:
 	$(eval DOCKER_PORT=$(shell $(DOCKER) port $(CONTAINER) | cut -d ":" -f 2))
 	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; $(DOCKER) stop $(CONTAINER)
 
-docker-push: docker-test docker-multiarch-builder docker-login
+docker-push: docker-test docker-login
+	$(DOCKER) push $(DOCKER_IMAGE)
+
+docker-pushx: docker-multiarch-builder docker-login
 	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
 xinstall:
