@@ -9,20 +9,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: build and test
+        run: make
+  deploy:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
-    - uses: actions/checkout@v2
-    - name: install go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.15
-    - name: build and test
-      run: make
-    - name: enable experimental docker features
-      run: |
-        echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
-        sudo service docker restart
-    - name: publish multi-arch docker image
-      run: make docker-pushx
+      - name: enable experimental docker features
+        run: |
+          echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+          sudo service docker restart
+      - name: publish multi-arch docker image
+        run: make docker-pushx
