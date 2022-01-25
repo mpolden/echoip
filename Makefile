@@ -57,7 +57,10 @@ docker-test:
 	$(eval DOCKER_PORT=$(shell $(DOCKER) port $(CONTAINER) | cut -d ":" -f 2))
 	curl -fsS -m 5 localhost:$(DOCKER_PORT) > /dev/null; $(DOCKER) stop $(CONTAINER)
 
-docker-push: docker-test docker-multiarch-builder docker-login
+docker-push: docker-test docker-login
+	$(DOCKER) push $(DOCKER_IMAGE)
+
+docker-pushx: docker-multiarch-builder docker-test docker-login
 	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
 xinstall:
@@ -71,4 +74,4 @@ endif
 	@sha256sum $(GOPATH)/bin/$(XBIN)
 
 run:
-	go run cmd/echoip/main.go -a data/asn.mmdb -c data/city.mmdb -f data/country.mmdb -H x-forwarded-for -r -s
+	go run cmd/echoip/main.go -a data/asn.mmdb -c data/city.mmdb -f data/country.mmdb -H x-forwarded-for -r -s -p

@@ -1,6 +1,6 @@
 # echoip
 
-[![Build Status](https://travis-ci.org/mpolden/echoip.svg)](https://travis-ci.org/mpolden/echoip)
+![Build Status](https://github.com/mpolden/echoip/workflows/ci/badge.svg)
 
 A simple service for looking up your IP address. This is the code that powers
 https://ifconfig.co.
@@ -93,9 +93,9 @@ between IPv4 and IPv6 lookup.
 ## Building
 
 Compiling requires the [Golang compiler](https://golang.org/) to be installed.
-This package can be installed with `go get`:
+This package can be installed with:
 
-`go get github.com/mpolden/echoip/...`
+`go install github.com/mpolden/echoip/...@latest`
 
 For more information on building a Go project, see the [official Go
 documentation](https://golang.org/doc/code.html).

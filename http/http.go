@@ -370,7 +370,7 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) *appError {
 func cliMatcher(r *http.Request) bool {
 	ua := useragent.Parse(r.UserAgent())
 	switch ua.Product {
-	case "curl", "HTTPie", "httpie-go", "Wget", "fetch libfetch", "Go", "Go-http-client", "ddclient", "Mikrotik":
+	case "curl", "HTTPie", "httpie-go", "Wget", "fetch libfetch", "Go", "Go-http-client", "ddclient", "Mikrotik", "xh":
 		return true
 	}
 	return false

@@ -26,6 +26,7 @@
     background: #f2f2f2;
     font-size: 36px;
     padding: 6px;
+    word-wrap: break-word;
   }
   svg.github-corner {
     fill: #151513;
@@ -52,12 +53,12 @@
   .info-table th {
     padding: 5px;
     border: 2px solid #ababab;
+    word-wrap: break-word;
   }
 
   .info-table th[scope="row"] {
     background-color: #d5d5d5;
     text-align: left;
-    white-space: nowrap;
   }
 
   .widgetbox {
@@ -88,17 +89,17 @@
     text-align: right;
   }
 
-  .narrow-input {
-    width: 5.5em;
-    margin-top: 0.2em;
-  }
-
   .medium-input {
     width: 10em;
   }
 
   button.selected {
     background-color: rgb(208 208 208);
+  }
+
+  .input-buttons {
+    line-height: 2.6em;
+    font-size: smaller;
   }
 
   /* POST CORRECTION */
@@ -113,7 +114,6 @@
     a {
       background-color: #161719;
       color: #d8d9da;
-      /* text-decoration: underline; */
     }
     .ip {
       border: 1px solid #313233;
@@ -137,13 +137,13 @@
       background-color: #2e2e2e;
       color: rgb(220, 220, 220);
       text-align: left;
-      white-space: nowrap;
     }
 
-    button {
+    .pure-button {
       background-color: #2e2e2e;
+      color: rgb(220, 220, 220);
     }
-    button.selected {
+    .pure-button.selected {
       background-color: rgb(125 125 125);
     }
 
