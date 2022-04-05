@@ -1,184 +1,181 @@
 <style>
-  html,
-  .pure-g [class*="pure-u"] {
-    background-color: white;
-    font-family: "Open Sans", sans-serif;
-  }
-  pre {
-    font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
-    white-space: pre-wrap; /* Since CSS 2.1 */
-    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-    white-space: -pre-wrap; /* Opera 4-6 */
-    white-space: -o-pre-wrap; /* Opera 7 */
-    word-wrap: break-word;
-  }
-  a {
-    /* background: #e3e3e3; */
+.ip,pre {
+    word-wrap: break-word
+}
+
+pre {
+    font-family: "Monaco","Menlo","Consolas","Courier New",monospace;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap
+}
+
+a {
     text-decoration: underline;
-    color: #000;
-  }
-  a:hover,
-  active {
-    background: #d7d7d7;
-  }
-  .ip {
+    color: #000
+}
+
+a:hover,active {
+    background: #d7d7d7
+}
+
+.ip {
     border: 1px solid #cbcbcb;
     background: #f2f2f2;
     font-size: 36px;
-    padding: 6px;
-    word-wrap: break-word;
-  }
-  svg.github-corner {
-    fill: #151513;
-    color: #fff;
-  }
-  .footer {
-    margin-top: 34px;
-    border-top: 1px solid #cbcbcb;
-  }
+    padding: 6px
+}
 
-  .content {
+svg.github-corner {
+    fill: #151513;
+    color: #fff
+}
+
+.footer {
+    margin-top: 34px;
+    border-top: 1px solid #cbcbcb
+}
+
+.content {
     margin-left: auto;
     margin-right: auto;
     padding-left: 1em;
     padding-right: 1em;
-    max-width: 1024px;
-  }
+    max-width: 1024px
+}
 
-  .center {
-    justify-content: center;
-  }
+.center {
+    justify-content: center
+}
 
-  .info-table td,
-  .info-table th {
+.info-table td,.info-table th {
     padding: 5px;
     border: 2px solid #ababab;
-    word-wrap: break-word;
-  }
+    word-wrap: break-word
+}
 
-  .info-table th[scope="row"] {
+.info-table th[scope=row] {
     background-color: #d5d5d5;
-    text-align: left;
-  }
+    text-align: left
+}
 
-  .widgetbox {
+.widgetbox {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid grey;
-    font-family: "Courier New", Courier, monospace;
-    margin-top: 0.5rem;
-    box-sizing: border-box;
-  }
+    padding: .5rem;
+    border: 1px solid gray;
+    font-family: "Courier New",Courier,monospace;
+    margin-top: .5rem;
+    box-sizing: border-box
+}
 
-  .widgetbox.input :first-child::before {
+.widgetbox.input :first-child::before {
     content: "$ ";
-    white-space: pre;
-  }
+    white-space: pre
+}
 
-  .widgetbox.output {
+.widgetbox.output {
     min-height: 4em;
     white-space: pre;
-    overflow-x: scroll;
-  }
+    overflow-x: scroll
+}
 
-  .l-box {
-    margin: 0 1rem;
-  }
+.l-box {
+    margin: 0 1rem
+}
 
-  .align-right {
-    text-align: right;
-  }
+.align-right {
+    text-align: right
+}
 
-  .medium-input {
-    width: 10em;
-  }
+.medium-input {
+    width: 10em
+}
 
-  button.selected {
-    background-color: rgb(208 208 208);
-  }
+button.selected {
+    background-color: rgb(208 208 208)
+}
 
-  .input-buttons {
+.input-buttons {
     line-height: 2.6em;
-    font-size: smaller;
-  }
+    font-size: smaller
+}
 
-  /* POST CORRECTION */
-  .leafcloud-logo .letters {
-    fill: black;
-  }
+.leafcloud-logo .letters {
+    fill: #000
+}
 
-  /* DARK MODE OVERRIDES */
-  @media (prefers-color-scheme: dark) {
-    html,
-    .pure-g [class*="pure-u"],
-    a {
-      background-color: #161719;
-      color: #d8d9da;
+@media (prefers-color-scheme:dark) {
+    .pure-g [class*=pure-u],a,html {
+        background-color: #161719;
+        color: #d8d9da
     }
+
     .ip {
-      border: 1px solid #313233;
-      background: #212223;
+        border: 1px solid #313233;
+        background: #212223
     }
+
     .footer {
-      color: #8e8e8e !important;
-      border-top: 1px solid #313233;
+        color: #8e8e8e!important;
+        border-top: 1px solid #313233
     }
-    a:hover,
-    active {
-      background: #3d3e3f;
+
+    a:hover,active {
+        background: #3d3e3f
     }
 
     svg.github-corner {
-      fill: #f8f9fa;
-      color: #161719;
+        fill: #f8f9fa;
+        color: #161719
     }
 
-    .info-table th[scope="row"] {
-      background-color: #2e2e2e;
-      color: rgb(220, 220, 220);
-      text-align: left;
+    .info-table th[scope=row] {
+        text-align: left
     }
 
-    .pure-button {
-      background-color: #2e2e2e;
-      color: rgb(220, 220, 220);
+    .info-table th[scope=row],.pure-button {
+        background-color: #2e2e2e;
+        color: #dcdcdc
     }
+
     .pure-button.selected {
-      background-color: rgb(125 125 125);
+        background-color: rgb(125 125 125)
     }
 
     .pure-input {
-      background-color: #e6e6e6;
-      color: #666;
+        background-color: #e6e6e6;
+        color: #666
     }
 
     .pure-input::placeholder {
-      color: #bbb;
+        color: #bbb
     }
 
     .leafcloud-logo .letters {
-      fill: white;
-      max-width: 100%;
+        fill: #fff;
+        max-width: 100%
     }
-  }
+}
 
-  @media (min-width: 768px) {
+@media (min-width:768px) {
     .leafcloud-placement {
-      text-align: right;
+        text-align: right
     }
-    .leafcloud-logo {
-      height: 80px;
-      margin: 2em 0 -0.5em 0;
-    }
-  }
 
-  @media (max-width: 768px) {
     .leafcloud-logo {
-      margin-right: 1em;
+        height: 80px;
+        margin: 2em 0-.5em
     }
-  }
+}
 
-  .debug {
-    outline: 1px dotted pink;
-  }
+@media (max-width:768px) {
+    .leafcloud-logo {
+        margin-right: 1em
+    }
+}
+
+.debug {
+    outline: 1px dotted pink
+}
 </style>
