@@ -94,6 +94,7 @@ func TestCLIHandlers(t *testing.T) {
 		{s.URL + "/city", "Bornyasherk\n", 200, "", ""},
 		{s.URL + "/foo", "404 page not found", 404, "", ""},
 		{s.URL + "/asn", "AS59795\n", 200, "", ""},
+		{s.URL + "/asn-org", "Hosting4Real\n", 200, "", ""},
 	}
 
 	for _, tt := range tests {
