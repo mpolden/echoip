@@ -107,6 +107,11 @@ Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
 
 `docker pull mpolden/echoip`
 
+## [GeoIP](https://www.maxmind.com/en/geoip2-databases)/[GeoLite](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data?) Database (MaxMind)
+To utilise MaxMind [GeoIP](https://www.maxmind.com/en/geoip2-databases)/[GeoLite](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data?) database to enhance the information provided to end users, you can download the relevant **binary** databases (`.mmdb` format) directly from MaxMind using the above links.
+
+**Please Note**: This has only been tested using the free, GeoLite database.
+
 ### Usage
 
 ```
