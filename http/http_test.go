@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -10,7 +11,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
+	parser "github.com/mpolden/echoip/paser"
 )
 
 func lookupAddr(net.IP) (string, error) { return "localhost", nil }
@@ -32,8 +35,37 @@ func (t *testDb) ASN(net.IP) (geo.ASN, error) {
 
 func (t *testDb) IsEmpty() bool { return false }
 
+func (t *testDb) Parse(ip net.IP, hostname string) (parser.Response, error) {
+	ipDecimal := iputil.ToDecimal(ip)
+	country, _ := t.Country(ip)
+	city, _ := t.City(ip)
+	asn, _ := t.ASN(ip)
+	var autonomousSystemNumber string
+	if asn.AutonomousSystemNumber > 0 {
+		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
+	}
+	return parser.Response{
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    country.Name,
+		CountryISO: country.ISO,
+		CountryEU:  country.IsEU,
+		RegionName: city.RegionName,
+		RegionCode: city.RegionCode,
+		MetroCode:  city.MetroCode,
+		PostalCode: city.PostalCode,
+		City:       city.Name,
+		Latitude:   city.Latitude,
+		Longitude:  city.Longitude,
+		Timezone:   city.Timezone,
+		ASN:        autonomousSystemNumber,
+		ASNOrg:     asn.AutonomousSystemOrganization,
+		Hostname:   hostname,
+	}, nil
+}
+
 func testServer() *Server {
-	return &Server{cache: NewCache(100), gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
+	return &Server{cache: NewCache(100), parser: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -116,7 +148,8 @@ func TestDisabledHandlers(t *testing.T) {
 	server := testServer()
 	server.LookupPort = nil
 	server.LookupAddr = nil
-	server.gr, _ = geo.Open("", "", "")
+	parser, _ := geo.Open("", "", "")
+	server.parser = &parser
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {

@@ -47,12 +47,14 @@ func main() {
 		return
 	}
 
+	// open GeoIP files
 	r, err := geo.Open(*countryFile, *cityFile, *asnFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error")
 	}
+
 	cache := http.NewCache(*cacheSize)
-	server := http.New(r, cache, *profile)
+	server := http.New(&r, cache, *profile)
 	server.IPHeaders = headers
 	if _, err := os.Stat(*template); err == nil {
 		server.Template = *template

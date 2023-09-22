@@ -11,11 +11,9 @@ import (
 
 	"net/http/pprof"
 
-	"github.com/mpolden/echoip/iputil"
-	"github.com/mpolden/echoip/iputil/geo"
+	parser "github.com/mpolden/echoip/paser"
 	"github.com/mpolden/echoip/useragent"
 
-	"math/big"
 	"net"
 	"net/http"
 	"strconv"
@@ -32,29 +30,9 @@ type Server struct {
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
 	cache      *Cache
-	gr         geo.Reader
+	parser     parser.Parser
 	profile    bool
 	Sponsor    bool
-}
-
-type Response struct {
-	IP         net.IP               `json:"ip"`
-	IPDecimal  *big.Int             `json:"ip_decimal"`
-	Country    string               `json:"country,omitempty"`
-	CountryISO string               `json:"country_iso,omitempty"`
-	CountryEU  *bool                `json:"country_eu,omitempty"`
-	RegionName string               `json:"region_name,omitempty"`
-	RegionCode string               `json:"region_code,omitempty"`
-	MetroCode  uint                 `json:"metro_code,omitempty"`
-	PostalCode string               `json:"zip_code,omitempty"`
-	City       string               `json:"city,omitempty"`
-	Latitude   float64              `json:"latitude,omitempty"`
-	Longitude  float64              `json:"longitude,omitempty"`
-	Timezone   string               `json:"time_zone,omitempty"`
-	ASN        string               `json:"asn,omitempty"`
-	ASNOrg     string               `json:"asn_org,omitempty"`
-	Hostname   string               `json:"hostname,omitempty"`
-	UserAgent  *useragent.UserAgent `json:"user_agent,omitempty"`
 }
 
 type PortResponse struct {
@@ -63,8 +41,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(db geo.Reader, cache *Cache, profile bool) *Server {
-	return &Server{cache: cache, gr: db, profile: profile}
+func New(parser parser.Parser, cache *Cache, profile bool) *Server {
+	return &Server{cache: cache, parser: parser, profile: profile}
 }
 
 func ipFromForwardedForHeader(v string) string {
@@ -122,10 +100,10 @@ func userAgentFromRequest(r *http.Request) *useragent.UserAgent {
 	return userAgent
 }
 
-func (s *Server) newResponse(r *http.Request) (Response, error) {
+func (s *Server) newResponse(r *http.Request) (parser.Response, error) {
 	ip, err := ipFromRequest(s.IPHeaders, r, true)
 	if err != nil {
-		return Response{}, err
+		return parser.Response{}, err
 	}
 	response, ok := s.cache.Get(ip)
 	if ok {
@@ -133,36 +111,12 @@ func (s *Server) newResponse(r *http.Request) (Response, error) {
 		response.UserAgent = userAgentFromRequest(r)
 		return response, nil
 	}
-	ipDecimal := iputil.ToDecimal(ip)
-	country, _ := s.gr.Country(ip)
-	city, _ := s.gr.City(ip)
-	asn, _ := s.gr.ASN(ip)
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
 	}
-	var autonomousSystemNumber string
-	if asn.AutonomousSystemNumber > 0 {
-		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
-	}
-	response = Response{
-		IP:         ip,
-		IPDecimal:  ipDecimal,
-		Country:    country.Name,
-		CountryISO: country.ISO,
-		CountryEU:  country.IsEU,
-		RegionName: city.RegionName,
-		RegionCode: city.RegionCode,
-		MetroCode:  city.MetroCode,
-		PostalCode: city.PostalCode,
-		City:       city.Name,
-		Latitude:   city.Latitude,
-		Longitude:  city.Longitude,
-		Timezone:   city.Timezone,
-		ASN:        autonomousSystemNumber,
-		ASNOrg:     asn.AutonomousSystemOrganization,
-		Hostname:   hostname,
-	}
+
+	response, err = s.parser.Parse(ip, hostname)
 	s.cache.Set(ip, response)
 	response.UserAgent = userAgentFromRequest(r)
 	return response, nil
@@ -342,7 +296,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	}
 
 	var data = struct {
-		Response
+		Response     parser.Response
 		Host         string
 		BoxLatTop    float64
 		BoxLatBottom float64
@@ -434,7 +388,8 @@ func (s *Server) Handler() http.Handler {
 	r.Route("GET", "/", s.CLIHandler).MatcherFunc(cliMatcher)
 	r.Route("GET", "/", s.CLIHandler).Header("Accept", textMediaType)
 	r.Route("GET", "/ip", s.CLIHandler)
-	if !s.gr.IsEmpty() {
+
+	if !s.parser.IsEmpty() {
 		r.Route("GET", "/country", s.CLICountryHandler)
 		r.Route("GET", "/country-iso", s.CLICountryISOHandler)
 		r.Route("GET", "/city", s.CLICityHandler)

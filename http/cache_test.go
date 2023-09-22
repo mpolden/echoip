@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"testing"
+
+	parser "github.com/mpolden/echoip/paser"
 )
 
 func TestCacheCapacity(t *testing.T) {
@@ -19,10 +21,10 @@ func TestCacheCapacity(t *testing.T) {
 	}
 	for i, tt := range tests {
 		c := NewCache(tt.capacity)
-		var responses []Response
+		var responses []parser.Response
 		for i := 0; i < tt.addCount; i++ {
 			ip := net.ParseIP(fmt.Sprintf("192.0.2.%d", i))
-			r := Response{IP: ip}
+			r := parser.Response{IP: ip}
 			responses = append(responses, r)
 			c.Set(ip, r)
 		}
@@ -48,7 +50,7 @@ func TestCacheCapacity(t *testing.T) {
 func TestCacheDuplicate(t *testing.T) {
 	c := NewCache(10)
 	ip := net.ParseIP("192.0.2.1")
-	response := Response{IP: ip}
+	response := parser.Response{IP: ip}
 	c.Set(ip, response)
 	c.Set(ip, response)
 	want := 1
@@ -64,7 +66,7 @@ func TestCacheResize(t *testing.T) {
 	c := NewCache(10)
 	for i := 1; i <= 20; i++ {
 		ip := net.ParseIP(fmt.Sprintf("192.0.2.%d", i))
-		r := Response{IP: ip}
+		r := parser.Response{IP: ip}
 		c.Set(ip, r)
 	}
 	if got, want := len(c.entries), 10; got != want {
@@ -79,7 +81,7 @@ func TestCacheResize(t *testing.T) {
 	if got, want := c.evictions, uint64(0); got != want {
 		t.Errorf("want %d evictions, got %d", want, got)
 	}
-	r := Response{IP: net.ParseIP("192.0.2.42")}
+	r := parser.Response{IP: net.ParseIP("192.0.2.42")}
 	c.Set(r.IP, r)
 	if got, want := len(c.entries), 5; got != want {
 		t.Errorf("want %d entries, got %d", want, got)
