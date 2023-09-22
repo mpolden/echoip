@@ -50,7 +50,7 @@ func main() {
 	// open GeoIP files
 	r, err := geo.Open(*countryFile, *cityFile, *asnFile)
 	if err != nil {
-		log.Fatal("error")
+		log.Fatal(err)
 	}
 
 	cache := http.NewCache(*cacheSize)
