@@ -13,7 +13,7 @@ import (
 
 	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
-	parser "github.com/mpolden/echoip/paser"
+	parser "github.com/mpolden/echoip/iputil/paser"
 )
 
 func lookupAddr(net.IP) (string, error) { return "localhost", nil }

@@ -5,7 +5,7 @@ import (
 	"net"
 	"testing"
 
-	parser "github.com/mpolden/echoip/paser"
+	parser "github.com/mpolden/echoip/iputil/paser"
 )
 
 func TestCacheCapacity(t *testing.T) {

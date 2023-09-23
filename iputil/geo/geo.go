@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/mpolden/echoip/iputil"
-	parser "github.com/mpolden/echoip/paser"
+	parser "github.com/mpolden/echoip/iputil/paser"
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
