@@ -81,6 +81,7 @@ func (g *geoip) Parse(ip net.IP, hostname string) (parser.Response, error) {
 		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
 	}
 	return parser.Response{
+		Service:    "ipstack",
 		IP:         ip,
 		IPDecimal:  ipDecimal,
 		Country:    country.Name,

@@ -1,4 +1,4 @@
-package stack
+package ipstack
 
 import (
 	"fmt"
@@ -9,11 +9,11 @@ import (
 	"github.com/qioalice/ipstack"
 )
 
-type IPstackParser struct {
+type IPStack struct {
 	response *ipstack.Response
 }
 
-func (ips *IPstackParser) Parse(ip net.IP, hostname string) (parser.Response, error) {
+func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	res, err := ipstack.IP(ip.String()); 
 	ips.response = res
 	if err != nil { 
@@ -27,6 +27,7 @@ func (ips *IPstackParser) Parse(ip net.IP, hostname string) (parser.Response, er
 	
 
 	parserResponse := parser.Response{
+		Service:    "ipstack",
 		Latitude:   float64(res.Latitide),
 		Longitude:  float64(res.Longitude),
 		Hostname:   hostname,
@@ -58,6 +59,6 @@ func (ips *IPstackParser) Parse(ip net.IP, hostname string) (parser.Response, er
 	return parserResponse, nil
 }
 
-func (ips *IPstackParser) IsEmpty() bool {
+func (ips *IPStack) IsEmpty() bool {
 	return false
 }

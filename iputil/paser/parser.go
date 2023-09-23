@@ -13,6 +13,7 @@ type Parser interface {
 }
 
 type Response struct {
+	Service   string               `json:"database"`
 	IP         net.IP               `json:"ip"`
 	IPDecimal  *big.Int             `json:"ip_decimal"`
 	Country    string               `json:"country,omitempty"`

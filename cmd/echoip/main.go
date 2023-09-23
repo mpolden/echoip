@@ -10,9 +10,9 @@ import (
 	"github.com/mpolden/echoip/http"
 	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
+	"github.com/mpolden/echoip/iputil/ipstack"
 	parser "github.com/mpolden/echoip/iputil/paser"
-	"github.com/mpolden/echoip/iputil/stack"
-	"github.com/qioalice/ipstack"
+	ipstackApi "github.com/qioalice/ipstack"
 )
 
 type multiValueFlag []string
@@ -33,7 +33,7 @@ func init() {
 
 func main() {
 	var ipstackApiKey string
-	database := flag.String("d", "geoip", "Which database to use, 'ipstack' or 'geoip'")
+	service := flag.String("d", "geoip", "Which database to use, 'ipstack' or 'geoip'")
 	flag.StringVar(&ipstackApiKey, "S", "", "IP Stack API Key")
 	countryFile := flag.String("f", "", "Path to GeoIP country database")
 	cityFile := flag.String("c", "", "Path to GeoIP city database")
@@ -55,7 +55,7 @@ func main() {
 	}
 
 	var parser parser.Parser
-	if (*database == "geoip") {
+	if (*service == "geoip") {
 		geo, err := geo.Open(*countryFile, *cityFile, *asnFile)
 		if err != nil {
 			log.Fatal(err)
@@ -63,11 +63,11 @@ func main() {
 		parser = &geo
 	} 
 	
-	if (*database == "ipstack") {
-		if err := ipstack.Init(ipstackApiKey); err != nil { 
+	if (*service == "ipstack") {
+		if err := ipstackApi.Init(ipstackApiKey); err != nil { 
 			log.Fatal(err)
 		}
-		ips := stack.IPstackParser{}
+		ips := ipstack.IPStack{}
 		parser = &ips
 	} 
 	
