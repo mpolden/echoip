@@ -48,29 +48,29 @@ func main() {
 	var headers multiValueFlag
 	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
 	flag.Parse()
-	
+
 	if len(flag.Args()) != 0 {
 		flag.Usage()
 		return
 	}
 
 	var parser parser.Parser
-	if (*service == "geoip") {
+	if *service == "geoip" {
 		geo, err := geo.Open(*countryFile, *cityFile, *asnFile)
 		if err != nil {
 			log.Fatal(err)
 		}
 		parser = &geo
-	} 
-	
-	if (*service == "ipstack") {
-		if err := ipstackApi.Init(ipstackApiKey); err != nil { 
+	}
+
+	if *service == "ipstack" {
+		if err := ipstackApi.Init(ipstackApiKey); err != nil {
 			log.Fatal(err)
 		}
 		ips := ipstack.IPStack{}
 		parser = &ips
-	} 
-	
+	}
+
 	cache := http.NewCache(*cacheSize)
 	server := http.New(parser, cache, *profile)
 	server.IPHeaders = headers

@@ -296,7 +296,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	}
 
 	var data = struct {
-		parser.Response     
+		parser.Response
 		Host         string
 		BoxLatTop    float64
 		BoxLatBottom float64
@@ -316,7 +316,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		s.LookupPort != nil,
 		s.Sponsor,
 	}
-	
+
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
 	}

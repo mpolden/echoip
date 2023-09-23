@@ -14,32 +14,30 @@ type IPStack struct {
 }
 
 func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
-	res, err := ipstack.IP(ip.String()); 
+	res, err := ipstack.IP(ip.String())
 	ips.response = res
-	if err != nil { 
-		return parser.Response{}, err	
+	if err != nil {
+		return parser.Response{}, err
 	}
 	fmt.Printf("%+v\n", res)
 
-	
 	ipDecimal := iputil.ToDecimal(ip)
-	
-	
 
 	parserResponse := parser.Response{
-		Service:    "ipstack",
-		Latitude:   float64(res.Latitide),
-		Longitude:  float64(res.Longitude),
-		Hostname:   hostname,
-		IP:         ip,
-		IPDecimal:  ipDecimal,
-		Country:    res.CountryName,
-		CountryISO: res.CountryCode,
-		RegionName: res.RegionName,
-		RegionCode: res.RegionCode,
-		MetroCode:  0,
-		PostalCode: res.Zip,
-		City:       res.City,
+		UsingGeoIP:   false,
+		UsingIPStack: true,
+		Latitude:     float64(res.Latitide),
+		Longitude:    float64(res.Longitude),
+		Hostname:     hostname,
+		IP:           ip,
+		IPDecimal:    ipDecimal,
+		Country:      res.CountryName,
+		CountryISO:   res.CountryCode,
+		RegionName:   res.RegionName,
+		RegionCode:   res.RegionCode,
+		MetroCode:    0,
+		PostalCode:   res.Zip,
+		City:         res.City,
 	}
 
 	if res.Timezone != nil {
@@ -47,7 +45,7 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	}
 
 	if res.Location != nil {
-		parserResponse.CountryEU = &res.Location.IsEU;
+		parserResponse.CountryEU = &res.Location.IsEU
 	}
 
 	if res.Connection != nil {
@@ -55,7 +53,7 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 			parserResponse.ASN = fmt.Sprintf("AS%d", res.Connection.ASN)
 		}
 	}
-	
+
 	return parserResponse, nil
 }
 
