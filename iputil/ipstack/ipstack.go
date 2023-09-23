@@ -19,7 +19,6 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	if err != nil {
 		return parser.Response{}, err
 	}
-	fmt.Printf("%+v\n", res)
 
 	ipDecimal := iputil.ToDecimal(ip)
 
