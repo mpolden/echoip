@@ -10,6 +10,9 @@ import (
 	"github.com/mpolden/echoip/http"
 	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
+	"github.com/mpolden/echoip/iputil/ipstack"
+	parser "github.com/mpolden/echoip/iputil/paser"
+	ipstackApi "github.com/qioalice/ipstack"
 )
 
 type multiValueFlag []string
@@ -29,6 +32,9 @@ func init() {
 }
 
 func main() {
+	var ipstackApiKey string
+	service := flag.String("d", "geoip", "Which database to use, 'ipstack' or 'geoip'")
+	flag.StringVar(&ipstackApiKey, "S", "", "IP Stack API Key")
 	countryFile := flag.String("f", "", "Path to GeoIP country database")
 	cityFile := flag.String("c", "", "Path to GeoIP city database")
 	asnFile := flag.String("a", "", "Path to GeoIP ASN database")
@@ -42,17 +48,31 @@ func main() {
 	var headers multiValueFlag
 	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
 	flag.Parse()
+
 	if len(flag.Args()) != 0 {
 		flag.Usage()
 		return
 	}
 
-	r, err := geo.Open(*countryFile, *cityFile, *asnFile)
-	if err != nil {
-		log.Fatal(err)
+	var parser parser.Parser
+	if *service == "geoip" {
+		geo, err := geo.Open(*countryFile, *cityFile, *asnFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		parser = &geo
 	}
+
+	if *service == "ipstack" {
+		if err := ipstackApi.Init(ipstackApiKey); err != nil {
+			log.Fatal(err)
+		}
+		ips := ipstack.IPStack{}
+		parser = &ips
+	}
+
 	cache := http.NewCache(*cacheSize)
-	server := http.New(r, cache, *profile)
+	server := http.New(parser, cache, *profile)
 	server.IPHeaders = headers
 	if _, err := os.Stat(*template); err == nil {
 		server.Template = *template

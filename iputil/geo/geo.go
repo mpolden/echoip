@@ -1,9 +1,12 @@
 package geo
 
 import (
+	"fmt"
 	"math"
 	"net"
 
+	"github.com/mpolden/echoip/iputil"
+	parser "github.com/mpolden/echoip/iputil/paser"
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
@@ -42,30 +45,61 @@ type geoip struct {
 	asn     *geoip2.Reader
 }
 
-func Open(countryDB, cityDB string, asnDB string) (Reader, error) {
+func Open(countryDB, cityDB string, asnDB string) (geoip, error) {
 	var country, city, asn *geoip2.Reader
 	if countryDB != "" {
 		r, err := geoip2.Open(countryDB)
 		if err != nil {
-			return nil, err
+			return geoip{}, err
 		}
 		country = r
 	}
 	if cityDB != "" {
 		r, err := geoip2.Open(cityDB)
 		if err != nil {
-			return nil, err
+			return geoip{}, err
 		}
 		city = r
 	}
 	if asnDB != "" {
 		r, err := geoip2.Open(asnDB)
 		if err != nil {
-			return nil, err
+			return geoip{}, err
 		}
 		asn = r
 	}
-	return &geoip{country: country, city: city, asn: asn}, nil
+	return geoip{country: country, city: city, asn: asn}, nil
+}
+
+func (g *geoip) Parse(ip net.IP, hostname string) (parser.Response, error) {
+	ipDecimal := iputil.ToDecimal(ip)
+	country, _ := g.Country(ip)
+	city, _ := g.City(ip)
+	asn, _ := g.ASN(ip)
+	var autonomousSystemNumber string
+	if asn.AutonomousSystemNumber > 0 {
+		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
+	}
+	return parser.Response{
+		UsingGeoIP:   true,
+		UsingIPStack: false,
+		IP:           ip,
+		IPDecimal:    ipDecimal,
+		Country:      country.Name,
+		CountryISO:   country.ISO,
+		CountryEU:    country.IsEU,
+		RegionName:   city.RegionName,
+		RegionCode:   city.RegionCode,
+		MetroCode:    city.MetroCode,
+		PostalCode:   city.PostalCode,
+		City:         city.Name,
+		Latitude:     city.Latitude,
+		Longitude:    city.Longitude,
+		Timezone:     city.Timezone,
+		ASN:          autonomousSystemNumber,
+		ASNOrg:       asn.AutonomousSystemOrganization,
+		Hostname:     hostname,
+	}, nil
 }
 
 func (g *geoip) Country(ip net.IP) (Country, error) {

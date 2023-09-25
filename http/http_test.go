@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -10,7 +11,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mpolden/echoip/iputil"
 	"github.com/mpolden/echoip/iputil/geo"
+	parser "github.com/mpolden/echoip/iputil/paser"
 )
 
 func lookupAddr(net.IP) (string, error) { return "localhost", nil }
@@ -32,8 +35,39 @@ func (t *testDb) ASN(net.IP) (geo.ASN, error) {
 
 func (t *testDb) IsEmpty() bool { return false }
 
+func (t *testDb) Parse(ip net.IP, hostname string) (parser.Response, error) {
+	ipDecimal := iputil.ToDecimal(ip)
+	country, _ := t.Country(ip)
+	city, _ := t.City(ip)
+	asn, _ := t.ASN(ip)
+	var autonomousSystemNumber string
+	if asn.AutonomousSystemNumber > 0 {
+		autonomousSystemNumber = fmt.Sprintf("AS%d", asn.AutonomousSystemNumber)
+	}
+	return parser.Response{
+		UsingGeoIP:   true,
+		UsingIPStack: false,
+		IP:           ip,
+		IPDecimal:    ipDecimal,
+		Country:      country.Name,
+		CountryISO:   country.ISO,
+		CountryEU:    country.IsEU,
+		RegionName:   city.RegionName,
+		RegionCode:   city.RegionCode,
+		MetroCode:    city.MetroCode,
+		PostalCode:   city.PostalCode,
+		City:         city.Name,
+		Latitude:     city.Latitude,
+		Longitude:    city.Longitude,
+		Timezone:     city.Timezone,
+		ASN:          autonomousSystemNumber,
+		ASNOrg:       asn.AutonomousSystemOrganization,
+		Hostname:     hostname,
+	}, nil
+}
+
 func testServer() *Server {
-	return &Server{cache: NewCache(100), gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
+	return &Server{cache: NewCache(100), parser: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -116,7 +150,8 @@ func TestDisabledHandlers(t *testing.T) {
 	server := testServer()
 	server.LookupPort = nil
 	server.LookupAddr = nil
-	server.gr, _ = geo.Open("", "", "")
+	parser, _ := geo.Open("", "", "")
+	server.parser = &parser
 	s := httptest.NewServer(server.Handler())
 
 	var tests = []struct {
@@ -128,7 +163,7 @@ func TestDisabledHandlers(t *testing.T) {
 		{s.URL + "/country", "404 page not found", 404},
 		{s.URL + "/country-iso", "404 page not found", 404},
 		{s.URL + "/city", "404 page not found", 404},
-		{s.URL + "/json", "{\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433\n}", 200},
+		{s.URL + "/json", "{\n  \"UsingGeoIP\": true,\n  \"UsingIPStack\": false,\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433\n}", 200},
 	}
 
 	for _, tt := range tests {
@@ -154,7 +189,7 @@ func TestJSONHandlers(t *testing.T) {
 		out    string
 		status int
 	}{
-		{s.URL, "{\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433,\n  \"country\": \"Elbonia\",\n  \"country_iso\": \"EB\",\n  \"country_eu\": false,\n  \"region_name\": \"North Elbonia\",\n  \"region_code\": \"1234\",\n  \"metro_code\": 1234,\n  \"zip_code\": \"1234\",\n  \"city\": \"Bornyasherk\",\n  \"latitude\": 63.416667,\n  \"longitude\": 10.416667,\n  \"time_zone\": \"Europe/Bornyasherk\",\n  \"asn\": \"AS59795\",\n  \"asn_org\": \"Hosting4Real\",\n  \"hostname\": \"localhost\",\n  \"user_agent\": {\n    \"product\": \"curl\",\n    \"version\": \"7.2.6.0\",\n    \"raw_value\": \"curl/7.2.6.0\"\n  }\n}", 200},
+		{s.URL, "{\n  \"UsingGeoIP\": true,\n  \"UsingIPStack\": false,\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433,\n  \"country\": \"Elbonia\",\n  \"country_iso\": \"EB\",\n  \"country_eu\": false,\n  \"region_name\": \"North Elbonia\",\n  \"region_code\": \"1234\",\n  \"metro_code\": 1234,\n  \"zip_code\": \"1234\",\n  \"city\": \"Bornyasherk\",\n  \"latitude\": 63.416667,\n  \"longitude\": 10.416667,\n  \"time_zone\": \"Europe/Bornyasherk\",\n  \"asn\": \"AS59795\",\n  \"asn_org\": \"Hosting4Real\",\n  \"hostname\": \"localhost\",\n  \"user_agent\": {\n    \"product\": \"curl\",\n    \"version\": \"7.2.6.0\",\n    \"raw_value\": \"curl/7.2.6.0\"\n  }\n}", 200},
 		{s.URL + "/port/foo", "{\n  \"status\": 400,\n  \"error\": \"invalid port: foo\"\n}", 400},
 		{s.URL + "/port/0", "{\n  \"status\": 400,\n  \"error\": \"invalid port: 0\"\n}", 400},
 		{s.URL + "/port/65537", "{\n  \"status\": 400,\n  \"error\": \"invalid port: 65537\"\n}", 400},

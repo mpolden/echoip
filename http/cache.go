@@ -6,6 +6,8 @@ import (
 	"hash/fnv"
 	"net"
 	"sync"
+
+	parser "github.com/mpolden/echoip/iputil/paser"
 )
 
 type Cache struct {
@@ -39,7 +41,7 @@ func key(ip net.IP) uint64 {
 	return h.Sum64()
 }
 
-func (c *Cache) Set(ip net.IP, resp Response) {
+func (c *Cache) Set(ip net.IP, resp parser.Response) {
 	if c.capacity == 0 {
 		return
 	}
@@ -50,7 +52,7 @@ func (c *Cache) Set(ip net.IP, resp Response) {
 	if minEvictions > 0 { // At or above capacity. Shrink the cache
 		evicted := 0
 		for el := c.values.Front(); el != nil && evicted < minEvictions; {
-			value := el.Value.(Response)
+			value := el.Value.(parser.Response)
 			delete(c.entries, key(value.IP))
 			next := el.Next()
 			c.values.Remove(el)
@@ -66,15 +68,15 @@ func (c *Cache) Set(ip net.IP, resp Response) {
 	c.entries[k] = c.values.PushBack(resp)
 }
 
-func (c *Cache) Get(ip net.IP) (Response, bool) {
+func (c *Cache) Get(ip net.IP) (parser.Response, bool) {
 	k := key(ip)
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	r, ok := c.entries[k]
 	if !ok {
-		return Response{}, false
+		return parser.Response{}, false
 	}
-	return r.Value.(Response), true
+	return r.Value.(parser.Response), true
 }
 
 func (c *Cache) Resize(capacity int) error {
