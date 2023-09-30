@@ -41,6 +41,17 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 
 	if res.Timezone != nil {
 		parserResponse.Timezone = res.Timezone.ID
+		parserResponse.IsDayLightSavings = res.Timezone.IsDaylightSaving
+	}
+
+	if res.Security != nil {
+		parserResponse.IsProxy = res.Security.IsProxy
+		parserResponse.IsCrawler = res.Security.IsCrawler
+		parserResponse.CrawlerName = res.Security.CrawlerName
+		parserResponse.CrawlerType = res.Security.CrawlerType
+		parserResponse.IsTor = res.Security.IsTOR
+		parserResponse.ThreatLevel = res.Security.ThreatLevel
+		parserResponse.ThreatTypes = &res.Security.ThreatTypes
 	}
 
 	if res.Location != nil {

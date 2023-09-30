@@ -136,6 +136,11 @@
                 <th scope="row">Timezone</th>
                 <td>{{ .Timezone }}</td>
               </tr>
+              {{ end }} {{ if .IsDayLightSavings }}
+              <tr>
+                <th scope="row">Is Daylight Savings?</th>
+                <td>{{ .IsDayLightSavings }}</td>
+              </tr>
               {{ end }} {{ if .ASN }}
               <tr>
                 <th scope="row">ASN</th>
@@ -166,7 +171,52 @@
                 <th scope="row">User&nbsp;agent: Raw</th>
                 <td>{{ .UserAgent.RawValue }}</td>
               </tr>
-              {{ end }} {{ end }}
+              {{ end }} 
+
+              {{ if .IsProxy }}
+              <tr>
+                <th scope="row">Is Proxy?</th>
+                <td>{{ .IsProxy }}</td>
+              </tr>
+              {{ end }}
+
+              {{ if .IsCrawler }}
+              <tr>
+                <th scope="row">Is Crawler?</th>
+                <td>{{ .IsCrawler }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Crawler Name</th>
+                <td>{{ .CrawlerName }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Crawler Type</th>
+                <td>{{ .CrawlerType }}</td>
+              </tr>
+              {{ end }}
+
+              {{ if .IsTor }}
+              <tr>
+                <th scope="row">Is Tor?</th>
+                <td>{{ .IsTor }}</td>
+              </tr>
+              {{ end }}
+
+              {{ if .ThreatLevel }}
+              <tr>
+                <th scope="row">Threat Level</th>
+                <td>{{ .ThreatLevel }}</td>
+              </tr>
+              {{ end }}
+
+              {{ if .ThreatTypes }}
+              <tr>
+                <th scope="row">Threat Types</th>
+                <td>{{ .ThreatTypes }}</td>
+              </tr>
+              {{ end }}
+
+              {{ end }}
             </table>
             {{ if .Country }} {{ if .UsingGeoIP }}
             <p>
