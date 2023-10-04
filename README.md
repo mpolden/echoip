@@ -85,12 +85,6 @@ between IPv4 and IPv6 lookup.
 - All endpoints (except `/port`) can return information about a custom IP address specified via `?ip=` query parameter
 - Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 
-## Why?
-
-- To scratch an itch
-- An excuse to use Go for something
-- Faster than ifconfig.me and has IPv6 support
-
 ### Usage
 
 ```
