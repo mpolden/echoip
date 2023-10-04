@@ -35,6 +35,8 @@ func main() {
 	var ipstackApiKey string
 	service := flag.String("d", "geoip", "Which database to use, 'ipstack' or 'geoip'")
 	flag.StringVar(&ipstackApiKey, "S", "", "IP Stack API Key")
+	ipStackEnableSecurityModule := flag.Bool("x", false, "Enable security module for IP Stack ( must have security module, aka. non-free account. )")
+	ipStackUseHttps := flag.Bool("h", false, "Use HTTPS for IP Stack ( only non-free accounts )")
 	countryFile := flag.String("f", "", "Path to GeoIP country database")
 	cityFile := flag.String("c", "", "Path to GeoIP city database")
 	asnFile := flag.String("a", "", "Path to GeoIP ASN database")
@@ -56,6 +58,7 @@ func main() {
 
 	var parser parser.Parser
 	if *service == "geoip" {
+		log.Print("Using GeoIP for IP database")
 		geo, err := geo.Open(*countryFile, *cityFile, *asnFile)
 		if err != nil {
 			log.Fatal(err)
@@ -64,7 +67,17 @@ func main() {
 	}
 
 	if *service == "ipstack" {
-		if err := ipstackApi.Init(ipstackApiKey); err != nil {
+		log.Print("Using GeoIP for IP database")
+		if *ipStackEnableSecurityModule {
+			log.Print("Enable Security Module ( Requires Professional Plus account )")
+		}
+		enableSecurity := ipstackApi.ParamEnableSecurity(*ipStackEnableSecurityModule)
+		apiKey := ipstackApi.ParamToken(ipstackApiKey)
+		useHttps := ipstackApi.ParamUseHTTPS(*ipStackUseHttps)
+		if *ipStackUseHttps {
+			log.Print("Use IP Stack HTTPS API ( Requires non-free account )")
+		}
+		if err := ipstackApi.Init(apiKey, enableSecurity, useHttps); err != nil {
 			log.Fatal(err)
 		}
 		ips := ipstack.IPStack{}
