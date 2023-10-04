@@ -136,10 +136,9 @@
                 <th scope="row">Timezone</th>
                 <td>{{ .Timezone }}</td>
               </tr>
-              {{ end }} {{ if .IsDayLightSavings }}
               <tr>
                 <th scope="row">Is Daylight Savings?</th>
-                <td>{{ .IsDayLightSavings }}</td>
+                <td>{{ .TimezoneEtc.IsDaylightSavings }}</td>
               </tr>
               {{ end }} {{ if .ASN }}
               <tr>
@@ -176,35 +175,35 @@
               {{ if .IPStackSecurityEnabled }}
               <tr>
                 <th scope="row">Is Proxy?</th>
-                <td>{{ .IsProxy }}</td>
+                <td>{{ .Security.IsProxy }}</td>
               </tr>
               <tr>
                 <th scope="row">Is Crawler?</th>
-                <td>{{ .IsCrawler }}</td>
+                <td>{{ .Security.IsCrawler }}</td>
               </tr>
 
-              {{ if .IsCrawler }}
+              {{ if .Security.IsCrawler }}
               <tr>
                 <th scope="row">Crawler Name</th>
-                <td>{{ .CrawlerName }}</td>
+                <td>{{ .Security.CrawlerName }}</td>
               </tr>
               <tr>
                 <th scope="row">Crawler Type</th>
-                <td>{{ .CrawlerType }}</td>
+                <td>{{ .Security.CrawlerType }}</td>
               </tr>
               {{ end }} 
 
               <tr>
                 <th scope="row">Is Tor?</th>
-                <td>{{ .IsTor }}</td>
+                <td>{{ .Security.IsTor }}</td>
               </tr>
               <tr>
                 <th scope="row">Threat Level</th>
-                <td>{{ .ThreatLevel }}</td>
+                <td>{{ .Security.ThreatLevel }}</td>
               </tr>
               <tr>
                 <th scope="row">Threat Types</th>
-                <td>{{ .ThreatTypes }}</td>
+                <td>{{ .Security.ThreatTypes }}</td>
               </tr>
               {{ end }}
 
