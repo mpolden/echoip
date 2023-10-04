@@ -3,6 +3,7 @@ package ipstack
 import (
 	"fmt"
 	"net"
+	"reflect"
 
 	"github.com/mpolden/echoip/iputil"
 	parser "github.com/mpolden/echoip/iputil/paser"
@@ -45,13 +46,17 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	}
 
 	if res.Security != nil {
+		parserResponse.IPStackSecurityEnabled = true
 		parserResponse.IsProxy = res.Security.IsProxy
 		parserResponse.IsCrawler = res.Security.IsCrawler
 		parserResponse.CrawlerName = res.Security.CrawlerName
 		parserResponse.CrawlerType = res.Security.CrawlerType
 		parserResponse.IsTor = res.Security.IsTOR
 		parserResponse.ThreatLevel = res.Security.ThreatLevel
-		parserResponse.ThreatTypes = &res.Security.ThreatTypes
+
+		if !reflect.ValueOf(&res.Security.ThreatTypes).IsNil() {
+			parserResponse.ThreatTypes = &res.Security.ThreatTypes
+		}
 	}
 
 	if res.Location != nil {

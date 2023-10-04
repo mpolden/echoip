@@ -173,18 +173,17 @@
               </tr>
               {{ end }} 
 
-              {{ if .IsProxy }}
+              {{ if .IPStackSecurityEnabled }}
               <tr>
                 <th scope="row">Is Proxy?</th>
                 <td>{{ .IsProxy }}</td>
               </tr>
-              {{ end }}
-
-              {{ if .IsCrawler }}
               <tr>
                 <th scope="row">Is Crawler?</th>
                 <td>{{ .IsCrawler }}</td>
               </tr>
+
+              {{ if .IsCrawler }}
               <tr>
                 <th scope="row">Crawler Name</th>
                 <td>{{ .CrawlerName }}</td>
@@ -193,23 +192,16 @@
                 <th scope="row">Crawler Type</th>
                 <td>{{ .CrawlerType }}</td>
               </tr>
-              {{ end }}
+              {{ end }} 
 
-              {{ if .IsTor }}
               <tr>
                 <th scope="row">Is Tor?</th>
                 <td>{{ .IsTor }}</td>
               </tr>
-              {{ end }}
-
-              {{ if .ThreatLevel }}
               <tr>
                 <th scope="row">Threat Level</th>
                 <td>{{ .ThreatLevel }}</td>
               </tr>
-              {{ end }}
-
-              {{ if .ThreatTypes }}
               <tr>
                 <th scope="row">Threat Types</th>
                 <td>{{ .ThreatTypes }}</td>
