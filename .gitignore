@@ -2,4 +2,5 @@
 /custom.html
 /vendor/
 .vscode/
+.idea/
 /bin/

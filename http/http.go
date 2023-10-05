@@ -11,8 +11,8 @@ import (
 
 	"net/http/pprof"
 
-	parser "github.com/mpolden/echoip/iputil/paser"
-	"github.com/mpolden/echoip/useragent"
+	parser "github.com/levelsoftware/echoip/iputil/paser"
+	"github.com/levelsoftware/echoip/useragent"
 
 	"net"
 	"net/http"

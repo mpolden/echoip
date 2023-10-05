@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"net"
 
-	"github.com/mpolden/echoip/useragent"
+	"github.com/levelsoftware/echoip/useragent"
 )
 
 type Parser interface {

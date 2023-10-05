@@ -7,11 +7,11 @@ import (
 
 	"os"
 
-	"github.com/mpolden/echoip/http"
-	"github.com/mpolden/echoip/iputil"
-	"github.com/mpolden/echoip/iputil/geo"
-	"github.com/mpolden/echoip/iputil/ipstack"
-	parser "github.com/mpolden/echoip/iputil/paser"
+	"github.com/levelsoftware/echoip/http"
+	"github.com/levelsoftware/echoip/iputil"
+	"github.com/levelsoftware/echoip/iputil/geo"
+	"github.com/levelsoftware/echoip/iputil/ipstack"
+	parser "github.com/levelsoftware/echoip/iputil/paser"
 	ipstackApi "github.com/qioalice/ipstack"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/mpolden/echoip/iputil"
-	parser "github.com/mpolden/echoip/iputil/paser"
+	"github.com/levelsoftware/echoip/iputil"
+	parser "github.com/levelsoftware/echoip/iputil/paser"
 
 	"github.com/qioalice/ipstack"
 )
