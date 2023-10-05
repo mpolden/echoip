@@ -21,13 +21,13 @@ type Currency struct {
 }
 
 type Security struct {
-	IsProxy     bool        `json:"is_proxy"`
-	IsCrawler   bool        `json:"is_crawler"`
-	CrawlerName string      `json:"crawler_name,omitempty"`
-	CrawlerType string      `json:"crawler_type,omitempty"`
-	IsTor       bool        `json:"is_tor"`
-	ThreatLevel string      `json:"threat_level,omitempty"`
-	ThreatTypes interface{} `json:"threat_types,omitempty"`
+	IsProxy     bool     `json:"is_proxy"`
+	IsCrawler   bool     `json:"is_crawler"`
+	CrawlerName string   `json:"crawler_name,omitempty"`
+	CrawlerType string   `json:"crawler_type,omitempty"`
+	IsTor       bool     `json:"is_tor"`
+	ThreatLevel string   `json:"threat_level,omitempty"`
+	ThreatTypes []string `json:"threat_types,omitempty"`
 }
 
 type Timezone struct {
