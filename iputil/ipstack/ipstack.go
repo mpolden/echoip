@@ -3,10 +3,11 @@ package ipstack
 import (
 	"fmt"
 	"net"
-	"reflect"
+	"time"
 
-	"github.com/mpolden/echoip/iputil"
-	parser "github.com/mpolden/echoip/iputil/paser"
+	"github.com/levelsoftware/echoip/iputil"
+	parser "github.com/levelsoftware/echoip/iputil/paser"
+
 	"github.com/qioalice/ipstack"
 )
 
@@ -17,6 +18,7 @@ type IPStack struct {
 func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	res, err := ipstack.IP(ip.String())
 	ips.response = res
+
 	if err != nil {
 		return parser.Response{}, err
 	}
@@ -26,50 +28,89 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	parserResponse := parser.Response{
 		UsingGeoIP:   false,
 		UsingIPStack: true,
-		Latitude:     float64(res.Latitide),
-		Longitude:    float64(res.Longitude),
-		Hostname:     hostname,
-		IP:           ip,
-		IPDecimal:    ipDecimal,
-		Country:      res.CountryName,
-		CountryISO:   res.CountryCode,
-		RegionName:   res.RegionName,
-		RegionCode:   res.RegionCode,
-		MetroCode:    0,
-		PostalCode:   res.Zip,
-		City:         res.City,
+
+		/* kept for backward compatibility */
+		Latitude:   float64(res.Latitide),
+		Longitude:  float64(res.Longitude),
+		Hostname:   hostname,
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    res.CountryName,
+		CountryISO: res.CountryCode,
+		RegionName: res.RegionName,
+		RegionCode: res.RegionCode,
+		MetroCode:  0,
+		PostalCode: res.Zip,
+		City:       res.City,
 	}
 
-	if res.Timezone != nil {
-		parserResponse.Timezone = res.Timezone.ID
-		parserResponse.IsDayLightSavings = res.Timezone.IsDaylightSaving
-	}
-
-	if res.Security != nil {
-		parserResponse.IPStackSecurityEnabled = true
-		parserResponse.IsProxy = res.Security.IsProxy
-		parserResponse.IsCrawler = res.Security.IsCrawler
-		parserResponse.CrawlerName = res.Security.CrawlerName
-		parserResponse.CrawlerType = res.Security.CrawlerType
-		parserResponse.IsTor = res.Security.IsTOR
-		parserResponse.ThreatLevel = res.Security.ThreatLevel
-
-		if !reflect.ValueOf(&res.Security.ThreatTypes).IsNil() {
-			parserResponse.ThreatTypes = &res.Security.ThreatTypes
-		}
-	}
-
-	if res.Location != nil {
-		parserResponse.CountryEU = &res.Location.IsEU
-	}
-
-	if res.Connection != nil {
-		if res.Connection.ASN > 0 {
-			parserResponse.ASN = fmt.Sprintf("AS%d", res.Connection.ASN)
-		}
-	}
+	ips.ParseSecurityResponse(&parserResponse)
+	ips.ParseTimezoneResponse(&parserResponse)
+	ips.ParseLocationResponse(&parserResponse)
+	ips.ParseConnectionResponse(&parserResponse)
 
 	return parserResponse, nil
+}
+
+func (ips *IPStack) ParseSecurityResponse(parserResponse *parser.Response) {
+	if ips.response.Security != nil {
+		parserResponse.IPStackSecurityEnabled = true
+
+		parserResponse.Security = parser.Security{
+			IsProxy:     ips.response.Security.IsProxy,
+			IsTor:       ips.response.Security.IsTOR,
+			CrawlerName: ips.response.Security.CrawlerName,
+			CrawlerType: ips.response.Security.CrawlerType,
+			ThreatLevel: ips.response.Security.ThreatLevel,
+			ThreatTypes: ips.response.Security.ThreatTypes.([]string),
+		}
+	}
+}
+
+func (ips *IPStack) ParseTimezoneResponse(parserResponse *parser.Response) {
+	if ips.response.Timezone != nil {
+		parserResponse.TimezoneEtc = parser.Timezone{
+			ID:                ips.response.Timezone.ID,
+			CurrentTime:       ips.response.Timezone.CurrentTime.Format(time.RFC3339),
+			GmtOffset:         ips.response.Timezone.GMTOffset,
+			Code:              ips.response.Timezone.Code,
+			IsDaylightSavings: ips.response.Timezone.IsDaylightSaving,
+		}
+
+		/* kept for backward compatibility */
+		parserResponse.Timezone = ips.response.Timezone.ID
+	}
+}
+
+func (ips *IPStack) ParseLocationResponse(parserResponse *parser.Response) {
+	if ips.response.Location != nil {
+		var languages []parser.Language
+		for i := 0; i < len(ips.response.Location.Languages); i++ {
+			languages = append(languages, parser.Language{
+				Code:   ips.response.Location.Languages[i].Code,
+				Name:   ips.response.Location.Languages[i].Name,
+				Native: ips.response.Location.Languages[i].NativeName,
+			})
+		}
+		parserResponse.Location = parser.Location{
+			Languages: languages,
+			CountryFlag: parser.CountryFlag{
+				Flag:         ips.response.Location.CountryFlagLink,
+				Emoji:        ips.response.Location.CountryFlagEmoji,
+				EmojiUnicode: ips.response.Location.CountryFlagEmojiUnicode,
+			},
+		}
+
+		/* kept for backward compatibility */
+		parserResponse.CountryEU = &ips.response.Location.IsEU
+	}
+}
+
+func (ips *IPStack) ParseConnectionResponse(parserResponse *parser.Response) {
+	if ips.response.Connection != nil && ips.response.Connection.ASN > 0 {
+		/* kept for backward compatibility */
+		parserResponse.ASN = fmt.Sprintf("AS%d", ips.response.Connection.ASN)
+	}
 }
 
 func (ips *IPStack) IsEmpty() bool {

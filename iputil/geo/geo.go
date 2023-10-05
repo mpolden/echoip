@@ -5,8 +5,8 @@ import (
 	"math"
 	"net"
 
-	"github.com/mpolden/echoip/iputil"
-	parser "github.com/mpolden/echoip/iputil/paser"
+	"github.com/levelsoftware/echoip/iputil"
+	parser "github.com/levelsoftware/echoip/iputil/paser"
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
@@ -84,22 +84,24 @@ func (g *geoip) Parse(ip net.IP, hostname string) (parser.Response, error) {
 		UsingGeoIP:             true,
 		UsingIPStack:           false,
 		IPStackSecurityEnabled: false,
-		IP:                     ip,
-		IPDecimal:              ipDecimal,
-		Country:                country.Name,
-		CountryISO:             country.ISO,
-		CountryEU:              country.IsEU,
-		RegionName:             city.RegionName,
-		RegionCode:             city.RegionCode,
-		MetroCode:              city.MetroCode,
-		PostalCode:             city.PostalCode,
-		City:                   city.Name,
-		Latitude:               city.Latitude,
-		Longitude:              city.Longitude,
-		Timezone:               city.Timezone,
-		ASN:                    autonomousSystemNumber,
-		ASNOrg:                 asn.AutonomousSystemOrganization,
-		Hostname:               hostname,
+
+		/* kept for backward compatibility */
+		IP:         ip,
+		IPDecimal:  ipDecimal,
+		Country:    country.Name,
+		CountryISO: country.ISO,
+		CountryEU:  country.IsEU,
+		RegionName: city.RegionName,
+		RegionCode: city.RegionCode,
+		MetroCode:  city.MetroCode,
+		PostalCode: city.PostalCode,
+		City:       city.Name,
+		Latitude:   city.Latitude,
+		Longitude:  city.Longitude,
+		Timezone:   city.Timezone,
+		ASN:        autonomousSystemNumber,
+		ASNOrg:     asn.AutonomousSystemOrganization,
+		Hostname:   hostname,
 	}, nil
 }
 

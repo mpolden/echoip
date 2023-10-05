@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync"
 
-	parser "github.com/mpolden/echoip/iputil/paser"
+	parser "github.com/levelsoftware/echoip/iputil/paser"
 )
 
 type Cache struct {

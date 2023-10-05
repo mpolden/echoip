@@ -1,0 +1,22 @@
+name: Go
+
+on: [push]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.13.x"
+
+      - name: Display Go version
+        run: go version
+
+      - name: Run tests
+        run: go test ./...
