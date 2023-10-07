@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.18.x"
+
+      - name: Build EchoIP binary
+        run: go build -o ./echoip ./cmd/echoip/main.go
+
+      - name: Upload Release Artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          zip -r echoip-linux-amd64-${{  github.ref_name }}.zip echoip html LICENSE 
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: echoip-linux-amd64-${{  github.ref_name }}.zip
+          bodyFile: "CHANGELOG.md"

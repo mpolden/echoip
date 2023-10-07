@@ -84,34 +84,58 @@ between IPv4 and IPv6 lookup.
 - Port testing
 - All endpoints (except `/port`) can return information about a custom IP address specified via `?ip=` query parameter
 - Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
+- Supports IP Stack API or GeoIP
+
+### Installation from Release
+
+- Download release file.
+- Install `./echoip` binary ( `sudo install echoip /usr/local/bin/echoip` )
+- Install configuration file( `sudo install -D etc/echoip/config.toml /etc/echoip/config.toml` )
+- Point `config.TemplateDir` to release `html/`
+
+### Installation from Source
+
+- Install Go 1.18
+- `$ cd echoip/`
+- `$ make install`
 
 ### Usage
 
 ```
-$ echoip -h
-Usage of echoip:
-  -C int
-    	Size of response cache. Set to 0 to disable
-  -H value
-    	Header to trust for remote IP, if present (e.g. X-Real-IP)
-  -P	Enables profiling handlers
-  -S string
-    	IP Stack API Key
-  -a string
-    	Path to GeoIP ASN database
-  -c string
-    	Path to GeoIP city database
-  -d string
-    	Which database to use, 'ipstack' or 'geoip' (default "geoip")
-  -f string
-    	Path to GeoIP country database
-  -h	Use HTTPS for IP Stack ( only non-free accounts )
-  -l string
-    	Listening address (default ":8080")
-  -p	Enable port lookup
-  -r	Perform reverse hostname lookups
-  -s	Show sponsor logo
-  -t string
-    	Path to template dir (default "html")
-  -x	Enable security module for IP Stack ( must have security module, aka. non-free account. )
+$ echoip
 ```
+
+### Configuration
+
+Configuration is managed in the `etc/echoip/config.toml` file. This file should be located in the `/etc` folder on your server ( /etc/echoip/config.toml ). If you have the project on your server, you can run `make install-config` to copy it the right location.
+
+```toml
+Listen = ":8080"
+TemplateDir = "html" # The directory of the template files ( eg, index.html )
+RedisUrl = "redis://localhost:6379" # Redis Connection URL, leave blank for no Cache
+CacheTtl = 3600 # in seconds
+ReverseLookup = true
+PortLookup = true
+ShowSponsor = true
+Database = "ipstack" # use "IP Stack" or "GeoIP"
+TrustedHeaders = [] # Which header to trust, eg, `["X-Real-IP"]`
+Profile = false # enable debug / profiling
+
+[IPStack]
+ApiKey = "" 
+UseHttps = true
+EnableSecurity = true
+
+[GeoIP]
+CountryFile = ""
+CityFile = ""
+AsnFile = ""
+```
+
+### Caching with Redis
+
+You can connect EchoIP to a Redis client to cache each request per IP. You can configure the life of the key in `config.CacheTtl`.
+
+### Running with `systemd`
+
+There is a systemd service file you can install in `/etc/systemd`.

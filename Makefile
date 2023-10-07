@@ -19,10 +19,14 @@ vet:
 check-fmt:
 	bash -c "diff --line-format='%L' <(echo -n) <(gofmt -d -s .)"
 
+
 lint: check-fmt vet
 
-install:
+install: install-config
 	go install ./...
+
+install-config:
+	sudo install -D etc/echoip/config.toml /etc/echoip/config.toml
 
 databases := GeoLite2-City GeoLite2-Country GeoLite2-ASN
 
@@ -63,7 +67,7 @@ docker-push: docker-test docker-login
 docker-pushx: docker-multiarch-builder docker-test docker-login
 	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
-xinstall:
+xinstall: install-config
 	env GOOS=$(XGOOS) GOARCH=$(XGOARCH) go install ./...
 
 publish:

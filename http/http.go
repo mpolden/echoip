@@ -1,16 +1,18 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"path/filepath"
 	"strings"
 
 	"net/http/pprof"
 
+	rcache "github.com/go-redis/cache/v9"
+	"github.com/levelsoftware/echoip/cache"
 	parser "github.com/levelsoftware/echoip/iputil/paser"
 	"github.com/levelsoftware/echoip/useragent"
 
@@ -29,7 +31,8 @@ type Server struct {
 	IPHeaders  []string
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
-	cache      *Cache
+	cache      cache.Cache
+	cacheTtl   int
 	parser     parser.Parser
 	profile    bool
 	Sponsor    bool
@@ -41,8 +44,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(parser parser.Parser, cache *Cache, profile bool) *Server {
-	return &Server{cache: cache, parser: parser, profile: profile}
+func New(parser parser.Parser, cache cache.Cache, cacheTtl int, profile bool) *Server {
+	return &Server{cache: cache, cacheTtl: cacheTtl, parser: parser, profile: profile}
 }
 
 func ipFromForwardedForHeader(v string) string {
@@ -101,24 +104,38 @@ func userAgentFromRequest(r *http.Request) *useragent.UserAgent {
 }
 
 func (s *Server) newResponse(r *http.Request) (parser.Response, error) {
+	ctx := context.Background()
+
 	ip, err := ipFromRequest(s.IPHeaders, r, true)
 	if err != nil {
 		return parser.Response{}, err
 	}
-	response, ok := s.cache.Get(ip)
-	if ok {
-		// Do not cache user agent
-		response.UserAgent = userAgentFromRequest(r)
-		return response, nil
+
+	var cachedResponse cache.CachedResponse
+	if err := s.cache.Get(ctx, ip.String(), &cachedResponse); err != nil && err != rcache.ErrCacheMiss {
+		return parser.Response{}, err
 	}
+
+	if cachedResponse.IsSet() {
+		log.Printf("Return cached response for %s", ip.String())
+		return cachedResponse.Get(), nil
+	}
+
 	var hostname string
 	if s.LookupAddr != nil {
 		hostname, _ = s.LookupAddr(ip)
 	}
 
+	var response parser.Response
 	response, err = s.parser.Parse(ip, hostname)
-	s.cache.Set(ip, response)
+
+	log.Printf("Caching response for %s", ip.String())
+	if err := s.cache.Set(ctx, ip.String(), cachedResponse.Build(response), s.cacheTtl); err != nil {
+		return parser.Response{}, err
+	}
+
 	response.UserAgent = userAgentFromRequest(r)
+
 	return response, nil
 }
 
@@ -229,50 +246,6 @@ func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
 	b, err := json.MarshalIndent(response, "", "  ")
-	if err != nil {
-		return internalServerError(err).AsJSON()
-	}
-	w.Header().Set("Content-Type", jsonMediaType)
-	w.Write(b)
-	return nil
-}
-
-func (s *Server) cacheResizeHandler(w http.ResponseWriter, r *http.Request) *appError {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return badRequest(err).WithMessage(err.Error()).AsJSON()
-	}
-	capacity, err := strconv.Atoi(string(body))
-	if err != nil {
-		return badRequest(err).WithMessage(err.Error()).AsJSON()
-	}
-	if err := s.cache.Resize(capacity); err != nil {
-		return badRequest(err).WithMessage(err.Error()).AsJSON()
-	}
-	data := struct {
-		Message string `json:"message"`
-	}{fmt.Sprintf("Changed cache capacity to %d.", capacity)}
-	b, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return internalServerError(err).AsJSON()
-	}
-	w.Header().Set("Content-Type", jsonMediaType)
-	w.Write(b)
-	return nil
-}
-
-func (s *Server) cacheHandler(w http.ResponseWriter, r *http.Request) *appError {
-	cacheStats := s.cache.Stats()
-	var data = struct {
-		Size      int    `json:"size"`
-		Capacity  int    `json:"capacity"`
-		Evictions uint64 `json:"evictions"`
-	}{
-		cacheStats.Size,
-		cacheStats.Capacity,
-		cacheStats.Evictions,
-	}
-	b, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return internalServerError(err).AsJSON()
 	}
@@ -411,8 +384,6 @@ func (s *Server) Handler() http.Handler {
 
 	// Profiling
 	if s.profile {
-		r.Route("POST", "/debug/cache/resize", s.cacheResizeHandler)
-		r.Route("GET", "/debug/cache/", s.cacheHandler)
 		r.Route("GET", "/debug/pprof/cmdline", wrapHandlerFunc(pprof.Cmdline))
 		r.Route("GET", "/debug/pprof/profile", wrapHandlerFunc(pprof.Profile))
 		r.Route("GET", "/debug/pprof/symbol", wrapHandlerFunc(pprof.Symbol))
