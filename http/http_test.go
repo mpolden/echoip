@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/levelsoftware/echoip/cache"
 	"github.com/levelsoftware/echoip/iputil"
 	"github.com/levelsoftware/echoip/iputil/geo"
 	parser "github.com/levelsoftware/echoip/iputil/paser"
@@ -66,8 +68,23 @@ func (t *testDb) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	}, nil
 }
 
+type FakeCache struct{}
+
+var cachedResponse cache.CachedResponse
+
+func (fc *FakeCache) Get(ctx context.Context, ip string, response *cache.CachedResponse) error {
+	response = &cachedResponse
+	return nil
+}
+
+func (fc *FakeCache) Set(ctx context.Context, ip string, response cache.CachedResponse, cacheTtl int) error {
+	cachedResponse = response
+	return nil
+}
+
 func testServer() *Server {
-	return &Server{cache: NewCache(100), parser: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
+	fakeCache := FakeCache{}
+	return &Server{cache: &fakeCache, cacheTtl: 100, parser: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
@@ -211,36 +228,6 @@ func TestJSONHandlers(t *testing.T) {
 		if out != tt.out {
 			t.Errorf("Expected %q for %s, got %q", tt.out, tt.url, out)
 		}
-	}
-}
-
-func TestCacheHandler(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
-	srv := testServer()
-	srv.profile = true
-	s := httptest.NewServer(srv.Handler())
-	got, _, err := httpGet(s.URL+"/debug/cache/", jsonMediaType, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := "{\n  \"size\": 0,\n  \"capacity\": 100,\n  \"evictions\": 0\n}"
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
-func TestCacheResizeHandler(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
-	srv := testServer()
-	srv.profile = true
-	s := httptest.NewServer(srv.Handler())
-	_, got, err := httpPost(s.URL+"/debug/cache/resize", "10")
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := "{\n  \"message\": \"Changed cache capacity to 10.\"\n}"
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

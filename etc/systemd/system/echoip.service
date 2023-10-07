@@ -1,0 +1,17 @@
+[Unit]
+Description=EchoIP
+After=network.target
+
+[Service]
+Type=simple
+User=web
+
+ExecStart=/usr/local/bin/echoip 
+Restart=always
+RestartSec=5s
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=echoip
+
+[Install]
+WantedBy=multi-user.target

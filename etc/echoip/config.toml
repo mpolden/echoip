@@ -1,0 +1,20 @@
+Listen = ":8080"
+TemplateDir = "html/index.html"
+RedisUrl = "redis://localhost:6379"
+CacheTtl = 3600 # in seconds
+ReverseLookup = true
+PortLookup = true
+ShowSponsor = true
+Database = "ipstack" # use "IP Stack" or "GeoIP"
+TrustedHeaders = []
+Profile = false # enable debug / profiling
+
+[IPStack]
+ApiKey = "HelloWorld"
+UseHttps = true
+EnableSecurity = true
+
+[GeoIP]
+CountryFile = ""
+CityFile = ""
+AsnFile = ""

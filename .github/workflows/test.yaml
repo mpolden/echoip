@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 on: [push]
 
@@ -13,10 +13,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.13.x"
-
-      - name: Display Go version
-        run: go version
+          go-version: "1.18.x"
 
       - name: Run tests
         run: go test ./...

@@ -62,7 +62,10 @@ func (ips *IPStack) ParseSecurityResponse(parserResponse *parser.Response) {
 			CrawlerName: ips.response.Security.CrawlerName,
 			CrawlerType: ips.response.Security.CrawlerType,
 			ThreatLevel: ips.response.Security.ThreatLevel,
-			ThreatTypes: ips.response.Security.ThreatTypes.([]string),
+		}
+
+		if threat_types, ok := ips.response.Security.ThreatTypes.([]string); ok {
+			parserResponse.Security.ThreatTypes = threat_types
 		}
 	}
 }
