@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 type IPStack struct {
@@ -36,11 +37,10 @@ type Config struct {
 
 func GetConfig() (Config, error) {
 	defaultConfig := Config{
-		Listen:         getenv_string("ECHOIP_LISTEN", ":8080"),
-		TemplateDir:    getenv_string("ECHOIP_TEMPLATE_DIR", "html/"),
-		RedisUrl:       getenv_string("ECHOIP_REDIS_URL", ""),
-		TrustedHeaders: nil,
-		Database:       getenv_string("ECHOIP_DATABASE", "geoip"),
+		Listen:      getenv_string("ECHOIP_LISTEN", ":8080"),
+		TemplateDir: getenv_string("ECHOIP_TEMPLATE_DIR", "html/"),
+		RedisUrl:    getenv_string("ECHOIP_REDIS_URL", ""),
+		Database:    getenv_string("ECHOIP_DATABASE", "geoip"),
 		IPStack: IPStack{
 			ApiKey: getenv_string("ECHOIP_IPSTACK_API_KEY", ""),
 		},
@@ -92,6 +92,9 @@ func GetConfig() (Config, error) {
 		return Config{}, err
 	}
 	defaultConfig.IPStack.EnableSecurity = ipStackEnableSecurity
+
+	trustedHeaders := getenv_string("ECHOIP_TRUSTED_HEADERS", "")
+	defaultConfig.TrustedHeaders = strings.Split(trustedHeaders, ",")
 
 	return defaultConfig, nil
 }

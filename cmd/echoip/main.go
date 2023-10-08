@@ -46,9 +46,7 @@ func main() {
 
 	if err != nil {
 		log.Printf("Error opening config file (/etc/echoip/config.toml): %s", err)
-	}
-
-	if err == nil {
+	} else {
 		var b []byte
 		b, err = io.ReadAll(file)
 		if err != nil {
