@@ -1,5 +1,5 @@
 DOCKER ?= docker
-DOCKER_IMAGE ?= mpolden/echoip
+DOCKER_IMAGE ?= levelsoftware/echoip
 OS := $(shell uname)
 ifeq ($(OS),Linux)
 	TAR_OPTS := --wildcards
@@ -22,11 +22,11 @@ check-fmt:
 
 lint: check-fmt vet
 
-install: install-config
+install: 
 	go install ./...
 
 install-config:
-	sudo install -D etc/echoip/config.toml /etc/echoip/config.toml
+	install -D etc/echoip/config.toml /etc/echoip/config.toml
 
 databases := GeoLite2-City GeoLite2-Country GeoLite2-ASN
 
@@ -51,7 +51,7 @@ docker-multiarch-builder:
 	$(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
 docker-build:
-	$(DOCKER) build -t $(DOCKER_IMAGE) .
+	$(DOCKER) build -t $(DOCKER_IMAGE) . 
 
 docker-login:
 	@echo "$(DOCKER_PASSWORD)" | $(DOCKER) login -u "$(DOCKER_USERNAME)" --password-stdin

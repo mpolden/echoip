@@ -4,3 +4,4 @@
 .vscode/
 .idea/
 /bin/
+.envrc

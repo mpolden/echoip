@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  echoip:
+    image: hub.01a.in/echoip:latest
+    environment:
+        - ECHOIP_DATABASE="ipstack"
+        - ECHOIP_IPSTACK_API_KEY="ipstack"
+    ports:
+      - '8080:8080'
+
   cache:
     image: redis:6.2-alpine
     restart: always
