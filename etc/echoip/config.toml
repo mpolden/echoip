@@ -1,5 +1,5 @@
 Listen = ":8080"
-TemplateDir = "html/index.html"
+TemplateDir = "html"
 RedisUrl = "redis://localhost:6379"
 CacheTtl = 3600 # in seconds
 ReverseLookup = true

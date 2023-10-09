@@ -9,6 +9,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/levelsoftware/echoip/cache"
+	"github.com/levelsoftware/echoip/config"
 	"github.com/levelsoftware/echoip/http"
 	"github.com/levelsoftware/echoip/iputil"
 	"github.com/levelsoftware/echoip/iputil/geo"
@@ -33,61 +34,38 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-type IPStack struct {
-	ApiKey         string
-	UseHttps       bool
-	EnableSecurity bool
-}
-
-type GeoIP struct {
-	CountryFile string
-	CityFile    string
-	AsnFile     string
-}
-
-type Config struct {
-	Listen         string
-	TemplateDir    string
-	RedisUrl       string
-	CacheTtl       int
-	ReverseLookup  bool
-	PortLookup     bool
-	ShowSponsor    bool
-	TrustedHeaders []string
-
-	Database string
-	Profile  bool
-
-	IPStack IPStack
-	GeoIP   GeoIP
-}
-
 func main() {
-	file, err := os.Open("/etc/echoip/config.toml")
+	runConfig, err := config.GetConfig()
+
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error building configuration: %s", err)
 	}
+
+	file, err := os.Open("/etc/echoip/config.toml")
 	defer file.Close()
 
-	var config Config
-
-	b, err := io.ReadAll(file)
 	if err != nil {
-		panic(err)
-	}
+		log.Printf("Error opening config file (/etc/echoip/config.toml): %s", err)
+	} else {
+		var b []byte
+		b, err = io.ReadAll(file)
+		if err != nil {
+			log.Printf("Error reading config file (/etc/echoip/config.toml): %s", err)
+		}
 
-	err = toml.Unmarshal(b, &config)
-	if err != nil {
-		panic(err)
+		err = toml.Unmarshal(b, &runConfig)
+		if err != nil {
+			log.Fatalf("Error parsing config file: %s", err)
+		}
 	}
 
 	var parser parser.Parser
-	if config.Database == "geoip" {
+	if runConfig.Database == "geoip" {
 		log.Print("Using GeoIP for IP database")
 		geo, err := geo.Open(
-			config.GeoIP.CountryFile,
-			config.GeoIP.CityFile,
-			config.GeoIP.AsnFile,
+			runConfig.GeoIP.CountryFile,
+			runConfig.GeoIP.CityFile,
+			runConfig.GeoIP.AsnFile,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -95,27 +73,27 @@ func main() {
 		parser = &geo
 	}
 
-	if config.Database == "ipstack" {
-		log.Print("Using GeoIP for IP database")
-		if config.IPStack.EnableSecurity {
-			log.Print("Enable Security Module ( Requires Professional Plus account )")
+	if runConfig.Database == "ipstack" {
+		log.Print("Using IP Stack for IP database")
+		if runConfig.IPStack.EnableSecurity {
+			log.Print("Enable IP Stack Security Module ( Requires Professional Plus account )")
 		}
-		enableSecurity := ipstackApi.ParamEnableSecurity(config.IPStack.EnableSecurity)
-		apiKey := ipstackApi.ParamToken(config.IPStack.ApiKey)
-		useHttps := ipstackApi.ParamUseHTTPS(config.IPStack.UseHttps)
-		if config.IPStack.UseHttps {
+		enableSecurity := ipstackApi.ParamEnableSecurity(runConfig.IPStack.EnableSecurity)
+		apiKey := ipstackApi.ParamToken(runConfig.IPStack.ApiKey)
+		useHttps := ipstackApi.ParamUseHTTPS(runConfig.IPStack.UseHttps)
+		if runConfig.IPStack.UseHttps {
 			log.Print("Use IP Stack HTTPS API ( Requires non-free account )")
 		}
 		if err := ipstackApi.Init(apiKey, enableSecurity, useHttps); err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error initializing IP Stack client: %s", err)
 		}
 		ips := ipstack.IPStack{}
 		parser = &ips
 	}
 
 	var serverCache cache.Cache
-	if len(config.RedisUrl) > 0 {
-		redisCache, err := cache.RedisCache(config.RedisUrl)
+	if len(runConfig.RedisUrl) > 0 {
+		redisCache, err := cache.RedisCache(runConfig.RedisUrl)
 		serverCache = &redisCache
 		if err != nil {
 			log.Fatal(err)
@@ -124,34 +102,35 @@ func main() {
 		serverCache = &cache.Null{}
 	}
 
-	server := http.New(parser, serverCache, config.CacheTtl, config.Profile)
-	server.IPHeaders = config.TrustedHeaders
+	server := http.New(parser, serverCache, runConfig.CacheTtl, runConfig.Profile)
+	server.IPHeaders = runConfig.TrustedHeaders
 
-	if _, err := os.Stat(config.TemplateDir); err == nil {
-		server.Template = config.TemplateDir
+	if _, err := os.Stat(runConfig.TemplateDir); err == nil {
+		server.Template = runConfig.TemplateDir
 	} else {
-		log.Printf("Not configuring default handler: Template not found: %s", config.TemplateDir)
+		log.Printf("Not configuring default handler: Template not found: %s", runConfig.TemplateDir)
 	}
-	if config.ReverseLookup {
+	if runConfig.ReverseLookup {
 		log.Println("Enabling reverse lookup")
 		server.LookupAddr = iputil.LookupAddr
 	}
-	if config.PortLookup {
+	if runConfig.PortLookup {
 		log.Println("Enabling port lookup")
 		server.LookupPort = iputil.LookupPort
 	}
-	if config.ShowSponsor {
+	if runConfig.ShowSponsor {
 		log.Println("Enabling sponsor logo")
-		server.Sponsor = config.ShowSponsor
+		server.Sponsor = runConfig.ShowSponsor
 	}
-	if len(config.TrustedHeaders) > 0 {
-		log.Printf("Trusting remote IP from header(s): %s", config.TrustedHeaders)
+	if len(runConfig.TrustedHeaders) > 0 {
+		log.Printf("Trusting remote IP from header(s): %s", runConfig.TrustedHeaders)
 	}
-	if config.Profile {
+	if runConfig.Profile {
 		log.Printf("Enabling profiling handlers")
 	}
-	log.Printf("Listening on http://%s", config.Listen)
-	if err := server.ListenAndServe(config.Listen); err != nil {
+
+	log.Printf("Listening on http://%s", runConfig.Listen)
+	if err := server.ListenAndServe(runConfig.Listen); err != nil {
 		log.Fatal(err)
 	}
 }

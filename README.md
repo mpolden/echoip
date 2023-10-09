@@ -132,6 +132,28 @@ CityFile = ""
 AsnFile = ""
 ```
 
+### Environment Variables for Configuration
+You can also use environment variables for configuration, most likely used for Docker.
+
+```
+ECHOIP_LISTEN=":8080"
+ECHOIP_TEMPLATE_DIR="html/"
+ECHOIP_REDIS_URL="redis://localhost:6379"
+ECHOIP_DATABASE="ipstack"
+ECHOIP_TRUSTED_HEADERS="X-Real-IP,X-Forwaded-For"
+ECHOIP_IPSTACK_API_KEY="askdfj39sjdkf29dsjfk39sdfkj3"
+ECHOIP_GEOIP_COUNTRY_FILE="/full/path/to/file.db"
+ECHOIP_GEOIP_CITY_FILE="/full/path/to/file.db"
+ECHOIP_GEOIP_ASN_FILE="/full/path/to/file.db"
+ECHOIP_CACHE_TTL=3600
+ECHOIP_REVERSE_LOOKUP=true
+ECHOIP_PORT_LOOKUP=true
+ECHOIP_SHOW_SPONSOR=true
+ECHOIP_PROFILE=false
+ECHOIP_IPSTACK_USE_HTTPS=true
+ECHOIP_IPSTACK_ENABLE_SECURITY=true
+```
+
 ### Caching with Redis
 
 You can connect EchoIP to a Redis client to cache each request per IP. You can configure the life of the key in `config.CacheTtl`.
