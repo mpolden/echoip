@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/levelsoftware/echoip/cache"
+	"github.com/levelsoftware/echoip/config"
 	"github.com/levelsoftware/echoip/iputil"
 	"github.com/levelsoftware/echoip/iputil/geo"
 	parser "github.com/levelsoftware/echoip/iputil/paser"
@@ -84,7 +85,13 @@ func (fc *FakeCache) Set(ctx context.Context, ip string, response cache.CachedRe
 
 func testServer() *Server {
 	fakeCache := FakeCache{}
-	return &Server{cache: &fakeCache, cacheTtl: 100, parser: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
+	return &Server{
+		cache:      &fakeCache,
+		parser:     &testDb{},
+		LookupAddr: lookupAddr,
+		LookupPort: lookupPort,
+		runConfig:  &config.Config{},
+	}
 }
 
 func httpGet(url string, acceptMediaType string, userAgent string) (string, int, error) {
