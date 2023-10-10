@@ -102,13 +102,19 @@ func main() {
 		serverCache = &cache.Null{}
 	}
 
-	server := http.New(parser, serverCache, runConfig.CacheTtl, runConfig.Profile)
+	server := http.New(parser, serverCache, &runConfig)
 	server.IPHeaders = runConfig.TrustedHeaders
 
-	if _, err := os.Stat(runConfig.TemplateDir); err == nil {
-		server.Template = runConfig.TemplateDir
-	} else {
+	if _, err := os.Stat(runConfig.TemplateDir); err != nil {
+		runConfig.TemplateDir = ""
 		log.Printf("Not configuring default handler: Template not found: %s", runConfig.TemplateDir)
+	}
+	if runConfig.Jwt.Enabled {
+		log.Println("Enabling JWT Auth")
+
+		if len(runConfig.Jwt.Secret) == 0 {
+			log.Fatal("Please provide a JWT Token secret when JWT is enabled")
+		}
 	}
 	if runConfig.ReverseLookup {
 		log.Println("Enabling reverse lookup")
@@ -118,9 +124,9 @@ func main() {
 		log.Println("Enabling port lookup")
 		server.LookupPort = iputil.LookupPort
 	}
+
 	if runConfig.ShowSponsor {
 		log.Println("Enabling sponsor logo")
-		server.Sponsor = runConfig.ShowSponsor
 	}
 	if len(runConfig.TrustedHeaders) > 0 {
 		log.Printf("Trusting remote IP from header(s): %s", runConfig.TrustedHeaders)

@@ -1,6 +1,9 @@
 package http
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 type appError struct {
 	Error       error
@@ -22,6 +25,11 @@ func notFound(err error) *appError {
 }
 
 func badRequest(err error) *appError {
+	badAuth := new(InvalidTokenError)
+	if errors.As(err, &badAuth) {
+		return &appError{Error: err, Code: http.StatusUnauthorized}
+	}
+
 	return &appError{Error: err, Code: http.StatusBadRequest}
 }
 

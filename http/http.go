@@ -12,7 +12,9 @@ import (
 	"net/http/pprof"
 
 	rcache "github.com/go-redis/cache/v9"
+	"github.com/golang-jwt/jwt"
 	"github.com/levelsoftware/echoip/cache"
+	"github.com/levelsoftware/echoip/config"
 	parser "github.com/levelsoftware/echoip/iputil/paser"
 	"github.com/levelsoftware/echoip/useragent"
 
@@ -27,15 +29,12 @@ const (
 )
 
 type Server struct {
-	Template   string
 	IPHeaders  []string
 	LookupAddr func(net.IP) (string, error)
 	LookupPort func(net.IP, uint64) error
 	cache      cache.Cache
-	cacheTtl   int
+	runConfig  *config.Config
 	parser     parser.Parser
-	profile    bool
-	Sponsor    bool
 }
 
 type PortResponse struct {
@@ -44,8 +43,8 @@ type PortResponse struct {
 	Reachable bool   `json:"reachable"`
 }
 
-func New(parser parser.Parser, cache cache.Cache, cacheTtl int, profile bool) *Server {
-	return &Server{cache: cache, cacheTtl: cacheTtl, parser: parser, profile: profile}
+func New(parser parser.Parser, cache cache.Cache, runConfig *config.Config) *Server {
+	return &Server{cache: cache, parser: parser, runConfig: runConfig}
 }
 
 func ipFromForwardedForHeader(v string) string {
@@ -104,6 +103,10 @@ func userAgentFromRequest(r *http.Request) *useragent.UserAgent {
 }
 
 func (s *Server) newResponse(r *http.Request) (parser.Response, error) {
+	if err := handleAuth(r, s.runConfig); err != nil {
+		return parser.Response{}, err
+	}
+
 	ctx := context.Background()
 
 	ip, err := ipFromRequest(s.IPHeaders, r, true)
@@ -130,7 +133,7 @@ func (s *Server) newResponse(r *http.Request) (parser.Response, error) {
 	response, err = s.parser.Parse(ip, hostname)
 
 	log.Printf("Caching response for %s", ip.String())
-	if err := s.cache.Set(ctx, ip.String(), cachedResponse.Build(response), s.cacheTtl); err != nil {
+	if err := s.cache.Set(ctx, ip.String(), cachedResponse.Build(response), s.runConfig.CacheTtl); err != nil {
 		return parser.Response{}, err
 	}
 
@@ -158,6 +161,10 @@ func (s *Server) newPortResponse(r *http.Request) (PortResponse, error) {
 }
 
 func (s *Server) CLIHandler(w http.ResponseWriter, r *http.Request) *appError {
+	if err := handleAuth(r, s.runConfig); err != nil {
+		return badRequest(err).WithMessage(err.Error()).AsJSON()
+	}
+
 	ip, err := ipFromRequest(s.IPHeaders, r, true)
 	if err != nil {
 		return badRequest(err).WithMessage(err.Error()).AsJSON()
@@ -259,10 +266,12 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 	if err != nil {
 		return badRequest(err).WithMessage(err.Error())
 	}
-	t, err := template.ParseGlob(s.Template + "/*")
+
+	t, err := template.ParseGlob(s.runConfig.TemplateDir + "/*")
 	if err != nil {
 		return internalServerError(err)
 	}
+
 	json, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return internalServerError(err)
@@ -287,7 +296,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		response.Longitude + 0.05,
 		string(json),
 		s.LookupPort != nil,
-		s.Sponsor,
+		s.runConfig.ShowSponsor,
 	}
 
 	if err := t.Execute(w, &data); err != nil {
@@ -373,7 +382,7 @@ func (s *Server) Handler() http.Handler {
 	}
 
 	// Browser
-	if s.Template != "" {
+	if s.runConfig.TemplateDir != "" {
 		r.Route("GET", "/", s.DefaultHandler)
 	}
 
@@ -383,7 +392,7 @@ func (s *Server) Handler() http.Handler {
 	}
 
 	// Profiling
-	if s.profile {
+	if s.runConfig.Profile {
 		r.Route("GET", "/debug/pprof/cmdline", wrapHandlerFunc(pprof.Cmdline))
 		r.Route("GET", "/debug/pprof/profile", wrapHandlerFunc(pprof.Profile))
 		r.Route("GET", "/debug/pprof/symbol", wrapHandlerFunc(pprof.Symbol))
@@ -400,4 +409,31 @@ func (s *Server) ListenAndServe(addr string) error {
 
 func formatCoordinate(c float64) string {
 	return strconv.FormatFloat(c, 'f', 6, 64)
+}
+
+type InvalidTokenError struct{}
+
+func (m *InvalidTokenError) Error() string {
+	return "invalid_token"
+}
+
+func handleAuth(r *http.Request, runConfig *config.Config) error {
+	if !runConfig.Jwt.Enabled {
+		return nil
+	}
+
+	authorization := r.Header.Get("Authorization")
+	tokenString := strings.ReplaceAll(authorization, "Bearer ", "")
+
+	if _, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(runConfig.Jwt.Secret), nil
+	}); err != nil {
+		if runConfig.Debug {
+			log.Printf("Error validating token ( %s ): %s \n", tokenString, err)
+		}
+
+		return new(InvalidTokenError)
+	}
+
+	return nil
 }

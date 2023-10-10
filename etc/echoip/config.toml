@@ -7,7 +7,12 @@ PortLookup = true
 ShowSponsor = true
 Database = "ipstack" # use "IP Stack" or "GeoIP"
 TrustedHeaders = []
-Profile = false # enable debug / profiling
+Profile = false # enable profiling
+Debug = false # enable debugging, ex print jwt token errors
+
+[Jwt]
+Enabled = false
+Secret = ""
 
 [IPStack]
 ApiKey = "HelloWorld"

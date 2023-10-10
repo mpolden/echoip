@@ -133,7 +133,7 @@ AsnFile = ""
 ```
 
 ### Environment Variables for Configuration
-You can also use environment variables for configuration, most likely used for Docker.
+You can also use environment variables for configuration, most likely used for Docker. Configuration file takes precedence first, and then environment variables. Remove the value from the config file if you wish to use the environment variable.
 
 ```
 ECHOIP_LISTEN=":8080"
