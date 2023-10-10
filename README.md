@@ -55,8 +55,7 @@ $ curl -H 'Accept: application/json' ip.level.io  # or curl ip.level.io/json
   "ip_decimal": 2130706433,
   "asn": "AS59795",
   "asn_org": "Hosting4Real"
-}
-```
+} ```
 
 Port testing:
 
@@ -85,6 +84,7 @@ between IPv4 and IPv6 lookup.
 - All endpoints (except `/port`) can return information about a custom IP address specified via `?ip=` query parameter
 - Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 - Supports IP Stack API or GeoIP
+- JWT Authentication
 
 ### Installation from Release
 
@@ -121,6 +121,10 @@ Database = "ipstack" # use "IP Stack" or "GeoIP"
 TrustedHeaders = [] # Which header to trust, eg, `["X-Real-IP"]`
 Profile = false # enable debug / profiling
 
+[Jwt]
+Enabled = false
+Secret = ""
+
 [IPStack]
 ApiKey = "" 
 UseHttps = true
@@ -152,7 +156,18 @@ ECHOIP_SHOW_SPONSOR=true
 ECHOIP_PROFILE=false
 ECHOIP_IPSTACK_USE_HTTPS=true
 ECHOIP_IPSTACK_ENABLE_SECURITY=true
+ECHOIP_JWT_AUTH=false
+ECHOIP_JWT_SECRET=""
 ```
+
+### Authenticate each API request with JWT
+
+You can authenticate each API request with JWT token.
+Just enable `config.Jwt.Enabled` and add your JWT secret to `config.Jwt.Secret`. 
+
+Requests will be accepted if a valid token is provided in `Authorization: Bearer $token` header.
+
+A `401` will be returned should the token not be valid.
 
 ### Caching with Redis
 
