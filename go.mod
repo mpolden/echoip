@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/go-redis/cache/v9 v9.0.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/oschwald/geoip2-golang v1.5.0
 	github.com/qioalice/ipstack v1.0.1
 	github.com/redis/go-redis/v9 v9.2.1

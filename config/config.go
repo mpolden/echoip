@@ -18,6 +18,12 @@ type GeoIP struct {
 	AsnFile     string
 }
 
+type Jwt struct {
+	Enabled       bool
+	SigningMethod string
+	Secret        string
+}
+
 type Config struct {
 	Listen         string
 	TemplateDir    string
@@ -30,9 +36,11 @@ type Config struct {
 
 	Database string
 	Profile  bool
+	Debug    bool
 
 	IPStack IPStack
 	GeoIP   GeoIP
+	Jwt     Jwt
 }
 
 func GetConfig() (Config, error) {
@@ -41,6 +49,10 @@ func GetConfig() (Config, error) {
 		TemplateDir: getenv_string("ECHOIP_TEMPLATE_DIR", "html/"),
 		RedisUrl:    getenv_string("ECHOIP_REDIS_URL", ""),
 		Database:    getenv_string("ECHOIP_DATABASE", "geoip"),
+		Jwt: Jwt{
+			Secret:        getenv_string("ECHOIP_JWT_SECRET", ""),
+			SigningMethod: getenv_string("ECHOIP_JWT_SIGNING_METHOD", "HS256"),
+		},
 		IPStack: IPStack{
 			ApiKey: getenv_string("ECHOIP_IPSTACK_API_KEY", ""),
 		},
@@ -50,6 +62,18 @@ func GetConfig() (Config, error) {
 			AsnFile:     getenv_string("ECHOIP_GEOIP_ASN_FILE", ""),
 		},
 	}
+
+	jwtAuthEnabled, err := getenv_bool("ECHOIP_JWT_AUTH", false)
+	if err != nil {
+		return Config{}, err
+	}
+	defaultConfig.Jwt.Enabled = jwtAuthEnabled
+
+	debug, err := getenv_bool("ECHOIP_DEBUG", false)
+	if err != nil {
+		return Config{}, err
+	}
+	defaultConfig.Debug = debug
 
 	cacheTtl, err := getenv_int("ECHOIP_CACHE_TTL", 3600)
 	if err != nil {
