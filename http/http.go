@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"net/http/pprof"
@@ -426,6 +427,13 @@ func handleAuth(r *http.Request, runConfig *config.Config) error {
 	tokenString := strings.ReplaceAll(authorization, "Bearer ", "")
 
 	if _, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		expected := reflect.TypeOf(jwt.GetSigningMethod(runConfig.Jwt.SigningMethod))
+		got := reflect.TypeOf(token.Method)
+		if expected != got {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		// Only support SigningMethodHMAC ( Others will be quite a bit more complicated )
 		return []byte(runConfig.Jwt.Secret), nil
 	}); err != nil {
 		if runConfig.Debug {

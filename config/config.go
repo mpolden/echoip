@@ -19,8 +19,9 @@ type GeoIP struct {
 }
 
 type Jwt struct {
-	Enabled bool
-	Secret  string
+	Enabled       bool
+	SigningMethod string
+	Secret        string
 }
 
 type Config struct {
@@ -49,7 +50,8 @@ func GetConfig() (Config, error) {
 		RedisUrl:    getenv_string("ECHOIP_REDIS_URL", ""),
 		Database:    getenv_string("ECHOIP_DATABASE", "geoip"),
 		Jwt: Jwt{
-			Secret: getenv_string("ECHOIP_JWT_SECRET", ""),
+			Secret:        getenv_string("ECHOIP_JWT_SECRET", ""),
+			SigningMethod: getenv_string("ECHOIP_JWT_SIGNING_METHOD", "HS256"),
 		},
 		IPStack: IPStack{
 			ApiKey: getenv_string("ECHOIP_IPSTACK_API_KEY", ""),

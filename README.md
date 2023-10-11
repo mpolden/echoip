@@ -157,13 +157,22 @@ ECHOIP_PROFILE=false
 ECHOIP_IPSTACK_USE_HTTPS=true
 ECHOIP_IPSTACK_ENABLE_SECURITY=true
 ECHOIP_JWT_AUTH=false
-ECHOIP_JWT_SECRET=""
+ECHOIP_JWT_SIGNING_METHOD=HS256
+ECHOIP_JWT_SECRET="HS256"
 ```
 
 ### Authenticate each API request with JWT
 
 You can authenticate each API request with JWT token.
 Just enable `config.Jwt.Enabled` and add your JWT secret to `config.Jwt.Secret`. 
+
+EchoIP validates JWT signing algorithm, `config.SigningMethod` should be one of available from `golang-jwt/jwt` and match your expceted algorithm. Currently only supporting HMAC signing.
+
+`config.SigningMethod string`
+
+```
+# HS256 | HS384 | HS512
+```
 
 Requests will be accepted if a valid token is provided in `Authorization: Bearer $token` header.
 
