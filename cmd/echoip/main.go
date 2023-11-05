@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"log"
 	"strings"
@@ -35,20 +36,25 @@ func init() {
 }
 
 func main() {
+	var configPath string
+	flag.StringVar(&configPath, "c", "/etc/echoip/config.toml", "Path to config file ( /etc/echoip/config.toml )")
+	flag.Parse()
+
 	runConfig, err := config.GetConfig()
 
 	if err != nil {
 		log.Fatalf("Error building configuration: %s", err)
 	}
 
-	file, err := os.Open("/etc/echoip/config.toml")
-	defer file.Close()
+	log.Printf("Using config file %s", configPath)
+	configFile, err := os.Open(configPath)
+	defer configFile.Close()
 
 	if err != nil {
 		log.Printf("Error opening config file (/etc/echoip/config.toml): %s", err)
 	} else {
 		var b []byte
-		b, err = io.ReadAll(file)
+		b, err = io.ReadAll(configFile)
 		if err != nil {
 			log.Printf("Error reading config file (/etc/echoip/config.toml): %s", err)
 		}
@@ -100,6 +106,18 @@ func main() {
 		}
 	} else {
 		serverCache = &cache.Null{}
+	}
+
+	if len(runConfig.Jwt.PublicKey) != 0 {
+		log.Printf("Loading public key from %s", runConfig.Jwt.PublicKey)
+
+		pubKey, err := os.ReadFile(runConfig.Jwt.PublicKey)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		runConfig.Jwt.PublicKeyData = pubKey
 	}
 
 	server := http.New(parser, serverCache, &runConfig)

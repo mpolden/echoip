@@ -7,13 +7,11 @@ import (
 	"html/template"
 	"log"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"net/http/pprof"
 
 	rcache "github.com/go-redis/cache/v9"
-	"github.com/golang-jwt/jwt"
 	"github.com/levelsoftware/echoip/cache"
 	"github.com/levelsoftware/echoip/config"
 	parser "github.com/levelsoftware/echoip/iputil/paser"
@@ -426,21 +424,8 @@ func handleAuth(r *http.Request, runConfig *config.Config) error {
 	authorization := r.Header.Get("Authorization")
 	tokenString := strings.ReplaceAll(authorization, "Bearer ", "")
 
-	if _, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		expected := reflect.TypeOf(jwt.GetSigningMethod(runConfig.Jwt.SigningMethod))
-		got := reflect.TypeOf(token.Method)
-		if expected != got {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-
-		// Only support SigningMethodHMAC ( Others will be quite a bit more complicated )
-		return []byte(runConfig.Jwt.Secret), nil
-	}); err != nil {
-		if runConfig.Debug {
-			log.Printf("Error validating token ( %s ): %s \n", tokenString, err)
-		}
-
-		return new(InvalidTokenError)
+	if err := ParseJWT(runConfig, tokenString); err != nil {
+		return err
 	}
 
 	return nil
