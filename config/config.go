@@ -22,6 +22,8 @@ type Jwt struct {
 	Enabled       bool
 	SigningMethod string
 	Secret        string
+	PublicKey     string
+	PublicKeyData []byte
 }
 
 type Config struct {

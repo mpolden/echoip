@@ -55,7 +55,8 @@ $ curl -H 'Accept: application/json' ip.level.io  # or curl ip.level.io/json
   "ip_decimal": 2130706433,
   "asn": "AS59795",
   "asn_org": "Hosting4Real"
-} ```
+}
+```
 
 Port testing:
 
@@ -108,6 +109,8 @@ $ echoip
 ### Configuration
 
 Configuration is managed in the `etc/echoip/config.toml` file. This file should be located in the `/etc` folder on your server ( /etc/echoip/config.toml ). If you have the project on your server, you can run `make install-config` to copy it the right location.
+
+***Change location of config file with the `echoip -c /path/to/config.toml` flag***
 
 ```toml
 Listen = ":8080"
@@ -166,17 +169,20 @@ ECHOIP_JWT_SECRET="HS256"
 You can authenticate each API request with JWT token.
 Just enable `config.Jwt.Enabled` and add your JWT secret to `config.Jwt.Secret`. 
 
-EchoIP validates JWT signing algorithm, `config.SigningMethod` should be one of available from `golang-jwt/jwt` and match your expceted algorithm. Currently only supporting HMAC signing.
-
+EchoIP validates JWT signing algorithm, `config.SigningMethod` should be one of available from `golang-jwt/jwt` and match your expceted algorithm.
 `config.SigningMethod string`
 
 ```
+# ES256 | ES384 | ES512 
+# RS256 | RS384 | RS512 
 # HS256 | HS384 | HS512
 ```
 
 Requests will be accepted if a valid token is provided in `Authorization: Bearer $token` header.
 
 A `401` will be returned should the token not be valid.
+
+***You can convert a key created with ssh-keygen using something like `ssh-keygen -f id_rsa.pub -e -mpem`***
 
 ### Caching with Redis
 
