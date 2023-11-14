@@ -48,6 +48,7 @@ func (ips *IPStack) Parse(ip net.IP, hostname string) (parser.Response, error) {
 	ips.ParseTimezoneResponse(&parserResponse)
 	ips.ParseLocationResponse(&parserResponse)
 	ips.ParseConnectionResponse(&parserResponse)
+	ips.ParseCurrencyResponse(&parserResponse)
 
 	return parserResponse, nil
 }
@@ -113,6 +114,18 @@ func (ips *IPStack) ParseConnectionResponse(parserResponse *parser.Response) {
 	if ips.response.Connection != nil && ips.response.Connection.ASN > 0 {
 		/* kept for backward compatibility */
 		parserResponse.ASN = fmt.Sprintf("AS%d", ips.response.Connection.ASN)
+	}
+}
+
+func (ips *IPStack) ParseCurrencyResponse(parserResponse *parser.Response) {
+	if ips.response.Currency != nil {
+		parserResponse.Currency = parser.Currency{
+			Code:         parserResponse.Currency.Code,
+			Name:         parserResponse.Currency.Name,
+			Plural:       parserResponse.Currency.Plural,
+			Symbol:       parserResponse.Currency.Symbol,
+			SymbolNative: parserResponse.Currency.SymbolNative,
+		}
 	}
 }
 
