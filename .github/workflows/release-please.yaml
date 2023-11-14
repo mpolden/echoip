@@ -14,15 +14,15 @@ jobs:
   test:
     if: |
       github.event.pull_request.merged == true &&
-      github.ref_name == "master" &&
-      contains(github.event.pull_request.head.name, "release")
+      github.ref_name == 'master' &&
+      contains(github.event.pull_request.head.name, 'release')
     uses: ./.github/workflows/test.yaml
 
   release-please:
     if: |
       github.event.pull_request.merged == true &&
-      github.ref_name == "master" &&
-      contains(github.event.pull_request.head.name, "release")
+      github.ref_name == 'master' &&
+      contains(github.event.pull_request.head.name, 'release')
     runs-on: ubuntu-latest
     needs: [test]
     steps:
