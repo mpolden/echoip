@@ -1,17 +1,13 @@
 # Changelog
 
-## 1.2.0 (2023-10-06)
+## 1.1.0 (2023-11-14)
 
 ### Features
 
+- RSA JWT Signature Validation
+- ECDSA JWT Signature Validation
 - JWT Authentication
-
-## 1.1.0 (2023-10-06)
-
-### Features
-
 - Environment Variable Configuration [712e216](https://github.com/levelsoftware/echoip/commit/712e2166d51fdb85229f52caa380743245f31dfa)
-
 
 ## 1.0.0 (2023-10-06)
 
