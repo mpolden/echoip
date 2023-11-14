@@ -15,7 +15,7 @@ jobs:
     if: |
       github.event.pull_request.merged == true &&
       github.ref_name == 'master' &&
-      contains(github.event.pull_request.head.name, 'release')
+      !contains(github.event.pull_request.head.name, 'release')
     uses: ./.github/workflows/test.yaml
 
   release-please:
