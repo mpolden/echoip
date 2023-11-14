@@ -108,7 +108,7 @@ func main() {
 		serverCache = &cache.Null{}
 	}
 
-	if len(runConfig.Jwt.PublicKey) != 0 {
+	if runConfig.Jwt.Enabled && len(runConfig.Jwt.PublicKey) != 0 {
 		log.Printf("Loading public key from %s", runConfig.Jwt.PublicKey)
 
 		pubKey, err := os.ReadFile(runConfig.Jwt.PublicKey)
