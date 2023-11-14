@@ -1,0 +1,55 @@
+name: Release Please
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test:
+    if: |
+      github.event.pull_request.merged == true &&
+      github.ref_name == "master" &&
+      contains(github.event.pull_request.head.name, "release")
+    uses: ./.github/workflows/test.yaml
+
+  release-please:
+    if: |
+      github.event.pull_request.merged == true &&
+      github.ref_name == "master" &&
+      contains(github.event.pull_request.head.name, "release")
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.18.x"
+
+      - name: Build EchoIP binary
+        run: go build -o ./echoip ./cmd/echoip/main.go
+
+      - name: Upload Release Artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          zip -r echoip-linux-amd64.zip echoip html LICENSE
+
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          bootstrap-sha: "ef1f4b388c24e977ec63d6943ac8f0b0c5f51b58"
+          last-release-sha: "32a92399085082121675553e23d722605752519e"
+          release-type: "go"
+          release-as: "1.1.0"
+          command: "release-pr"
+          extra-files: |
+            echoip-linux-amd64-${{  github.ref_name }}.zip 
+            echoip 
+            html 
+            LICENSE
