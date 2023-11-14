@@ -1,8 +1,6 @@
 {
   "bootstrap-sha": "ef1f4b388c24e977ec63d6943ac8f0b0c5f51b58",
   "last-release-sha": "32a92399085082121675553e23d722605752519e",
-  "commit-search-depth": 100,
-  "release-search-depth": 100,
   "release-type": "go",
   "release-as": "1.1.0",
   "packages": {
