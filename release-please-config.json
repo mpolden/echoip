@@ -6,6 +6,7 @@
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
+      "package-name": "echoip",
       "release-type": "go",
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
