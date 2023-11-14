@@ -22,7 +22,7 @@ jobs:
     if: |
       github.event.pull_request.merged == true &&
       github.ref_name == 'master' &&
-      contains(github.event.pull_request.head.name, 'release')
+      !contains(github.event.pull_request.head.name, 'release')
     runs-on: ubuntu-latest
     needs: [test]
     steps:
