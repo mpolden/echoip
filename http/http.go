@@ -269,6 +269,12 @@ func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) *appError
 	return nil
 }
 
+func (s *Server) HeadHandler(w http.ResponseWriter, r *http.Request) *appError {
+	return &appError{
+		Code: http.StatusNoContent,
+	}
+}
+
 func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 	response, err := s.newPortResponse(r)
 	if err != nil {
@@ -425,6 +431,9 @@ func (s *Server) Handler() http.Handler {
 
 	// Health
 	r.Route("GET", "/health", s.HealthHandler)
+
+	// Health
+	r.Route("HEAD", "/", s.HeadHandler)
 
 	// JSON
 	r.Route("GET", "/", s.JSONHandler).Header("Accept", jsonMediaType)
