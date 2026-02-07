@@ -42,14 +42,6 @@ endif
 
 geoip-download: $(databases)
 
-# Create an environment to build multiarch containers (https://github.com/docker/buildx/)
-docker-multiarch-builder:
-	DOCKER_BUILDKIT=1 $(DOCKER) build -o . https://github.com/docker/buildx.git
-	mkdir -p ~/.docker/cli-plugins
-	mv buildx ~/.docker/cli-plugins/docker-buildx
-	$(DOCKER) buildx create --name multiarch-builder --node multiarch-builder --driver docker-container --use
-	$(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
 docker-build:
 	$(DOCKER) build -t $(DOCKER_IMAGE) .
 
@@ -63,9 +55,6 @@ docker-test:
 
 docker-push: docker-test docker-login
 	$(DOCKER) push $(DOCKER_IMAGE)
-
-docker-pushx: docker-multiarch-builder docker-test docker-login
-	$(DOCKER) buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t $(DOCKER_IMAGE) --push .
 
 xinstall:
 	env GOOS=$(XGOOS) GOARCH=$(XGOARCH) go install ./...
