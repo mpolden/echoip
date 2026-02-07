@@ -44,7 +44,7 @@ geoip-download: $(databases)
 
 # Create an environment to build multiarch containers (https://github.com/docker/buildx/)
 docker-multiarch-builder:
-	DOCKER_BUILDKIT=1 $(DOCKER) build -o . https://github.com/docker/buildx
+	DOCKER_BUILDKIT=1 $(DOCKER) build -o . https://github.com/docker/buildx.git
 	mkdir -p ~/.docker/cli-plugins
 	mv buildx ~/.docker/cli-plugins/docker-buildx
 	$(DOCKER) buildx create --name multiarch-builder --node multiarch-builder --driver docker-container --use
