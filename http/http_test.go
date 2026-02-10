@@ -217,17 +217,18 @@ func TestIPFromRequest(t *testing.T) {
 		trustedHeaders []string
 		out            string
 	}{
-		{"127.0.0.1:9999", "", "", nil, "127.0.0.1"},                                                                               // No header given
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", nil, "127.0.0.1"},                                                               // Trusted header is empty
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Foo-Bar"}, "127.0.0.1"},                                             // Trusted header does not match
-		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},                            // Trusted header matches
-		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},                      // Second trusted header matches
-		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7,4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},                           // X-Forwarded-For with multiple entries (commas separator)
-		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7, 4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},                          // X-Forwarded-For with multiple entries (space+comma separator)
-		{"127.0.0.1:9999", "X-Forwarded-For", "", []string{"X-Forwarded-For"}, "127.0.0.1"},                                        // Empty header
+		{"127.0.0.1:9999", "", "", nil, "127.0.0.1"},                                                                // No header given
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", nil, "127.0.0.1"},                                                // Trusted header is empty
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Foo-Bar"}, "127.0.0.1"},                              // Trusted header does not match
+		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},             // Trusted header matches
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},       // Second trusted header matches
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7,4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},            // X-Forwarded-For with multiple entries (commas separator)
+		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7, 4.2.4.2", []string{"X-Forwarded-For"}, "1.3.3.7"},           // X-Forwarded-For with multiple entries (space+comma separator)
+		{"127.0.0.1:9999", "X-Forwarded-For", "", []string{"X-Forwarded-For"}, "127.0.0.1"},                         // Empty header
+		{"127.0.0.1:9999?ip=1.2.3.4", "", "", nil, "1.2.3.4"},                                                       // passed in "ip" parameter
+		{"127.0.0.1:9999?ip=1.2.3.4", "X-Forwarded-For", "1.3.3.7,4.2.4.2", []string{"X-Forwarded-For"}, "1.2.3.4"}, // ip parameter wins over X-Forwarded-For with multiple entries
+
 		{"127.0.0.1:9999", "X-Real-IP", "1.3.3.7:1337", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},                       // Trusted header matches (with port)
-		{"127.0.0.1:9999?ip=1.2.3.4", "", "", nil, "1.2.3.4"},                                                                      // passed in "ip" parameter
-		{"127.0.0.1:9999?ip=1.2.3.4", "X-Forwarded-For", "1.3.3.7,4.2.4.2", []string{"X-Forwarded-For"}, "1.2.3.4"},                // ip parameter wins over X-Forwarded-For with multiple entries
 		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7:1337", []string{"X-Real-IP", "X-Forwarded-For"}, "1.3.3.7"},                 // Second trusted header matches (with port)
 		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7:1337,4.2.4.2:4242", []string{"X-Forwarded-For"}, "1.3.3.7"},                 // X-Forwarded-For with multiple entries (commas separator, with port)
 		{"127.0.0.1:9999", "X-Forwarded-For", "1.3.3.7:1337, 4.2.4.2:4242", []string{"X-Forwarded-For"}, "1.3.3.7"},                // X-Forwarded-For with multiple entries (space+comma separator, with port)
