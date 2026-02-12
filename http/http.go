@@ -101,17 +101,19 @@ func ipFromRequest(headers []string, r *http.Request, customIP bool) (net.IP, er
 	if remoteIP == "" {
 		remoteIP = r.RemoteAddr
 	}
-	sep := strings.Index(remoteIP, ":")
-	if sep != -1 {
-		host, _, err := net.SplitHostPort(remoteIP)
-		if err != nil {
-			return nil, err
-		}
-		remoteIP = host
-	}
 	ip := net.ParseIP(remoteIP)
 	if ip == nil {
-		return nil, fmt.Errorf("could not parse IP: %s", remoteIP)
+		if strings.Contains(remoteIP, ":") {
+			host, _, err := net.SplitHostPort(remoteIP)
+			if err != nil {
+				return nil, err
+			}
+			remoteIP = host
+			ip = net.ParseIP(remoteIP)
+		}
+		if ip == nil {
+			return nil, fmt.Errorf("could not parse IP: %s", remoteIP)
+		}
 	}
 	return ip, nil
 }
