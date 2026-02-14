@@ -41,9 +41,9 @@
 
       <!-- Details -->
       <section class="section" id="details">
-        <div class="details-grid{{ if not .Latitude }} single-column{{ end }}">
+        <div class="details-grid">
           <div>
-            <h2>Information about your IP address</h2>
+            <h2>Additional information</h2>
             <table class="info-table">
               <tbody>
                 <tr>
@@ -141,9 +141,9 @@
               </tbody>
             </table>
           </div>
-          {{ if .Latitude }}
           <div>
-            <h2>Your location</h2>
+            <h2>Location</h2>
+            {{ if .Latitude }}
             <div class="map-wrapper">
               <iframe
                 width="100%"
@@ -153,14 +153,16 @@
                 src="https://www.openstreetmap.org/export/embed.html?bbox={{ .BoxLonLeft }}%2C{{ .BoxLatBottom }}%2C{{ .BoxLonRight }}%2C{{ .BoxLatTop }}&amp;layer=mapnik&amp;marker={{ .Latitude }}%2C{{ .Longitude }}"
               ></iframe>
             </div>
+            {{ else }}
+            <p><em>No coordinates available for this IP address.</em></p>
+            {{ end }}
             {{ if .Country }}
             <p class="attribution">
-              Approximate location based on IP address.
+              {{ if .Latitude }}Approximate location based on IP address.{{ end }}
               IP geolocation data is provided by <a href="https://www.maxmind.com">MaxMind GeoLite2.</a>
             </p>
             {{ end }}
           </div>
-          {{ end }}
         </div>
       </section>
 
