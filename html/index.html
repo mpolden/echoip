@@ -227,19 +227,19 @@
           <tbody>
             <tr>
               <td><code>curl {{ .Host }}/json</code></td>
-              <td>Retrieve all IP information. <a href="#json-response">Example response</a></td>
+              <td>Retrieve all IP information. <a href="#example-response">Example response</a></td>
             </tr>
             {{ if .Port }}
             <tr>
               <td><code>curl {{ .Host }}/port/&lt;PORT&gt;</code></td>
-              <td>Check if given port is reachable. <a href="#json-port-response">Example response</a></td>
+              <td>Check if given port is reachable. <a href="#example-port-response">Example response</a></td>
             </tr>
             {{ end }}
           </tbody>
         </table>
-        <h3 id="json-response">JSON response</h3>
+        <h3 id="example-response">Example response</h3>
         <pre class="json-block"><code>{{ .JSON }}</code></pre>
-        <h3 id="json-port-response">JSON port response</h3>
+        <h3 id="example-port-response">Example port response</h3>
         <p>Example response. The actual result depends on the reachability of the queried port.</p>
         <pre class="json-block"><code>{
   "ip": "{{ .IP }}",
