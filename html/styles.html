@@ -1,188 +1,390 @@
 <style>
-  html,
-  .pure-g [class*="pure-u"] {
-    background-color: white;
-    font-family: "Open Sans", sans-serif;
+  /* Reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
-  pre {
-    font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
-    white-space: pre-wrap; /* Since CSS 2.1 */
-    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-    white-space: -pre-wrap; /* Opera 4-6 */
-    white-space: -o-pre-wrap; /* Opera 7 */
-    word-wrap: break-word;
+
+  /* Theme — Light */
+  :root {
+    --bg: #ffffff;
+    --bg-surface: #f8f6f4;
+    --border: #d5cec6;
+    --text: #2c231a;
+    --text-secondary: #7a6e62;
+    --accent: #b35c00;
+    --code-bg: #f3efe9;
+    --ip-color: #9a4600;
+    --hero-bg: #faf6f0;
+    --code-accent: #b35c00;
+    --json-bg: #2a2017;
+    --json-text: #e8dfd3;
+    --json-border: #c76a10;
+    --table-row-hover: #f8f4ee;
+    --top-bar: #c76a10;
   }
+
+  /* Theme — Dark */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1410;
+      --bg-surface: #231c16;
+      --border: #3d3228;
+      --text: #e8dfd3;
+      --text-secondary: #a0927f;
+      --accent: #e8a44a;
+      --code-bg: #261f18;
+      --ip-color: #e8a44a;
+      --hero-bg: #1a1410;
+      --code-accent: #e8a44a;
+      --json-bg: #120e0a;
+      --json-text: #d4c8b8;
+      --json-border: #e8a44a;
+      --table-row-hover: #231c16;
+      --top-bar: #e8a44a;
+    }
+  }
+
+  /* Base */
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
   a {
-    /* background: #e3e3e3; */
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  a:hover {
     text-decoration: underline;
-    color: #000;
-  }
-  a:hover,
-  active {
-    background: #d7d7d7;
-  }
-  .ip {
-    border: 1px solid #cbcbcb;
-    background: #f2f2f2;
-    font-size: 36px;
-    padding: 6px;
-    word-wrap: break-word;
-  }
-  svg.github-corner {
-    fill: #151513;
-    color: #fff;
-  }
-  .footer {
-    margin-top: 34px;
-    border-top: 1px solid #cbcbcb;
   }
 
-  .content {
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1em;
-    padding-right: 1em;
-    max-width: 1024px;
+  code {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.95em;
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
   }
 
-  .center {
-    justify-content: center;
+  pre code {
+    background: none;
+    padding: 0;
   }
 
-  .info-table td,
-  .info-table th {
-    padding: 5px;
-    border: 2px solid #ababab;
-    word-wrap: break-word;
+  /* Layout */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
   }
 
-  .info-table th[scope="row"] {
-    background-color: #d5d5d5;
+  .section {
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child {
+    border-bottom: none;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    margin-bottom: 0.75rem;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 3rem 2rem;
+    margin-top: 2rem;
+    position: relative;
+    background: var(--hero-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .site-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .ip-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    word-break: break-all;
+    color: var(--ip-color);
+  }
+
+  .ip-meta {
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+  }
+
+  /* Sponsor logo */
+  .sponsor-logo {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    width: 96px;
+    text-align: center;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+
+  .sponsor-logo:hover {
+    opacity: 1;
+  }
+
+  .sponsor-logo a {
+    display: block;
+  }
+
+  .sponsor-logo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .sponsor-logo span {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .sponsor-logo .letters {
+    fill: var(--text);
+  }
+
+  /* Details grid */
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .details-grid.single-column {
+    grid-template-columns: 1fr;
+    max-width: 540px;
+  }
+
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .info-table th,
+  .info-table td {
+    padding: 0.35rem 0.75rem 0.35rem 0;
     text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .info-table tr:last-child th,
+  .info-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .info-table tr:hover {
+    background: var(--table-row-hover);
+  }
+
+  .info-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+    width: 40%;
   }
 
   .info-table td {
-    overflow-wrap: anywhere;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    word-break: break-all;
+    color: var(--accent);
   }
 
-  .widgetbox {
+  /* Map */
+  .map-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .map-wrapper iframe {
+    display: block;
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid grey;
-    font-family: "Courier New", Courier, monospace;
-    margin-top: 0.5rem;
-    box-sizing: border-box;
+    height: 300px;
+    border: none;
   }
 
-  .widgetbox.input :first-child::before {
-    content: "$ ";
-    white-space: pre;
+  .attribution {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
   }
 
-  .widgetbox.output {
-    min-height: 4em;
-    white-space: pre;
-    overflow-x: scroll;
+  /* API table */
+  .api-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.9rem;
   }
 
-  .l-box {
-    margin: 0 1rem;
+  .api-table th {
+    text-align: left;
+    padding: 0.35rem 0.75rem 0.35rem 0;
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
   }
 
-  .align-right {
-    text-align: right;
+  .api-table td {
+    padding: 0.35rem 0.75rem 0.35rem 0;
+    border-bottom: 1px solid var(--border);
   }
 
-  .medium-input {
-    width: 10em;
+  .api-table tr:last-child td {
+    border-bottom: none;
   }
 
-  button.selected {
-    background-color: rgb(208 208 208);
+  .api-table + p,
+  .api-table + .api-table {
+    margin-top: 1.5rem;
   }
 
-  .input-buttons {
-    line-height: 2.6em;
-    font-size: smaller;
+  .api-table tr:hover {
+    background: var(--table-row-hover);
   }
 
-  /* POST CORRECTION */
-  .leafcloud-logo .letters {
-    fill: black;
+  /* Note box */
+  .note {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text);
   }
 
-  /* DARK MODE OVERRIDES */
-  @media (prefers-color-scheme: dark) {
-    html,
-    .pure-g [class*="pure-u"],
-    a {
-      background-color: #161719;
-      color: #d8d9da;
-    }
-    .ip {
-      border: 1px solid #313233;
-      background: #212223;
-    }
-    .footer {
-      color: #8e8e8e !important;
-      border-top: 1px solid #313233;
-    }
-    a:hover,
-    active {
-      background: #3d3e3f;
-    }
-
-    svg.github-corner {
-      fill: #f8f9fa;
-      color: #161719;
-    }
-
-    .info-table th[scope="row"] {
-      background-color: #2e2e2e;
-      color: rgb(220, 220, 220);
-      text-align: left;
-    }
-
-    .pure-button {
-      background-color: #2e2e2e;
-      color: rgb(220, 220, 220);
-    }
-    .pure-button.selected {
-      background-color: rgb(125 125 125);
-    }
-
-    .pure-input {
-      background-color: #e6e6e6;
-      color: #666;
-    }
-
-    .pure-input::placeholder {
-      color: #bbb;
-    }
-
-    .leafcloud-logo .letters {
-      fill: white;
-      max-width: 100%;
-    }
+  .note ul {
+    list-style: none;
+    padding: 0;
   }
 
-  @media (min-width: 768px) {
-    .leafcloud-placement {
-      text-align: right;
-    }
-    .leafcloud-logo {
-      height: 80px;
-      margin: 2em 0 -0.5em 0;
-    }
+  .note li + li {
+    margin-top: 0.75rem;
   }
 
+  .note li::before {
+    content: '\203A\00a0';
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* JSON block — terminal style */
+  .json-block {
+    background: var(--json-bg);
+    color: var(--json-text);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--json-border);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* FAQ */
+  .faq-list dt {
+    font-weight: 600;
+    margin-top: 1.5rem;
+  }
+
+  .faq-list dt:first-child {
+    margin-top: 0;
+  }
+
+  .faq-list dd {
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 1.5rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .footer a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+  }
+
+  .footer a:hover {
+    color: var(--text);
+  }
+
+  /* Responsive */
   @media (max-width: 768px) {
-    .leafcloud-logo {
-      margin-right: 1em;
+    .details-grid {
+      grid-template-columns: 1fr;
     }
-  }
 
-  .debug {
-    outline: 1px dotted pink;
+    .ip-display {
+      font-size: 1.75rem;
+    }
+
+    .hero {
+      padding: 2rem 0;
+    }
+
+    .sponsor-logo {
+      position: static;
+      margin: 0 auto 1rem;
+    }
   }
 </style>
