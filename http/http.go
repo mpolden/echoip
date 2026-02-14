@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"log"
 	"path/filepath"
 	"strings"
@@ -296,7 +296,7 @@ func (s *Server) PortHandler(w http.ResponseWriter, r *http.Request) *appError {
 }
 
 func (s *Server) cacheResizeHandler(w http.ResponseWriter, r *http.Request) *appError {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return badRequest(err).WithMessage(err.Error()).AsJSON()
 	}
