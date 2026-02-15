@@ -31,7 +31,15 @@
         </div>
         {{ end }}
         <h1 class="site-title">❯ curl {{ .Host }}</h1>
-        <div class="ip-display">{{ .IP }}</div>
+        <form class="ip-form" action="/" method="GET">
+          <input class="ip-input" type="text" name="ip" value="{{ .IP }}">
+          <div class="ip-buttons">
+            <button class="ip-button" type="submit">Lookup IP address</button>
+            {{ if .ExplicitLookup }}
+            <a class="ip-button ip-button-secondary" href="/">Show my IP address</a>
+            {{ end }}
+          </div>
+        </form>
         <p class="ip-meta">
           {{- if .City }}{{ .City }}{{ if .Country }}, {{ end }}{{ end -}}
           {{- .Country -}}
