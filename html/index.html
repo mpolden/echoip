@@ -182,30 +182,30 @@
           </thead>
           <tbody>
             <tr>
-              <td><code>curl {{ .Host }}</code></td>
+              <td><code>curl {{ .Host }}{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
               <td><code>{{ .IP }}</code></td>
             </tr>
             {{ if .Country }}
             <tr>
-              <td><code>curl {{ .Host }}/country</code></td>
+              <td><code>curl {{ .Host }}/country{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
               <td><code>{{ .Country }}</code></td>
             </tr>
             {{ end }}
             {{ if .CountryISO }}
             <tr>
-              <td><code>curl {{ .Host }}/country-iso</code></td>
+              <td><code>curl {{ .Host }}/country-iso{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
               <td><code>{{ .CountryISO }}</code></td>
             </tr>
             {{ end }}
             {{ if .City }}
             <tr>
-              <td><code>curl {{ .Host }}/city</code></td>
+              <td><code>curl {{ .Host }}/city{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
               <td><code>{{ .City }}</code></td>
             </tr>
             {{ end }}
             {{ if .ASN }}
             <tr>
-              <td><code>curl {{ .Host }}/asn</code></td>
+              <td><code>curl {{ .Host }}/asn{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
               <td><code>{{ .ASN }}</code></td>
             </tr>
             {{ end }}
@@ -228,7 +228,7 @@
           </thead>
           <tbody>
             <tr>
-              <td><code>curl {{ .Host }}/json</code></td>
+              <td><code>curl {{ .Host }}/json{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
               <td>Retrieve all IP information. <a href="#example-response">Example response</a></td>
             </tr>
             {{ if .Port }}

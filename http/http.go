@@ -355,14 +355,15 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 
 	var data = struct {
 		Response
-		Host         string
-		BoxLatTop    float64
-		BoxLatBottom float64
-		BoxLonLeft   float64
-		BoxLonRight  float64
-		JSON         string
-		Port         bool
-		Sponsor      bool
+		Host           string
+		BoxLatTop      float64
+		BoxLatBottom   float64
+		BoxLonLeft     float64
+		BoxLonRight    float64
+		JSON           string
+		Port           bool
+		Sponsor        bool
+		ExplicitLookup bool
 	}{
 		response,
 		r.Host,
@@ -373,6 +374,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		string(json),
 		s.LookupPort != nil,
 		s.Sponsor,
+		r.URL.Query().Has("ip"),
 	}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)
