@@ -39,10 +39,10 @@ $ curl ifconfig.co/city
 Bornyasherk
 
 $ curl ifconfig.co/asn
-AS59795
+AS31337
 
 $ curl ifconfig.co/asn-org
-Hosting4Real
+Dilbert Technologies
 ```
 
 As JSON:
@@ -55,8 +55,8 @@ $ curl -H 'Accept: application/json' ifconfig.co  # or curl ifconfig.co/json
   "country_iso": "EB",
   "ip": "127.0.0.1",
   "ip_decimal": 2130706433,
-  "asn": "AS59795",
-  "asn_org": "Hosting4Real"
+  "asn": "AS31337",
+  "asn_org": "Dilbert Technologies"
 }
 ```
 
@@ -82,7 +82,7 @@ between IPv4 and IPv6 lookup.
 * Supports HTTPS
 * Supports common command-line clients (e.g. `curl`, `httpie`, `ht`, `wget` and `fetch`)
 * JSON output
-* ASN, country and city lookup using the MaxMind GeoIP database
+* ASN, country and city lookup, using data from MaxMind
 * Port testing
 * All endpoints (except `/port`) can return information about a custom IP address specified via `?ip=` query parameter
 * Open source under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
@@ -110,10 +110,19 @@ Hub](https://hub.docker.com/r/mpolden/echoip), which can be downloaded with:
 
 `docker pull mpolden/echoip`
 
-## [GeoIP](https://www.maxmind.com/en/geoip2-databases)/[GeoLite](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data?) Database (MaxMind)
-To utilise MaxMind [GeoIP](https://www.maxmind.com/en/geoip2-databases)/[GeoLite](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data?) database to enhance the information provided to end users, you can download the relevant **binary** databases (`.mmdb` format) directly from MaxMind using the above links.
+## Geolocation data
 
-**Please Note**: This has only been tested using the free, GeoLite database.
+`echoip` uses the MaxMind GeoIP databases to show additional information about
+IP addresses, such as registered country/city and ASN details.
+
+The databases can be downloaded with:
+
+`GEOIP_LICENSE_KEY=<key> MAXMIND_ACCOUNT_ID=<account-id> make geoip-download`
+
+Downloading requires a MaxMind account and license key. See the following links for more information:
+
+- https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+- https://dev.maxmind.com/geoip/updating-databases/#directly-downloading-databases
 
 ### Usage
 
@@ -121,19 +130,21 @@ To utilise MaxMind [GeoIP](https://www.maxmind.com/en/geoip2-databases)/[GeoLite
 $ echoip -h
 Usage of echoip:
   -C int
-    	Size of response cache. Set to 0 to disable
+        Size of response cache. Set to 0 to disable
   -H value
-    	Header to trust for remote IP, if present (e.g. X-Real-IP)
+        Header to trust for remote IP, if present (e.g. X-Real-IP)
+  -P    Enables profiling handlers
   -a string
-    	Path to GeoIP ASN database
+        Path to GeoIP ASN database
   -c string
-    	Path to GeoIP city database
+        Path to GeoIP city database
   -f string
-    	Path to GeoIP country database
+        Path to GeoIP country database
   -l string
-    	Listening address (default ":8080")
-  -p	Enable port lookup
-  -r	Perform reverse hostname lookups
+        Listening address (default ":8080")
+  -p    Enable port lookup
+  -r    Perform reverse hostname lookups
+  -s    Show sponsor logo
   -t string
-    	Path to template directory (default "html")
+        Path to template dir (default "html")
 ```
