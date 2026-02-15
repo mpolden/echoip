@@ -185,7 +185,7 @@
           <thead>
             <tr>
               <th>Command</th>
-              <th>Example response</th>
+              <th>Response</th>
             </tr>
           </thead>
           <tbody>
@@ -237,20 +237,20 @@
           <tbody>
             <tr>
               <td><code>curl {{ .Host }}/json{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
-              <td>Retrieve all IP information. <a href="#example-response">Example response</a></td>
+              <td>Retrieve all IP information. See <a href="#response">response</a>.</td>
             </tr>
             {{ if .Port }}
             <tr>
               <td><code>curl {{ .Host }}/port/&lt;PORT&gt;</code></td>
-              <td>Check if given port is reachable. <a href="#example-port-response">Example response</a></td>
+              <td>Check if given port is reachable. See <a href="#port-response">port response</a>.</td>
             </tr>
             {{ end }}
           </tbody>
         </table>
-        <h3 id="example-response">Example response</h3>
+        <h3 id="response">Response</h3>
         <pre class="json-block"><code>{{ .JSON }}</code></pre>
-        <h3 id="example-port-response">Example port response</h3>
-        <p>Example response. The actual result depends on the reachability of the queried port.</p>
+        <h3 id="port-response">Port response</h3>
+        <p>This is an example response. The actual result depends on the reachability of the queried port.</p>
         <pre class="json-block"><code>{
   "ip": "{{ .IP }}",
   "port": 443,
