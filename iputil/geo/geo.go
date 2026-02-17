@@ -17,7 +17,7 @@ type Reader interface {
 type Country struct {
 	Name string
 	ISO  string
-	IsEU *bool
+	IsEU bool
 }
 
 type City struct {
@@ -89,8 +89,7 @@ func (g *geoip) Country(ip net.IP) (Country, error) {
 	if record.RegisteredCountry.IsoCode != "" && country.ISO == "" {
 		country.ISO = record.RegisteredCountry.IsoCode
 	}
-	isEU := record.Country.IsInEuropeanUnion || record.RegisteredCountry.IsInEuropeanUnion
-	country.IsEU = &isEU
+	country.IsEU = record.Country.IsInEuropeanUnion
 	return country, nil
 }
 

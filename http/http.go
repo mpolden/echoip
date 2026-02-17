@@ -42,7 +42,7 @@ type Response struct {
 	IPDecimal  *big.Int             `json:"ip_decimal"`
 	Country    string               `json:"country,omitempty"`
 	CountryISO string               `json:"country_iso,omitempty"`
-	CountryEU  *bool                `json:"country_eu,omitempty"`
+	CountryEU  bool                 `json:"country_eu"`
 	RegionName string               `json:"region_name,omitempty"`
 	RegionCode string               `json:"region_code,omitempty"`
 	MetroCode  uint                 `json:"metro_code,omitempty"`
