@@ -26,7 +26,7 @@ type ipTestCase struct {
 }
 
 func (t *testDb) Country(net.IP) (geo.Country, error) {
-	return geo.Country{Name: "Elbonia", ISO: "EB", IsEU: new(bool)}, nil
+	return geo.Country{Name: "Elbonia", ISO: "EB"}, nil
 }
 
 func (t *testDb) City(net.IP) (geo.City, error) {
@@ -135,7 +135,7 @@ func TestDisabledHandlers(t *testing.T) {
 		{s.URL + "/country", "404 page not found", 404},
 		{s.URL + "/country-iso", "404 page not found", 404},
 		{s.URL + "/city", "404 page not found", 404},
-		{s.URL + "/json", "{\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433\n}", 200},
+		{s.URL + "/json", "{\n  \"ip\": \"127.0.0.1\",\n  \"ip_decimal\": 2130706433,\n  \"country_eu\": false\n}", 200},
 	}
 
 	for _, tt := range tests {
