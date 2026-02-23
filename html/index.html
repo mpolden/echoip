@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>What is my IP address? &mdash; {{ .Host }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="{{ .Host }} &mdash; What is my IP address?"
+    >
+    <link rel="canonical" href="https://ifconfig.co/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    >
+    {{ template "styles.html" . }}
+  </head>
+  <body>
+    <div class="container">
+
+      <!-- Hero -->
+      <header class="section hero">
+        {{ if .Sponsor }}
+        <div class="sponsor-logo">
+          <a href="https://www.leaf.cloud?utm_source=ifconfig" aria-label="Leafcloud">
+            {{ template "leafcloud-logo.svg" "." }}
+          </a>
+          <span>Hosted by Leafcloud</span>
+        </div>
+        {{ end }}
+        <h1 class="site-title">❯ curl {{ .Host }}</h1>
+        <form class="ip-form" action="/" method="GET">
+          <input class="ip-input" type="text" name="ip" value="{{ .IP }}">
+          <div class="ip-buttons">
+            <button class="ip-button" type="submit">Lookup IP address</button>
+            {{ if .ExplicitLookup }}
+            <a class="ip-button ip-button-secondary" href="/">Show my IP address</a>
+            {{ end }}
+          </div>
+        </form>
+        <p class="ip-meta">
+          {{- if .City }}{{ .City }}{{ if .Country }}, {{ end }}{{ end -}}
+          {{- .Country -}}
+          {{- if .ASNOrg }}{{- if or .City .Country }} &middot; {{ end }}{{ .ASNOrg }}{{ end -}}
+        </p>
+      </header>
+
+      <!-- Details -->
+      <section class="section" id="details">
+        <div class="details-grid">
+          <div>
+            <h2>Additional information</h2>
+            <table class="info-table">
+              <tbody>
+                <tr>
+                  <th>IP address</th>
+                  <td>{{ .IP }}</td>
+                </tr>
+                <tr>
+                  <th>Decimal</th>
+                  <td>{{ .IPDecimal }}</td>
+                </tr>
+                {{ if .Country }}
+                <tr>
+                  <th>Country</th>
+                  <td>{{ .Country }}</td>
+                </tr>
+                {{ end }}
+                {{ if .CountryISO }}
+                <tr>
+                  <th>Country (ISO)</th>
+                  <td>{{ .CountryISO }}</td>
+                </tr>
+                {{ end }}
+                {{ if .CountryEU }}
+                <tr>
+                  <th>EU member</th>
+                  <td>{{ .CountryEU }}</td>
+                </tr>
+                {{ end }}
+                {{ if .RegionName }}
+                <tr>
+                  <th>Region</th>
+                  <td>{{ .RegionName }}</td>
+                </tr>
+                {{ end }}
+                {{ if .RegionCode }}
+                <tr>
+                  <th>Region code</th>
+                  <td>{{ .RegionCode }}</td>
+                </tr>
+                {{ end }}
+                {{ if .MetroCode }}
+                <tr>
+                  <th>Metro code</th>
+                  <td>{{ .MetroCode }}</td>
+                </tr>
+                {{ end }}
+                {{ if .PostalCode }}
+                <tr>
+                  <th>Postal code</th>
+                  <td>{{ .PostalCode }}</td>
+                </tr>
+                {{ end }}
+                {{ if .City }}
+                <tr>
+                  <th>City</th>
+                  <td>{{ .City }}</td>
+                </tr>
+                {{ end }}
+                {{ if .Latitude }}
+                <tr>
+                  <th>Latitude</th>
+                  <td>{{ .Latitude }}</td>
+                </tr>
+                {{ end }}
+                {{ if .Longitude }}
+                <tr>
+                  <th>Longitude</th>
+                  <td>{{ .Longitude }}</td>
+                </tr>
+                {{ end }}
+                {{ if .Timezone }}
+                <tr>
+                  <th>Timezone</th>
+                  <td>{{ .Timezone }}</td>
+                </tr>
+                {{ end }}
+                {{ if .ASN }}
+                <tr>
+                  <th>ASN</th>
+                  <td>{{ .ASN }}</td>
+                </tr>
+                {{ end }}
+                {{ if .ASNOrg }}
+                <tr>
+                  <th>Organization</th>
+                  <td>{{ .ASNOrg }}</td>
+                </tr>
+                {{ end }}
+                {{ if .Hostname }}
+                <tr>
+                  <th>Hostname</th>
+                  <td>{{ .Hostname }}</td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h2>Location</h2>
+            {{ if .Latitude }}
+            <div class="map-wrapper">
+              <iframe
+                width="100%"
+                height="300"
+                frameborder="0"
+                scrolling="no"
+                src="https://www.openstreetmap.org/export/embed.html?bbox={{ .BoxLonLeft }}%2C{{ .BoxLatBottom }}%2C{{ .BoxLonRight }}%2C{{ .BoxLatTop }}&amp;layer=mapnik&amp;marker={{ .Latitude }}%2C{{ .Longitude }}"
+              ></iframe>
+            </div>
+            {{ else }}
+            <p><em>No coordinates available for this IP address.</em></p>
+            {{ end }}
+            {{ if .Country }}
+            <p class="attribution">
+              {{ if .Latitude }}Approximate location based on IP address.{{ end }}
+              IP geolocation data is provided by <a href="https://www.maxmind.com">MaxMind GeoLite2.</a>
+            </p>
+            {{ end }}
+          </div>
+        </div>
+      </section>
+
+      <!-- API -->
+      <section class="section" id="api">
+        <h2>API</h2>
+        <p>All data is available programmatically. When using <code>curl</code>, pass the <code>-s</code> flag to hide the progress bar.</p>
+        <h3>Plain text</h3>
+        <p>These endpoints return plain text by default, with a trailing newline
+          at the end.</p>
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>curl {{ .Host }}{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
+              <td><code>{{ .IP }}</code></td>
+            </tr>
+            {{ if .Country }}
+            <tr>
+              <td><code>curl {{ .Host }}/country{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
+              <td><code>{{ .Country }}</code></td>
+            </tr>
+            {{ end }}
+            {{ if .CountryISO }}
+            <tr>
+              <td><code>curl {{ .Host }}/country-iso{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
+              <td><code>{{ .CountryISO }}</code></td>
+            </tr>
+            {{ end }}
+            {{ if .City }}
+            <tr>
+              <td><code>curl {{ .Host }}/city{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
+              <td><code>{{ .City }}</code></td>
+            </tr>
+            {{ end }}
+            {{ if .ASN }}
+            <tr>
+              <td><code>curl {{ .Host }}/asn{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
+              <td><code>{{ .ASN }}</code></td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+        <div class="note">
+          <ul>
+            <li>Set the <code>Accept: application/json</code> header to request response as JSON.</li>
+            <li>Append <code>?ip=IP</code> to the request URL to lookup information for a different IP. This is not supported for the <code>/port</code> endpoint.</li>
+          </ul>
+        </div>
+        <h3>JSON</h3>
+        <p>These endpoints always return JSON.</p>
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>curl {{ .Host }}/json{{ if .ExplicitLookup }}?ip={{ .IP }}{{ end }}</code></td>
+              <td>Retrieve all IP information. See <a href="#response">response</a>.</td>
+            </tr>
+            {{ if .Port }}
+            <tr>
+              <td><code>curl {{ .Host }}/port/&lt;PORT&gt;</code></td>
+              <td>Check if given port is reachable. See <a href="#port-response">port response</a>.</td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+        <h3 id="response">Response</h3>
+        <pre class="json-block"><code>{{ .JSON }}</code></pre>
+        <h3 id="port-response">Port response</h3>
+        <p>This is an example response. The actual result depends on the reachability of the queried port.</p>
+        <pre class="json-block"><code>{
+  "ip": "{{ .IP }}",
+  "port": 443,
+  "reachable": false
+}
+</code></pre>
+      </section>
+
+      <!-- FAQ -->
+      <section class="section" id="faq">
+        <h2>FAQ</h2>
+        <dl class="faq-list">
+          <dt>How do I force IPv4 or IPv6 lookup?</dt>
+          <dd>
+            Pass the appropriate flag to your client, e.g.
+            <code>curl -4</code> or <code>curl -6</code>.
+          </dd>
+
+          <dt>Is automated use permitted?</dt>
+          <dd>
+            Yes, but please limit automated requests to
+            <strong>1 request per minute</strong>. Requests exceeding this limit
+            may receive a 429 status code or be dropped entirely.
+          </dd>
+
+          <dt>Can I run my own instance?</dt>
+          <dd>
+            Yes. The source code and documentation are available on
+            <a href="https://github.com/mpolden/echoip">GitHub</a>.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- Footer -->
+      <footer class="section footer">
+        <p>
+          Created by <a href="https://mpolden.no/blog">mpolden</a> and licensed
+          under the BSD 3-Clause license. Source code is available
+          on <a href="https://github.com/mpolden/echoip">GitHub.</a>
+        </p>
+      </footer>
+
+    </div>
+  </body>
+</html>
