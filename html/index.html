@@ -33,11 +33,11 @@
         <h1 class="site-title">❯ curl {{ .Host }}</h1>
         {{ if .NoCustomIP }}
         <div class="ip-form">
-          <input class="ip-input" type="text" value="{{ .IP }}" readonly>
+          <input class="ip-input" type="text" value="{{ .IP }}" readonly style="--ip-chars: {{ len .IP.String }}">
         </div>
         {{ else }}
         <form class="ip-form" action="/" method="GET">
-          <input class="ip-input" type="text" name="ip" value="{{ .IP }}">
+          <input class="ip-input" type="text" name="ip" value="{{ .IP }}" style="--ip-chars: {{ len .IP.String }}">
           <div class="ip-buttons">
             <button class="ip-button" type="submit">Lookup IP address</button>
             {{ if .ExplicitLookup }}

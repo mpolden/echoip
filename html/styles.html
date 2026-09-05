@@ -142,11 +142,14 @@
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
+    width: 75%;
+    margin: 0 auto;
   }
 
   .ip-input {
+    --ip-font-max: 2.5rem;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 2.5rem;
+    font-size: var(--ip-font-max);
     font-weight: 600;
     line-height: 1.2;
     color: var(--ip-color);
@@ -154,10 +157,23 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     text-align: center;
-    width: 75%;
+    width: 100%;
     padding: 0.35rem 0.75rem;
     outline: none;
     transition: border-color 0.15s;
+  }
+
+  /* Scale the font down so that long IPv6 addresses fit. --ip-chars is the
+     length of the address and is set by the template. Monospace glyphs are
+     about 0.6em wide. */
+  @supports (font-size: 1cqw) {
+    .ip-form {
+      container-type: inline-size;
+    }
+
+    .ip-input {
+      font-size: min(var(--ip-font-max), calc((100cqw - 1.75rem) / (var(--ip-chars, 15) * 0.62)));
+    }
   }
 
   .ip-input:focus {
@@ -422,12 +438,16 @@
       grid-template-columns: 1fr;
     }
 
+    .ip-form {
+      width: 100%;
+    }
+
     .ip-input {
-      font-size: 1.5rem;
+      --ip-font-max: 1.5rem;
     }
 
     .hero {
-      padding: 2rem 0;
+      padding: 2rem 1rem;
     }
 
     .sponsor-logo {
