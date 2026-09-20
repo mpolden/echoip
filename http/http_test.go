@@ -396,6 +396,9 @@ func TestCLIMatcher(t *testing.T) {
 		{"Go-http-client/2.0", true},
 		{"ddclient/3.8.3", true},
 		{"Mikrotik/6.x Fetch", true},
+		{"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.1", true},
+		{"Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.19045; en-US) PowerShell/7.4.6", true},
+		{"Mozilla/5.0 (Linux; Fedora Linux 44 (WSL); en-US) PowerShell/7.6.5", true},
 		{browserUserAgent, false},
 	}
 	for _, tt := range tests {

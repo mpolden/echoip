@@ -31,10 +31,30 @@ func Parse(s string) UserAgent {
 			comment = parts[1]
 		}
 	}
-	return UserAgent{
+	return parsePowerShell(UserAgent{
 		Product:  parts[0],
 		Version:  version,
 		Comment:  comment,
 		RawValue: s,
+	})
+}
+
+// PowerShell's Invoke-WebRequest and Invoke-RestMethod identify as Mozilla and
+// append their own product last. Windows PowerShell and PowerShell are separate
+// products.
+func parsePowerShell(ua UserAgent) UserAgent {
+	if ua.Product != "Mozilla" {
+		return ua
 	}
+	for _, product := range []string{"WindowsPowerShell", "PowerShell"} {
+		comment, version, found := strings.Cut(ua.Comment, " "+product+"/")
+		if !found {
+			continue
+		}
+		ua.Product = product
+		ua.Version, _, _ = strings.Cut(version, " ")
+		ua.Comment = comment
+		return ua
+	}
+	return ua
 }
