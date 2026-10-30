@@ -12,6 +12,13 @@ type Reader interface {
 	City(net.IP) (City, error)
 	ASN(net.IP) (ASN, error)
 	IsEmpty() bool
+	Databases() []Database
+}
+
+// Database describes an opened MMDB database, as reported by its metadata.
+type Database struct {
+	Type        string
+	Description map[string]string
 }
 
 type Country struct {
@@ -153,4 +160,16 @@ func (g *geoip) ASN(ip net.IP) (ASN, error) {
 
 func (g *geoip) IsEmpty() bool {
 	return g.country == nil && g.city == nil
+}
+
+func (g *geoip) Databases() []Database {
+	databases := []Database{}
+	for _, r := range []*geoip2.Reader{g.country, g.city, g.asn} {
+		if r == nil {
+			continue
+		}
+		m := r.Metadata()
+		databases = append(databases, Database{Type: m.DatabaseType, Description: m.Description})
+	}
+	return databases
 }

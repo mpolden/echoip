@@ -39,6 +39,10 @@ func (t *testDb) ASN(net.IP) (geo.ASN, error) {
 
 func (t *testDb) IsEmpty() bool { return false }
 
+func (t *testDb) Databases() []geo.Database {
+	return []geo.Database{{Type: "GeoLite2-City", Description: map[string]string{"en": "GeoLite2 City database"}}}
+}
+
 func testServer() *Server {
 	return &Server{cache: NewCache(100), gr: &testDb{}, LookupAddr: lookupAddr, LookupPort: lookupPort}
 }

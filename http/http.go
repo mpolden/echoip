@@ -30,15 +30,16 @@ const (
 )
 
 type Server struct {
-	Template   string
-	IPHeaders  []string
-	LookupAddr func(net.IP) (string, error)
-	LookupPort func(net.IP, uint64) error
-	cache      *Cache
-	gr         geo.Reader
-	profile    bool
-	Sponsor    bool
-	NoCustomIP bool
+	Template     string
+	IPHeaders    []string
+	LookupAddr   func(net.IP) (string, error)
+	LookupPort   func(net.IP, uint64) error
+	Attributions []geo.Attribution
+	cache        *Cache
+	gr           geo.Reader
+	profile      bool
+	Sponsor      bool
+	NoCustomIP   bool
 }
 
 type Response struct {
@@ -396,6 +397,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		Sponsor        bool
 		ExplicitLookup bool
 		NoCustomIP     bool
+		Attributions   []geo.Attribution
 	}{
 		response,
 		r.Host,
@@ -408,6 +410,7 @@ func (s *Server) DefaultHandler(w http.ResponseWriter, r *http.Request) *appErro
 		s.Sponsor,
 		!s.NoCustomIP && r.URL.Query().Has("ip"),
 		s.NoCustomIP,
+		s.Attributions,
 	}
 	if err := t.Execute(w, &data); err != nil {
 		return internalServerError(err)

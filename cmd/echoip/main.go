@@ -40,6 +40,8 @@ func main() {
 	cacheSize := flag.Int("C", 0, "Size of response cache. Set to 0 to disable")
 	profile := flag.Bool("P", false, "Enables profiling handlers")
 	sponsor := flag.Bool("s", false, "Show sponsor logo")
+	geoProviders := flag.String("geo-providers", "", "Path to YAML file describing GeoIP data providers and attributions (default: built-in)")
+	geoProvider := flag.String("geo-provider", "", "Force GeoIP data provider id for attribution, e.g. 'dbip', 'maxmind' or 'none' (default: auto-detect from database metadata)")
 	var headers multiValueFlag
 	flag.Var(&headers, "H", "Header to trust for remote IP, if present (e.g. X-Real-IP)")
 	flag.Parse()
@@ -52,9 +54,31 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if v := os.Getenv("ECHOIP_GEO_PROVIDERS"); v != "" && *geoProviders == "" {
+		*geoProviders = v
+	}
+	if v := os.Getenv("ECHOIP_GEO_PROVIDER"); v != "" && *geoProvider == "" {
+		*geoProvider = v
+	}
+	providers, err := geo.LoadProviders(*geoProviders)
+	if err != nil {
+		log.Fatal(err)
+	}
+	attributions, err := providers.Resolve(r.Databases(), *geoProvider)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(attributions) > 0 {
+		texts := make([]string, 0, len(attributions))
+		for _, a := range attributions {
+			texts = append(texts, a.Text)
+		}
+		log.Printf("GeoIP attribution: %s", strings.Join(texts, ", "))
+	}
 	cache := http.NewCache(*cacheSize)
 	server := http.New(r, cache, *profile)
 	server.IPHeaders = headers
+	server.Attributions = attributions
 	if _, err := os.Stat(*template); err == nil {
 		server.Template = *template
 	} else {

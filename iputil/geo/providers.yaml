@@ -1,0 +1,36 @@
+# GeoIP data providers configuration.
+#
+# attributions: map of provider id -> attribution shown in the web UI.
+#   text: link text of the attribution
+#   url:  link target (optional; if empty, plain text is rendered)
+#   A provider with a null attribution (see "none") renders nothing.
+#
+# rules: ordered list of detection rules, first match wins.
+#   provider: id from the attributions map
+#   match: glob patterns (case-insensitive), matched against the MMDB
+#     metadata fields database_type and description. Patterns within
+#     a rule have OR semantics.
+#
+# fallback: provider id used when no rule matches an opened database.
+#   Set to "none" to hide the attribution for unknown databases.
+
+attributions:
+  dbip:
+    text: "DB-IP"
+    url: "https://db-ip.com"
+  maxmind:
+    text: "MaxMind GeoLite2"
+    url: "https://www.maxmind.com"
+  none:
+
+rules:
+  - provider: dbip
+    match:
+      database_type: ["DBIP-*", "IPV6-*"]
+      description: ["*DB-IP.com*"]
+  - provider: maxmind
+    match:
+      database_type: ["GeoLite2-*", "GeoIP2-*", "GeoIP-*"]
+      description: ["*MaxMind*"]
+
+fallback: none

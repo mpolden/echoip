@@ -141,6 +141,10 @@ Usage of echoip:
         Path to GeoIP city database
   -f string
         Path to GeoIP country database
+  -geo-provider string
+        Force GeoIP data provider id for attribution, e.g. 'dbip', 'maxmind' or 'none' (default: auto-detect from database metadata)
+  -geo-providers string
+        Path to YAML file describing GeoIP data providers and attributions (default: built-in)
   -l string
         Listening address (default ":8080")
   -L    Disable custom IP lookup
@@ -149,4 +153,55 @@ Usage of echoip:
   -s    Show sponsor logo
   -t string
         Path to template dir (default "html")
+```
+
+The following flags can also be set via environment variables:
+
+| Flag             | Environment variable   |
+| ---------------- | ---------------------- |
+| `-geo-provider`  | `ECHOIP_GEO_PROVIDER`  |
+| `-geo-providers` | `ECHOIP_GEO_PROVIDERS` |
+
+### GeoIP data providers and attribution
+
+When the web UI shows geolocation results, it renders an attribution for the
+GeoIP data provider. The provider is auto-detected from the MMDB database
+metadata (`database_type` and `description` fields), so both MaxMind GeoLite2
+and DB-IP Lite databases are credited correctly out of the box:
+
+* MaxMind databases render a link to <https://www.maxmind.com>
+* DB-IP databases (`DBIP-*`) render a link to <https://db-ip.com>, as required
+  by the CC BY 4.0 license of the free DB-IP Lite databases
+
+Detection rules and attributions are described in a YAML file
+(`iputil/geo/providers.yaml`, embedded into the binary). It can be replaced
+without rebuilding, e.g. via a Docker mount:
+
+```yaml
+attributions:          # provider id -> attribution rendered in the UI
+  acme:
+    text: "ACME GeoData"
+    url: "https://acme.example.com"
+  none:                # null attribution hides the block
+
+rules:                 # ordered, first match wins; glob patterns are
+  - provider: acme     # case-insensitive and have OR semantics
+    match:
+      database_type: ["ACME-*"]
+      description: ["*ACME Corporation*"]
+
+fallback: none         # provider used when no rule matches
+```
+
+```console
+$ echoip -geo-providers /etc/echoip/providers.yaml ...
+```
+
+To skip auto-detection, force a provider id from the YAML file with
+`-geo-provider` (use `none` to hide the attribution block, e.g. when using a
+commercial DB-IP license which does not require attribution):
+
+```console
+$ echoip -geo-provider dbip ...
+$ ECHOIP_GEO_PROVIDER=none echoip ...
 ```
